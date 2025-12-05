@@ -2,12 +2,14 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   UploadedFile,
-  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
 import { storage } from './oss';
 
 @Controller('upload')
@@ -42,19 +44,78 @@ export class UploadController {
 
   @Post('large-file')
   @UseInterceptors(
-    FilesInterceptor('large-file', 20, {
+    FileInterceptor('large-file', {
       dest: './uploads',
     }),
   )
   uploadLargeFile(
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFile() file: Express.Multer.File,
     @Body() body: { name: string },
   ) {
     try {
-      console.log('files:::', files);
-      return files;
+      console.log('file:::', file);
+      console.log('body:::', body);
+
+      // Get file name
+      const fileName = body.name.replace(
+        /^(.*?\.[a-zA-Z0-9]+)(?:-\d+)?$/,
+        '$1',
+      );
+      const nameDir = `./uploads/${fileName}`;
+
+      // mkdir
+      if (!fs.existsSync(nameDir)) {
+        fs.mkdirSync(nameDir);
+      }
+
+      // Move file to folder
+      fs.cpSync(file.path, `${nameDir}/${body.name}`);
+
+      // remove temp file
+      fs.rmSync(file.path);
+
+      return fileName;
     } catch (error) {
       console.error('Error uploading files:', error);
     }
+  }
+
+  @Get('merge-file')
+  mergeFile(@Query('file') fileName: string) {
+    const nameDir = `./uploads/${fileName}`;
+
+    // Read all files in the directory
+    const files = fs.readdirSync(nameDir);
+
+    //
+    let startPos = 0;
+    let count = 0;
+    files.map((file) => {
+      const filePath = `${nameDir}/${file}`;
+      const streamFile = fs.createReadStream(filePath);
+      streamFile
+        .pipe(
+          fs.createWriteStream(`uploads/output/${fileName}`, {
+            start: startPos,
+          }),
+        )
+        .on('finish', () => {
+          count++;
+          if (count === files.length) {
+            console.log(`Merged file completed: ${fileName}`);
+            fs.rm(
+              nameDir,
+              {
+                recursive: true,
+              },
+              () => {
+                console.log(`Removed temp folder: ${nameDir}`);
+              },
+            );
+          }
+        });
+
+      startPos += fs.statSync(filePath).size;
+    });
   }
 }
