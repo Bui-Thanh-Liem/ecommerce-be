@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Post,
   UploadedFile,
@@ -45,7 +46,10 @@ export class UploadController {
       dest: './uploads',
     }),
   )
-  uploadLargeFile(@UploadedFiles() files: Express.Multer.File[]) {
+  uploadLargeFile(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: { name: string },
+  ) {
     try {
       console.log('files:::', files);
       return files;
