@@ -1,16 +1,15 @@
-import { Controller, Get, HostParam, Query } from '@nestjs/common';
+import { Controller, Get, Headers, Logger, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ValidatePipe } from './pipe/validate/validate.pipe';
 
 @Controller()
 export class AppController {
+  private logger = new Logger(AppController.name);
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(@HostParam() host: string): string {
-    console.log(host);
-
-    return this.appService.getHello() + ' from ' + host;
+  getHello(@Headers('host') host: string) {
+    return 'Hello from ' + host;
   }
 
   @Get('test')

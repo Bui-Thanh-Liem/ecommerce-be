@@ -1,0 +1,11 @@
+*.md
+!README.md
+
+/node_modules
+
+*.txt
+
+.git/
+.gitignore
+
+.prettierrc

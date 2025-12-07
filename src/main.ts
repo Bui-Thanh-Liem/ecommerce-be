@@ -5,11 +5,15 @@ import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { HttpExceptionFilter } from './filters/handler-error.filter';
+import { MyLogger } from './logger/my.logger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: false,
+    logger: new MyLogger(),
   });
+
+  // Use global logger
+  // app.useLogger(new MyLogger());
 
   // Add global prefix
   app.setGlobalPrefix('api');
