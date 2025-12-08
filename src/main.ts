@@ -4,10 +4,7 @@ import { LoginGuard } from './guards/auth/login.guard';
 import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import {
-  HttpExceptionFilter,
-  TypeOrmExceptionFilter,
-} from './filters/handler-error.filter';
+import { ErrorExceptionFilter } from './filters/handler-error.filter';
 import { MyLogger } from './logger/my.logger';
 
 async function bootstrap() {
@@ -33,8 +30,8 @@ async function bootstrap() {
   // app.useGlobalInterceptors(new TimeInterceptor());
 
   // Add global filters
-  app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalFilters(new TypeOrmExceptionFilter());
+  // app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new ErrorExceptionFilter());
 
   console.log('__dirname = ', __dirname);
   console.log('cwd = ', process.cwd());

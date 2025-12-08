@@ -15,6 +15,10 @@ import { UploadService } from './modules/upload/upload.service';
 import { UploadController } from './modules/upload/upload.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/users/entities/user.entity';
+import { TokensModule } from './modules/tokens/tokens.module';
+import { Token } from './modules/tokens/entities/token.entity';
+import { ProductsModule } from './modules/products/products.module';
+import { Product } from './modules/products/entities/product.entity';
 
 @Module({
   imports: [
@@ -28,13 +32,15 @@ import { User } from './modules/users/entities/user.entity';
       database: 'demo-typeorm',
       synchronize: true,
       logging: true,
-      entities: [User],
+      entities: [User, Token, Product],
       migrations: [],
       subscribers: [],
     }),
 
     UsersModule,
     AuthModule,
+    TokensModule,
+    ProductsModule,
   ],
   controllers: [AppController, UploadController],
   providers: [
