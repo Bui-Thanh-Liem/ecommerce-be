@@ -1,17 +1,9 @@
 import { User } from 'src/modules/users/entities/user.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Base } from 'src/shared/entity/Base.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
-export class Token {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Token extends Base {
   @Column()
   token: string;
 

@@ -1,10 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { LoginGuard } from './guards/auth/login.guard';
-import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { ErrorExceptionFilter } from './filters/handler-error.filter';
+import { AppModule } from './app.module';
+import { ErrorExceptionFilter } from './exceptions/handler-error.filter';
 import { MyLogger } from './logger/my.logger';
 
 async function bootstrap() {

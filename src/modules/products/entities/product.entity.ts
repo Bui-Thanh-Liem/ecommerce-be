@@ -1,11 +1,9 @@
 import { User } from 'src/modules/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Base } from 'src/shared/entity/Base.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
-export class Product {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Product extends Base {
   @Column()
   name: string;
 
@@ -13,5 +11,5 @@ export class Product {
   description: string;
 
   @ManyToOne(() => User)
-  owner: User;
+  user: User;
 }

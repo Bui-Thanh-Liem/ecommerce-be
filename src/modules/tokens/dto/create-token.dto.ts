@@ -1,4 +1,4 @@
 export class CreateTokenDto {
   token: string;
-  user: number;
+  user: string;
 }
