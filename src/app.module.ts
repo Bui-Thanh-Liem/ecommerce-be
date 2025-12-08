@@ -13,9 +13,29 @@ import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { UploadService } from './modules/upload/upload.service';
 import { UploadController } from './modules/upload/upload.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './modules/users/entities/user.entity';
 
 @Module({
-  imports: [UsersModule, AuthModule],
+  imports: [
+    // Database
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: '',
+      database: 'demo-typeorm',
+      synchronize: true,
+      logging: true,
+      entities: [User],
+      migrations: [],
+      subscribers: [],
+    }),
+
+    UsersModule,
+    AuthModule,
+  ],
   controllers: [AppController, UploadController],
   providers: [
     AppService,
