@@ -8,10 +8,6 @@ export class Token extends Base {
   token: string;
 
   @JoinColumn({ name: 'user_id' })
-  @OneToOne(() => User, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @OneToOne(() => User)
   user: User;
 }

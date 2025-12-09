@@ -29,8 +29,8 @@ export class Role extends Base {
     inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
   })
   @ManyToMany(() => Permission, (permission) => permission.roles, {
-    eager: true,
-    cascade: true,
+    eager: true, // Tự động load permissions khi load role
+    cascade: true, // Tự động lưu thay đổi permissions khi lưu role
   })
   permissions: Permission[];
 }

@@ -11,17 +11,12 @@ import { LoginGuard } from './guards/auth/login.guard';
 import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
-import { Permission } from './modules/permission/entities/permission.entity';
 import { PermissionModule } from './modules/permission/permission.module';
-import { Product } from './modules/products/entities/product.entity';
 import { ProductsModule } from './modules/products/products.module';
-import { Role } from './modules/roles/entities/role.entity';
 import { RolesModule } from './modules/roles/roles.module';
-import { Token } from './modules/tokens/entities/token.entity';
 import { TokensModule } from './modules/tokens/tokens.module';
 import { UploadController } from './modules/upload/upload.controller';
 import { UploadService } from './modules/upload/upload.service';
-import { User } from './modules/users/entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -34,11 +29,13 @@ import { UsersModule } from './modules/users/users.module';
       username: 'root',
       password: 'root',
       database: 'ecommerce',
-      synchronize: true,
+      synchronize: false,
       logging: true,
-      entities: [User, Token, Product, Role, Permission],
-      migrations: [],
-      subscribers: [],
+      entities: ['dist/src/modules/**/entities/*.entity.js'],
+      migrations: ['dist/src/migrations/*.js'],
+      migrationsTableName: 'migrations',
+      poolSize: 10,
+      connectorPackage: 'mysql2',
     }),
 
     UsersModule,

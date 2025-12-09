@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -12,6 +12,7 @@ export class UsersService {
     private userRepo: Repository<User>,
 
     private dataSource: DataSource,
+    private entityManager: EntityManager,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -23,8 +24,8 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.userRepo.query('SELECT * FROM user');
-    return users;
+    // return await this.userRepo.query('SELECT * FROM user');
+    return this.entityManager.find(User);
   }
 
   findOne(id: number) {

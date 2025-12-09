@@ -14,25 +14,27 @@ import {
 @Entity()
 export class User extends Base {
   @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
+  name: string;
 
   @Column()
   age: number;
 
-  @OneToOne(() => Token, (t) => t.user)
+  @Column({ length: 20, unique: true })
+  phone: string;
+
+  // 1 - 1
+  @OneToOne(() => Token, (t) => t.user, {
+    cascade: true, //  cấp độ ứng dụng
+    onDelete: 'CASCADE', // cấp độ cơ sở dữ liệu
+    onUpdate: 'CASCADE', // cấp độ cơ sở dữ liệu
+  })
   token: Token;
 
-  @OneToMany(() => Product, (p) => p.user, {
-    // One-to-Many high cascade
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  // 1 - N
+  @OneToMany(() => Product, (p) => p.user)
   products: Product[];
 
+  // N - N
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
     name: 'user_roles',
