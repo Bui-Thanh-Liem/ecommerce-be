@@ -1,13 +1,25 @@
 import { User } from 'src/modules/users/entities/user.entity';
 import { Base } from 'src/shared/entity/Base.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Token extends Base {
-  @Column()
-  token: string;
+  @Column({ type: 'varchar', length: 500 })
+  token: string; // refresh token (JWT dài)
 
-  @JoinColumn({ name: 'user_id' })
-  @OneToOne(() => User)
+  @Column({ type: 'uuid' }) // hoặc number nếu user.id là number
+  userId: string;
+
+  @JoinColumn()
+  @ManyToOne(() => User, (u) => u.tokens, {
+    onDelete: 'CASCADE', // xóa user → xóa hết token luôn (rất quan trọng cho bảo mật)
+    onUpdate: 'CASCADE',
+  })
   user: User;
+
+  @Column({ type: 'timestamp' })
+  expiresAt: Date;
+
+  @Column({ type: 'boolean', default: false })
+  isRevoked: boolean;
 }
