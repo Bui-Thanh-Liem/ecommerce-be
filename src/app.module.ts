@@ -12,12 +12,15 @@ import { TimeInterceptor } from './interceptors/time/time.interceptor';
 import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionModule } from './modules/permission/permission.module';
-import { ProductsModule } from './modules/products/products.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { TokensModule } from './modules/tokens/tokens.module';
 import { UploadController } from './modules/upload/upload.controller';
 import { UploadService } from './modules/upload/upload.service';
 import { UsersModule } from './modules/users/users.module';
+import { OptionValueModule } from './modules/prod/option-value/option-value.module';
+import { OptionModule } from './modules/prod/option/option.module';
+import { ProductVariantModule } from './modules/prod/product-variant/product-variant.module';
+import { ProductsModule } from './modules/prod/products/products.module';
 
 @Module({
   imports: [
@@ -44,6 +47,9 @@ import { UsersModule } from './modules/users/users.module';
     ProductsModule,
     RolesModule,
     PermissionModule,
+    ProductVariantModule,
+    OptionValueModule,
+    OptionModule,
   ],
   controllers: [AppController, UploadController],
   providers: [
