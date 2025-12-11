@@ -1,3 +1,4 @@
 export class CreateOptionValueDto {
-  optionIds: string[];
+  optionId: string;
+  value: string;
 }

@@ -11,7 +11,7 @@ export class Token extends Base {
   userId: string;
 
   @JoinColumn()
-  @ManyToOne(() => User, (u) => u.tokens, {
+  @ManyToOne(() => User, {
     onDelete: 'CASCADE', // xóa user → xóa hết token luôn (rất quan trọng cho bảo mật)
     onUpdate: 'CASCADE',
   })

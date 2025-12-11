@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOptionValueDto } from './dto/create-option-value.dto';
 import { UpdateOptionValueDto } from './dto/update-option-value.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,36 +10,38 @@ import { OptionService } from '../option/option.service';
 export class OptionValueService {
   @InjectRepository(OptionValue)
   private optionValueRepo: Repository<OptionValue>;
+
+  @Inject()
   private readonly optionService: OptionService;
 
-  async create(createOptionValueDto: CreateOptionValueDto) {
-    const { optionIds } = createOptionValueDto;
+  async create(body: CreateOptionValueDto) {
+    const { optionId, value } = body;
 
-    let options: any[] = [];
-    if (optionIds && optionIds.length) {
-      options = await Promise.all(
-        optionIds.map((id) => this.optionService.findOne(id)),
-      );
+    const option = await this.optionService.findOne(optionId);
+    if (!option || !optionId) {
+      throw new NotFoundException('Option not found');
     }
+
     return this.optionValueRepo.save({
-      ...createOptionValueDto,
-      optionIds: options,
+      value,
+      optionId: option,
     });
   }
 
-  findAll() {
-    return `This action returns all optionValue`;
+  async findAll() {
+    const [items, total] = await this.optionValueRepo.findAndCount();
+    return { items, total };
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} optionValue`;
   }
 
-  update(id: number, updateOptionValueDto: UpdateOptionValueDto) {
+  update(id: string, body: UpdateOptionValueDto) {
     return `This action updates a #${id} optionValue`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} optionValue`;
   }
 }

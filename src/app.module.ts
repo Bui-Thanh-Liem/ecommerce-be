@@ -2,9 +2,10 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
+  NotFoundException,
   RequestMethod,
 } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoginGuard } from './guards/auth/login.guard';
@@ -20,25 +21,33 @@ import { UsersModule } from './modules/users/users.module';
 import { OptionValueModule } from './modules/prod/option-value/option-value.module';
 import { OptionModule } from './modules/prod/option/option.module';
 import { ProductVariantModule } from './modules/prod/product-variant/product-variant.module';
-import { ProductsModule } from './modules/prod/products/products.module';
+import { ProductsModule } from './modules/prod/product/product.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import mysqlConfig from './config/mysql.conf';
+
+console.log(mysqlConfig);
 
 @Module({
   imports: [
-    // Database
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'ecommerce',
-      synchronize: false,
-      logging: true,
-      entities: ['dist/src/modules/**/entities/*.entity.js'],
-      migrations: ['dist/src/migrations/*.js'],
-      migrationsTableName: 'migrations',
-      poolSize: 10,
-      connectorPackage: 'mysql2',
+    // Config
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env`,
+      load: [mysqlConfig],
+    }),
+
+    // Database/ORM
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const mysqlConfig = configService.get<TypeOrmModuleOptions>('mysql');
+
+        if (!mysqlConfig) {
+          throw new NotFoundException('MySQL configuration not found');
+        }
+
+        return mysqlConfig;
+      },
     }),
 
     UsersModule,
@@ -70,6 +79,6 @@ export class AppModule implements NestModule {
     // Add global middleware
     consumer
       .apply(LogMiddleware)
-      .forRoutes({ path: '*', method: RequestMethod.POST });
+      .forRoutes({ path: '*path', method: RequestMethod.POST });
   }
 }

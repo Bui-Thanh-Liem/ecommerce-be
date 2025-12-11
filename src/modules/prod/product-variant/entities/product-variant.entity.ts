@@ -9,7 +9,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { OptionValue } from '../../option-value/entities/option-value.entity';
-import { Product } from '../../products/entities/product.entity';
+import { Product } from '../../product/entities/product.entity';
 
 @Entity()
 @Index(['sku'], { unique: true })
@@ -31,6 +31,6 @@ export class ProductVariant extends Base {
   @ManyToMany(() => OptionValue, (ov) => ov.productVariantIds, {
     onDelete: 'CASCADE',
   })
-  @JoinTable()
-  optionValues: OptionValue[];
+  @JoinTable({ name: 'product_variant_option_value' })
+  optionValueIds: OptionValue[];
 }

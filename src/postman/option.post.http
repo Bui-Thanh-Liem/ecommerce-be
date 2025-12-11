@@ -1,0 +1,7 @@
+@url=http://localhost:9000/api/option
+
+###
+POST {{url}}
+
+###
+GET {{url}}

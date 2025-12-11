@@ -1,4 +1,4 @@
-import { Product } from 'src/modules/prod/products/entities/product.entity';
+import { Product } from 'src/modules/prod/product/entities/product.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
 import { Token } from 'src/modules/tokens/entities/token.entity';
 import { Base } from 'src/shared/entity/Base.entity';
@@ -17,18 +17,18 @@ export class User extends Base {
 
   // 1 - N
   @OneToMany(() => Token, (token) => token.user)
-  tokens: Token[];
+  tokenIds: Token[];
 
   // 1 - N
   @OneToMany(() => Product, (p) => p.userId)
-  products: Product[];
+  productIds: Product[];
 
   // N - N
-  @ManyToMany(() => Role, (role) => role.users)
+  @ManyToMany(() => Role, (role) => role.userIds)
   @JoinTable({
     name: 'user_roles',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
-  roles: Role[];
+  roleIds: Role[];
 }

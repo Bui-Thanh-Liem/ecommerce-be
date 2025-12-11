@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProductVariantService } from './product-variant.service';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
@@ -8,8 +16,8 @@ export class ProductVariantController {
   constructor(private readonly productVariantService: ProductVariantService) {}
 
   @Post()
-  create(@Body() createProductVariantDto: CreateProductVariantDto) {
-    return this.productVariantService.create(createProductVariantDto);
+  create(@Body() body: CreateProductVariantDto) {
+    return this.productVariantService.create(body);
   }
 
   @Get()
@@ -23,8 +31,8 @@ export class ProductVariantController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductVariantDto: UpdateProductVariantDto) {
-    return this.productVariantService.update(+id, updateProductVariantDto);
+  update(@Param('id') id: string, @Body() body: UpdateProductVariantDto) {
+    return this.productVariantService.update(+id, body);
   }
 
   @Delete(':id')

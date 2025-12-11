@@ -10,23 +10,23 @@ export class OptionService {
   @InjectRepository(Option)
   private optionRepo: Repository<Option>;
 
-  async create(createOptionDto: CreateOptionDto) {
-    return await this.optionRepo.save(createOptionDto);
+  async create(body: CreateOptionDto) {
+    return await this.optionRepo.save(body);
   }
 
-  findAll() {
-    return `This action returns all option`;
+  async findAll() {
+    return await this.optionRepo.find();
   }
 
   async findOne(id: string) {
     return await this.optionRepo.findOne({ where: { id } });
   }
 
-  update(id: number, updateOptionDto: UpdateOptionDto) {
+  update(id: string, body: UpdateOptionDto) {
     return `This action updates a #${id} option`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} option`;
   }
 }

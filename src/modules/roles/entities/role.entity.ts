@@ -20,8 +20,8 @@ export class Role extends Base {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToMany(() => User, (user) => user.roles)
-  users: User[];
+  @ManyToMany(() => User, (user) => user.roleIds)
+  userIds: User[];
 
   @JoinTable({
     name: 'role_permissions',

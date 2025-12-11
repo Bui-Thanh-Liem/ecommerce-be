@@ -16,8 +16,8 @@ export class OptionValueController {
   constructor(private readonly optionValueService: OptionValueService) {}
 
   @Post()
-  create(@Body() createOptionValueDto: CreateOptionValueDto) {
-    return this.optionValueService.create(createOptionValueDto);
+  create(@Body() body: CreateOptionValueDto) {
+    return this.optionValueService.create(body);
   }
 
   @Get()
@@ -27,19 +27,16 @@ export class OptionValueController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.optionValueService.findOne(+id);
+    return this.optionValueService.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateOptionValueDto: UpdateOptionValueDto,
-  ) {
-    return this.optionValueService.update(+id, updateOptionValueDto);
+  update(@Param('id') id: string, @Body() body: UpdateOptionValueDto) {
+    return this.optionValueService.update(id, body);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.optionValueService.remove(+id);
+    return this.optionValueService.remove(id);
   }
 }

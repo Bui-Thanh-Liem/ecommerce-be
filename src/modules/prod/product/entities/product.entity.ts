@@ -26,7 +26,7 @@ export class Product extends Base {
   description: string;
 
   @JoinColumn()
-  @ManyToOne(() => User, (u) => u.products)
+  @ManyToOne(() => User)
   userId: User;
 
   @OneToMany(() => ProductVariant, (pv) => pv.productId, {

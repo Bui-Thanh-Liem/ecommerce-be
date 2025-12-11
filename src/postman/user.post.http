@@ -1,0 +1,8 @@
+@url=http://localhost:9000/api/user
+
+###
+POST {{url}}
+
+###
+GET {{url}}
+Content-Type: application/json

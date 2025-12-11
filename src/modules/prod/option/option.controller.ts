@@ -16,8 +16,8 @@ export class OptionController {
   constructor(private readonly optionService: OptionService) {}
 
   @Post()
-  create(@Body() createOptionDto: CreateOptionDto) {
-    return this.optionService.create(createOptionDto);
+  create(@Body() body: CreateOptionDto) {
+    return this.optionService.create(body);
   }
 
   @Get()
@@ -31,12 +31,12 @@ export class OptionController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOptionDto: UpdateOptionDto) {
-    return this.optionService.update(+id, updateOptionDto);
+  update(@Param('id') id: string, @Body() body: UpdateOptionDto) {
+    return this.optionService.update(id, body);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.optionService.remove(+id);
+    return this.optionService.remove(id);
   }
 }
