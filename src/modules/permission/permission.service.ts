@@ -7,15 +7,13 @@ import { Permission } from './entities/permission.entity';
 
 @Injectable()
 export class PermissionService {
-  constructor(
-    @InjectRepository(Permission)
-    private permissionRepo: Repository<Permission>,
-  ) {}
+  @InjectRepository(Permission)
+  private permissionRepo: Repository<Permission>;
 
-  async create(createPermissionDto: CreatePermissionDto) {
-    console.log('CreatePermissionDto :::', createPermissionDto);
+  async create(body: CreatePermissionDto) {
+    console.log('CreatePermissionDto :::', body);
 
-    const dataCreate = this.permissionRepo.create(createPermissionDto);
+    const dataCreate = this.permissionRepo.create(body);
     return await this.permissionRepo.save(dataCreate);
   }
 
@@ -31,7 +29,7 @@ export class PermissionService {
     return `This action returns a #${id} permission`;
   }
 
-  update(id: number, updatePermissionDto: UpdatePermissionDto) {
+  update(id: number, body: UpdatePermissionDto) {
     return `This action updates a #${id} permission`;
   }
 

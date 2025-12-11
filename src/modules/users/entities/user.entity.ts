@@ -2,18 +2,29 @@ import { Product } from 'src/modules/prod/product/entities/product.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
 import { Token } from 'src/modules/tokens/entities/token.entity';
 import { Base } from 'src/shared/entity/Base.entity';
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
+@Index(['username', 'email', 'phone'], { unique: true })
 export class User extends Base {
   @Column()
-  name: string;
+  username: string;
 
   @Column()
-  age: number;
+  email: string;
 
   @Column({ length: 20, unique: true })
   phone: string;
+
+  @Column()
+  password: string;
 
   // 1 - N
   @OneToMany(() => Token, (token) => token.user)

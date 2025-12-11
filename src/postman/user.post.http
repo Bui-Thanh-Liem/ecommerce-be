@@ -2,6 +2,14 @@
 
 ###
 POST {{url}}
+Content-Type: application/json
+
+{
+    "email": "buithanhliem@gmail.com",  
+    "phone": "0375255073",  
+    "password": "liemdev123",  
+    "username": "liemdev"
+}
 
 ###
 GET {{url}}

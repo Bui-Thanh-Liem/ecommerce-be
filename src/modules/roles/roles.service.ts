@@ -15,8 +15,8 @@ export class RolesService {
     private readonly permissionService: PermissionService,
   ) {}
 
-  async create(createRoleDto: CreateRoleDto) {
-    const { code, name, permissions } = createRoleDto;
+  async create(body: CreateRoleDto) {
+    const { code, name, permissions } = body;
 
     const foundPermissions =
       await this.permissionService.findByIds(permissions);
@@ -38,7 +38,7 @@ export class RolesService {
     return `This action returns a #${id} role`;
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
+  update(id: number, body: UpdateRoleDto) {
     return `This action updates a #${id} role`;
   }
 

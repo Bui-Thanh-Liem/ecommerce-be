@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserService } from '../users/user.service';
 import { CreateTokenDto } from './dto/create-token.dto';
 import { UpdateTokenDto } from './dto/update-token.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Token } from './entities/token.entity';
-import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class TokensService {
@@ -12,16 +12,13 @@ export class TokensService {
     @InjectRepository(Token)
     private tokenRepo: Repository<Token>,
 
-    @InjectRepository(User)
-    private userRepo: Repository<User>,
+    private userService: UserService,
   ) {}
 
-  async create(createTokenDto: CreateTokenDto) {
-    const { token, user } = createTokenDto;
+  async create(body: CreateTokenDto) {
+    const { token, user } = body;
 
-    const foundUser = await this.userRepo.findOne({
-      where: { id: user },
-    });
+    const foundUser = await this.userService.findOne(user);
 
     console.log('User :::', foundUser);
 
@@ -44,7 +41,7 @@ export class TokensService {
     return `This action returns a #${id} token`;
   }
 
-  update(id: number, updateTokenDto: UpdateTokenDto) {
+  update(id: number, body: UpdateTokenDto) {
     return `This action updates a #${id} token`;
   }
 

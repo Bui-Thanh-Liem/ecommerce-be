@@ -9,7 +9,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoginGuard } from './guards/auth/login.guard';
-import { TimeInterceptor } from './interceptors/time/time.interceptor';
+import { OvInterceptor } from './interceptors/ov.interceptor';
 import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionModule } from './modules/permission/permission.module';
@@ -17,7 +17,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { TokensModule } from './modules/tokens/tokens.module';
 import { UploadController } from './modules/upload/upload.controller';
 import { UploadService } from './modules/upload/upload.service';
-import { UsersModule } from './modules/users/users.module';
+import { UserModule } from './modules/users/user.module';
 import { OptionValueModule } from './modules/prod/option-value/option-value.module';
 import { OptionModule } from './modules/prod/option/option.module';
 import { ProductVariantModule } from './modules/prod/product-variant/product-variant.module';
@@ -50,7 +50,7 @@ console.log(mysqlConfig);
       },
     }),
 
-    UsersModule,
+    UserModule,
     AuthModule,
     TokensModule,
     ProductsModule,
@@ -69,7 +69,7 @@ console.log(mysqlConfig);
     },
     {
       provide: 'APP_INTERCEPTOR',
-      useClass: TimeInterceptor,
+      useClass: OvInterceptor,
     },
     UploadService,
   ],
