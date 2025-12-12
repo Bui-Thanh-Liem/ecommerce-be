@@ -28,12 +28,12 @@ export class UserService {
     }
 
     // 2. hash password
-    const password_hashed = hashPassword(password);
+    const passwordHashed = hashPassword(password);
 
     // 3. Create new user
     const newUser = this.userRepo.create({
       ...body,
-      password: password_hashed,
+      password: passwordHashed,
     });
     await this.userRepo.save(newUser);
 

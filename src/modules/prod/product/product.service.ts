@@ -6,7 +6,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductService {
   create(body: CreateProductDto) {
     const { description, name, userId } = body;
-    
+
     return 'This action adds a new product';
   }
 
