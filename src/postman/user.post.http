@@ -1,5 +1,5 @@
 @url=http://localhost:9000/api/user
-@accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyYzExM2Y3LWY2YmMtNGI3Yy1iOTc5LTQ3M2JmZjUzODIyZiIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTUzNTM1MiwiZXhwIjoxNzY1NTM4OTUyfQ.uQ1dlnyD60TEZe8DGdKPboePHkEtHgWMU9nTMTvqVvs
+@accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkzNGVhOWNjLWIxODQtNGE4NS1iYTUxLTQzMTRjN2I5MTRkMSIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTU1NjM1MiwiZXhwIjoxNzY1NTU5OTUyfQ.QusIuq0jy9XkxTjDL9bCGoYiw6nYSRYAldIKcB-OLr8
 
 ###
 POST {{url}}
@@ -7,10 +7,11 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-    "email": "buithanhliem@gmail.com",  
-    "phone": "0375255073",  
+    "email": "buithanhliem2@gmail.com",  
+    "phone": "0375255072",  
     "password": "liemdev123",  
-    "username": "liemdev"
+    "username": "liemdev2",
+    "roleIds": ["d25a0b68-04a7-4ebd-bae2-c8d843b3251c", "7b3b8e11-0680-4aa3-8431-95fe655448a6"]
 }
 
 ###

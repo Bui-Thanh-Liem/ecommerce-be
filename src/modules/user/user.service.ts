@@ -1,4 +1,8 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hashPassword } from 'src/utils/crypto';
 import { Repository } from 'typeorm';
@@ -6,21 +10,30 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { excludeFields } from 'src/utils/lodash';
+import { RoleService } from '../roles/role.service';
+import { Role } from '../roles/entities/role.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
+    private roleService: RoleService,
   ) {
-    this.initAdmin();
+    this.initAdmin().catch((err) => {
+      throw new InternalServerErrorException(
+        'Failed to initialize admin user',
+        err,
+      );
+    });
   }
 
   // Create new user
   async create(body: CreateUserDto) {
-    const { email, username, password, phone } = body;
+    const { email, username, password, phone, roleIds } = body;
 
     // 1. Check if user already exists
+    console.log('body :::', body);
     const existingUser = await this.userRepo.findOne({
       where: [{ email }, { username }, { phone }],
     });
@@ -28,13 +41,25 @@ export class UserService {
       throw new HttpException('User already exists', 200);
     }
 
-    // 2. hash password
+    // 2. Find roles
+    let roles: Role[] | null = null;
+    if (roleIds && roleIds.length > 0) {
+      roles = await this.roleService.findByIds(roleIds);
+      if (roles.length !== roleIds.length) {
+        throw new HttpException('Some roles are invalid', 200);
+      }
+    }
+
+    // 3. hash password
     const passwordHashed = hashPassword(password);
 
-    // 3. Create new user
+    // 4. Create new user
     const newUser = this.userRepo.create({
-      ...body,
+      email,
+      phone,
+      username,
       password: passwordHashed,
+      roleIds: (roles as Role[]) || [],
     });
     const savedUser = await this.userRepo.save(newUser);
 
@@ -43,14 +68,13 @@ export class UserService {
   }
 
   async findAll() {
-    // return await this.userRepo.query('SELECT * FROM user');
-    const users = await this.userRepo.find();
-    return users;
+    return await this.userRepo.find({ relations: { roleIds: true } });
   }
 
   async findOne(id: string) {
     const user = await this.userRepo.findOne({
       where: { id },
+      relations: { roleIds: true },
     });
     return user;
   }
@@ -60,7 +84,14 @@ export class UserService {
     return await this.userRepo.findOne({
       where: { email },
       relations: { roleIds: true },
-      select: { email: true, password: true, id: true, username: true },
+      select: {
+        id: true,
+        email: true,
+        isAdmin: true,
+        username: true,
+        password: true,
+        isActive: true,
+      },
     });
   }
 
@@ -88,6 +119,7 @@ export class UserService {
       email: adminEmail,
       username: 'admin',
       phone: '0123456789',
+      isAdmin: true,
       password: hashPassword('Admin@123'),
     });
     await this.userRepo.save(adminUser);

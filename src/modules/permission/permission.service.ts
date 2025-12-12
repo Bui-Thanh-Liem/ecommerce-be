@@ -1,39 +1,51 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { Permission } from './entities/permission.entity';
+import { SEED_PERMISSIONS } from './seeder';
 
 @Injectable()
 export class PermissionService {
-  @InjectRepository(Permission)
-  private permissionRepo: Repository<Permission>;
-
-  async create(body: CreatePermissionDto) {
-    console.log('CreatePermissionDto :::', body);
-
-    const dataCreate = this.permissionRepo.create(body);
-    return await this.permissionRepo.save(dataCreate);
+  constructor(
+    @InjectRepository(Permission)
+    private permissionRepo: Repository<Permission>,
+  ) {
+    this.seedPermissions().catch((err) => {
+      throw new InternalServerErrorException('Failed to seed permissions', err);
+    });
   }
 
-  findAll() {
-    return `This action returns all permission`;
+  async seedPermissions() {
+    const permissions = Object.values(SEED_PERMISSIONS);
+    for (const permData of permissions) {
+      const existing = await this.permissionRepo.findOne({
+        where: {
+          code: permData.code,
+        },
+      });
+
+      if (!existing) {
+        const perm = this.permissionRepo.create(permData);
+        await this.permissionRepo.save(perm);
+      }
+    }
   }
 
-  findByIds(ids: string[]) {
-    return this.permissionRepo.find({ where: { id: In(ids) } });
+  async findByIds(ids: string[]): Promise<Permission[]> {
+    return this.permissionRepo.find({
+      where: {
+        id: In(ids),
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} permission`;
-  }
-
-  update(id: number, body: UpdatePermissionDto) {
-    return `This action updates a #${id} permission`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} permission`;
+  async findAll(): Promise<Permission[]> {
+    return await this.permissionRepo
+      .createQueryBuilder('permission')
+      // 2. Sử dụng hàm MySQL CAST() để chuyển cột 'code' thành số
+      //    SIGNED: Chuyển thành số nguyên có dấu
+      .orderBy('CAST(permission.code AS SIGNED)', 'ASC')
+      // 3. Thực thi truy vấn và lấy kết quả
+      .getMany();
   }
 }

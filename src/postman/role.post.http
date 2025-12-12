@@ -1,0 +1,24 @@
+@url=http://localhost:9000/api/role
+@accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2ZDUyNGI5LTk3N2MtNDEyMy1hMmYyLTU5MjNkZmFhZjU0YSIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTU1NjUyMiwiZXhwIjoxNzY1NTYwMTIyfQ.oQ9NdvGolrJtsxM3a6_Qk2z1eS99WTeWaiYeSnpu9Og
+
+###
+POST {{url}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "admin_2",
+    "description": "Administrator role with full permissions",
+    "permissions": ["0c30a255-13b5-445f-98b1-b1fc23eac773", "79bac142-c7fc-45b1-8b52-35f1a02510b1"]
+}
+
+###
+GET {{url}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "admin",
+    "description": "Administrator role with full permissions",
+    "permissions": ["0c30a255-13b5-445f-98b1-b1fc23eac773"]
+}

@@ -1,5 +1,21 @@
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+
 export class CreateRoleDto {
-  permissions: string[];
+  @IsString()
+  @IsNotEmpty()
   name: string;
-  code: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsArray({ always: true })
+  @IsUUID('all', { each: true })
+  permissions: string[];
 }

@@ -7,14 +7,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import type { OvResult } from 'src/interceptors/ov.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request, Response } from 'express';
-import { User } from '../user/entities/user.entity';
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { Public } from 'src/decorators/public.decorator';
+import type { IOvResult } from 'src/interceptors/ov.interceptor';
+import { User } from '../user/entities/user.entity';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -30,7 +30,7 @@ export class AuthController {
     @Headers('user-agent') deviceInfo: string,
     @Headers('x-forwarded-for') ipAddress: string,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<OvResult> {
+  ): Promise<IOvResult> {
     // Call auth service to login
     const { tokens, user } = await this.authService.login({
       userLogged: req.user as User,

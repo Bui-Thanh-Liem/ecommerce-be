@@ -1,17 +1,15 @@
 import { Role } from 'src/modules/roles/entities/role.entity';
 import { Base } from 'src/shared/entity/Base.entity';
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToMany } from 'typeorm';
 
 @Entity()
+@Index(['name', 'code'], { unique: true })
 export class Permission extends Base {
-  @Column({ unique: true })
-  code: string; // 0001, 0002, etc.
+  @Column()
+  code: string; // 001, 002
 
   @Column()
-  resource: string; // products, orders, customers, inventory
-
-  @Column()
-  action: string; // create, read, update, delete, manage
+  name: string; // product:create, product:read, product:update, product:delete
 
   @Column({ nullable: true })
   description: string;

@@ -1,0 +1,7 @@
+@url=http://localhost:9000/api/permission
+@accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkzNGVhOWNjLWIxODQtNGE4NS1iYTUxLTQzMTRjN2I5MTRkMSIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTU1NjM1MiwiZXhwIjoxNzY1NTU5OTUyfQ.QusIuq0jy9XkxTjDL9bCGoYiw6nYSRYAldIKcB-OLr8
+
+###
+GET {{url}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}

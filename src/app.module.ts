@@ -12,7 +12,7 @@ import { OvInterceptor } from './interceptors/ov.interceptor';
 import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionModule } from './modules/permission/permission.module';
-import { RolesModule } from './modules/roles/roles.module';
+import { RoleModule } from './modules/roles/role.module';
 import { TokenModule } from './modules/token/token.module';
 import { UploadController } from './modules/upload/upload.controller';
 import { UploadService } from './modules/upload/upload.service';
@@ -65,7 +65,7 @@ console.log(mysqlConfig);
     AuthModule,
     TokenModule,
     ProductsModule,
-    RolesModule,
+    RoleModule,
     PermissionModule,
     ProductVariantModule,
     OptionValueModule,

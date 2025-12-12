@@ -41,7 +41,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // 2. Check password
+    // 2. Check if user is active
+    if (!foundUser.isActive) {
+      throw new UnauthorizedException('User is inactive');
+    }
+
+    // 3. Check password
     const validatePassword = verifyPassword(password, foundUser.password);
     if (!validatePassword) {
       throw new UnauthorizedException('Invalid credentials');

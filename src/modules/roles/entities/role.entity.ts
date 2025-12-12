@@ -1,15 +1,13 @@
 import { Permission } from 'src/modules/permission/entities/permission.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Base } from 'src/shared/entity/Base.entity';
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity()
+@Index(['name'], { unique: true })
 export class Role extends Base {
-  @Column({ unique: true })
-  name: string;
-
-  @Column({ unique: true })
-  code: string; // SUPER_ADMIN, STORE_MANAGER, etc.
+  @Column()
+  name: string; // admin, user, manager, etc.
 
   @Column({ nullable: true })
   description: string;

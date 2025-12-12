@@ -28,6 +28,12 @@ export class User extends Base {
   @Exclude()
   password: string;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
+  @Column({ default: true })
+  isActive: boolean;
+
   // 1 - N
   @OneToMany(() => Token, (token) => token.userId)
   tokenIds: Token[];
