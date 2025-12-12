@@ -8,22 +8,25 @@ import {
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoginGuard } from './guards/auth/login.guard';
 import { OvInterceptor } from './interceptors/ov.interceptor';
 import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { RolesModule } from './modules/roles/roles.module';
-import { TokensModule } from './modules/tokens/tokens.module';
+import { TokenModule } from './modules/token/token.module';
 import { UploadController } from './modules/upload/upload.controller';
 import { UploadService } from './modules/upload/upload.service';
-import { UserModule } from './modules/users/user.module';
+import { UserModule } from './modules/user/user.module';
 import { OptionValueModule } from './modules/prod/option-value/option-value.module';
 import { OptionModule } from './modules/prod/option/option.module';
 import { ProductVariantModule } from './modules/prod/product-variant/product-variant.module';
 import { ProductsModule } from './modules/prod/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import mysqlConfig from './config/mysql.conf';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtAccessGuard } from './modules/auth/guards/jwt-access.guard';
+import { PermissionsGuard } from './modules/permission/guards/permission.guard';
 
 console.log(mysqlConfig);
 
@@ -50,9 +53,17 @@ console.log(mysqlConfig);
       },
     }),
 
+    // JWT
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_ACCESS_SECRET || 'JWT_ACCESS_SECRET',
+      signOptions: { expiresIn: '1h' },
+    }),
+
+    // Application modules
     UserModule,
     AuthModule,
-    TokensModule,
+    TokenModule,
     ProductsModule,
     RolesModule,
     PermissionModule,
@@ -63,12 +74,22 @@ console.log(mysqlConfig);
   controllers: [AppController, UploadController],
   providers: [
     AppService,
+
+    // 1. Chạy đầu tiên – Kiểm tra JWT
     {
-      provide: 'APP_GUARD',
-      useClass: LoginGuard, // để có thể sử dụng hàm của AppService trong LoginGuard
+      provide: APP_GUARD,
+      useClass: JwtAccessGuard,
     },
+
+    // 2. Chạy thứ hai – Kiểm tra Permission
     {
-      provide: 'APP_INTERCEPTOR',
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
+
+    // Global interceptor
+    {
+      provide: APP_INTERCEPTOR,
       useClass: OvInterceptor,
     },
     UploadService,

@@ -1,6 +1,7 @@
+import { Exclude } from 'class-transformer';
 import { Product } from 'src/modules/prod/product/entities/product.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
-import { Token } from 'src/modules/tokens/entities/token.entity';
+import { Token } from 'src/modules/token/entities/token.entity';
 import { Base } from 'src/shared/entity/Base.entity';
 import {
   Column,
@@ -24,10 +25,11 @@ export class User extends Base {
   phone: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   // 1 - N
-  @OneToMany(() => Token, (token) => token.user)
+  @OneToMany(() => Token, (token) => token.userId)
   tokenIds: Token[];
 
   // 1 - N

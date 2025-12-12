@@ -5,7 +5,7 @@ import { Column, Entity, ManyToMany } from 'typeorm';
 @Entity()
 export class Permission extends Base {
   @Column({ unique: true })
-  code: string; // products:create, orders:read, etc.
+  code: string; // 0001, 0002, etc.
 
   @Column()
   resource: string; // products, orders, customers, inventory

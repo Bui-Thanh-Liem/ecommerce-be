@@ -1,0 +1,23 @@
+@url=http://localhost:9000/api/auth
+
+###
+POST {{url}}/login
+Content-Type: application/json
+
+# {
+#     "email": "buithanhliem@gmail.com",  
+#     "password": "liemdev123"
+# }
+
+{
+    "email": "admin@gmail.com",  
+    "password": "Admin@123"
+}
+
+###
+POST {{url}}/refresh-token
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIzMzBmZmE0LWNiNDYtNGIzOS1iMGExLTgxYWIzZTY4OWFmYSIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTUyOTQ5NCwiZXhwIjoxNzY4MTIxNDk0fQ.5KVnuoa21MA3x5X4H-qBLLM5hjOL6vvFRpsnyRAda8E"
+}

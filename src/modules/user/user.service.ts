@@ -1,19 +1,20 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hashPassword } from 'src/utils/crypto';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { excludeFields } from 'src/utils/lodash';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
-
-    private entityManager: EntityManager,
-  ) {}
+  ) {
+    this.initAdmin();
+  }
 
   // Create new user
   async create(body: CreateUserDto) {
@@ -35,29 +36,31 @@ export class UserService {
       ...body,
       password: passwordHashed,
     });
-    await this.userRepo.save(newUser);
+    const savedUser = await this.userRepo.save(newUser);
 
-    //
-    return newUser;
+    // 4. Return new user
+    return excludeFields(savedUser, ['password']);
   }
 
   async findAll() {
     // return await this.userRepo.query('SELECT * FROM user');
-    const users = await this.userRepo.find({
-      select: { password: false },
-    });
-    return { metadata: users };
+    const users = await this.userRepo.find();
+    return users;
   }
 
   async findOne(id: string) {
-    return await this.userRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { id },
     });
+    return user;
   }
 
-  async findOneByEmail(email: string) {
+  // Find user by email for auth service
+  async findOneForAuth(email: string) {
     return await this.userRepo.findOne({
       where: { email },
+      relations: { roleIds: true },
+      select: { email: true, password: true, id: true, username: true },
     });
   }
 
@@ -67,5 +70,27 @@ export class UserService {
 
   remove(id: string) {
     return `This action removes a #${id} user`;
+  }
+
+  async initAdmin() {
+    // Create admin user if not exists
+    const adminEmail = 'admin@gmail.com';
+    const existingAdmin = await this.userRepo.findOne({
+      where: { email: adminEmail },
+    });
+    if (existingAdmin) {
+      console.log('Admin user already exists');
+      return;
+    }
+
+    // Create admin user
+    const adminUser = this.userRepo.create({
+      email: adminEmail,
+      username: 'admin',
+      phone: '0123456789',
+      password: hashPassword('Admin@123'),
+    });
+    await this.userRepo.save(adminUser);
+    console.log('Admin user created');
   }
 }

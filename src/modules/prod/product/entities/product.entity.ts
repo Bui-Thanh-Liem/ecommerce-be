@@ -1,4 +1,4 @@
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { Base } from 'src/shared/entity/Base.entity';
 import { generateSlug } from 'src/utils/slug';
 import {

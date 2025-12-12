@@ -1,8 +1,10 @@
 @url=http://localhost:9000/api/user
+@accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyYzExM2Y3LWY2YmMtNGI3Yy1iOTc5LTQ3M2JmZjUzODIyZiIsImRldmljZUluZm8iOiJ2c2NvZGUtcmVzdGNsaWVudCIsImlhdCI6MTc2NTUzNTM1MiwiZXhwIjoxNzY1NTM4OTUyfQ.uQ1dlnyD60TEZe8DGdKPboePHkEtHgWMU9nTMTvqVvs
 
 ###
 POST {{url}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
     "email": "buithanhliem@gmail.com",  
@@ -14,3 +16,4 @@ Content-Type: application/json
 ###
 GET {{url}}
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { map, Observable, tap } from 'rxjs';
 
-interface Response {
-  message: string;
+export interface OvResult {
+  message?: string;
   statusCode?: number;
   metadata: any;
 }
@@ -22,7 +22,7 @@ export class OvInterceptor implements NestInterceptor {
       tap(() => {
         console.log(`After::: ${Date.now() - startTime} ms`);
       }),
-      map((res: Response) => {
+      map((res: OvResult) => {
         return {
           message: res.message || 'Success',
           statusCode: res.statusCode || 200,

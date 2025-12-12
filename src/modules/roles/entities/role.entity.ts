@@ -1,5 +1,5 @@
 import { Permission } from 'src/modules/permission/entities/permission.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { Base } from 'src/shared/entity/Base.entity';
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 

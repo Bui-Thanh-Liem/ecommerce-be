@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -7,12 +8,15 @@ import {
   Param,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { OvResult } from 'src/interceptors/ov.interceptor';
 
 @Controller('user')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   // constructor(private readonly usersService: UsersService) {}
 
@@ -20,13 +24,17 @@ export class UserController {
   private readonly userService: UserService;
 
   @Post()
-  create(@Body() body: CreateUserDto) {
-    return this.userService.create(body);
+  async create(@Body() body: CreateUserDto): Promise<OvResult> {
+    return {
+      metadata: await this.userService.create(body),
+    };
   }
 
   @Get()
-  async findAll() {
-    return await this.userService.findAll();
+  async findAll(): Promise<OvResult> {
+    return {
+      metadata: await this.userService.findAll(),
+    };
   }
 
   @Get(':id')
