@@ -1,0 +1,9 @@
+@root=http://localhost:3000/api/v1
+
+### Hello World!
+GET {{root}}
+content-type: application/json
+
+### Health Check
+GET {{root}}/health
+content-type: application/json

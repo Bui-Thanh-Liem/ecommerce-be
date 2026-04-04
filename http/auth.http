@@ -1,0 +1,27 @@
+@root=http://localhost:3000/api/v1
+
+### Auth signup
+POST {{root}}/auth/signup
+content-type: application/json
+
+{
+    "email": "liems@gmail.com",
+    "password": "password123"
+}
+
+### User signin
+POST {{root}}/auth/signin
+content-type: application/json
+
+{
+    "email": "liemdev@gmail.com",
+    "password": "admin123"
+}
+
+### User signout
+POST {{root}}/auth/signout
+content-type: application/json
+
+### Who am I?
+GET {{root}}/auth/whoami
+content-type: application/json

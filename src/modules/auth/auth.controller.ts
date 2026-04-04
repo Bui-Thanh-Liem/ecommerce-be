@@ -1,93 +1,58 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { Public } from 'src/decorators/public.decorator';
-import type { IOvResult } from 'src/interceptors/ov.interceptor';
-import { User } from '../user/entities/user.entity';
+import { Serializer } from 'src/interceptors/serializer.interceptor';
+import { CurrentStaff } from '../../decorators/current-staff.decorator';
+import { StaffEntity } from '../staffs/entities/staff.entity';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { AuthDto } from './dtos/auth.dto';
+import { SigninStaffDto } from './dtos/signin-user.dto';
+import { GoogleAuthGuard } from './guards/google.guard';
+import { JwtAuthGuard } from '../../guards/auth.guard';
+import { LocalAuthGuard } from './guards/local.guard';
 
 @Controller('auth')
+@Serializer(AuthDto)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Login existing user
-  @Public()
-  @UseGuards(AuthGuard('local'))
-  @Post('login')
-  async login(
-    @Req() req: Request,
-    @Body() body: LoginDto,
-    @Headers('user-agent') deviceInfo: string,
-    @Headers('x-forwarded-for') ipAddress: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<IOvResult> {
-    // Call auth service to login
-    const { tokens, user } = await this.authService.login({
-      userLogged: req.user as User,
-      deviceInfo,
-      ipAddress,
-    });
-
-    // Set refresh token in HttpOnly cookie
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true, // Không thể truy cập bằng JS (chống XSS)
-      secure: true, // Chỉ gửi qua HTTPS (bắt buộc trong Prod)
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-    });
-
-    // Return access token & user info
-    return {
-      metadata: { tokens, user },
-    };
-  }
-
-  // Refresh token
-  @Post('refresh-token')
-  @UseGuards(JwtRefreshGuard)
-  async refreshToken(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+  @Post('signin')
+  @UseGuards(LocalAuthGuard)
+  signIn(
+    @Body() signInDto: SigninStaffDto, // Giữ lại cho ValidationPipe - Swagger
+    @CurrentStaff() currentStaff: StaffEntity,
+    @Res() res: Response,
   ) {
-    const refreshToken = req.cookies['refresh_token'];
-    const tokens = await this.authService.refreshToken(refreshToken);
+    const { user, token } = this.authService.signIn(currentStaff);
 
-    // Set refresh token in HttpOnly cookie
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true, // Không thể truy cập bằng JS (chống XSS)
-      secure: true, // Chỉ gửi qua HTTPS (bắt buộc trong Prod)
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'prod',
+      sameSite: 'lax',
     });
 
-    return {
-      metadata: tokens,
-    };
+    return res.json({ user, token });
   }
 
-  //
-  @Post('logout')
-  async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    // 1. Thu hồi RT trong DB
-    await this.authService.logout(req.user.id);
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin() {}
 
-    // 2. Xóa RT khỏi Cookie
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-    });
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  googleCallback(@Req() req: Request, @CurrentStaff() currentStaff: StaffEntity) {
+    return currentStaff;
+  }
 
-    return { message: 'Logout successful' };
+  @Post('signout')
+  signOut(@Res() res: Response) {
+    res.clearCookie('token');
+    return { message: 'Signed out successfully' };
+  }
+
+  @Get('whoami')
+  @UseGuards(JwtAuthGuard)
+  whoami(@CurrentStaff() staff: StaffEntity) {
+    return staff;
   }
 }

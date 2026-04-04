@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { map, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 export interface IOvResult {
   message?: string;
@@ -15,19 +15,11 @@ export interface IOvResult {
 @Injectable()
 export class OvInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const startTime = Date.now();
-    console.log('Before::: 0 ms');
-
+    const now = Date.now();
+    console.log('Before... -> controller ::: 0ms');
     return next.handle().pipe(
       tap(() => {
-        console.log(`After::: ${Date.now() - startTime} ms`);
-      }),
-      map((res: IOvResult) => {
-        return {
-          message: res.message || 'Success',
-          statusCode: res.statusCode || 200,
-          metadata: res.metadata,
-        };
+        console.log(`After::: ${Date.now() - now} ms`);
       }),
     );
   }

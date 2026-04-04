@@ -1,105 +1,67 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  NotFoundException,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module, NotFoundException, ValidationPipe } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { OvInterceptor } from './interceptors/ov.interceptor';
-import { LogMiddleware } from './middlewares/log/log.middleware';
 import { AuthModule } from './modules/auth/auth.module';
-import { PermissionModule } from './modules/permission/permission.module';
-import { RoleModule } from './modules/roles/role.module';
-import { TokenModule } from './modules/token/token.module';
-import { UploadController } from './modules/upload/upload.controller';
-import { UploadService } from './modules/upload/upload.service';
-import { UserModule } from './modules/user/user.module';
-import { OptionValueModule } from './modules/prod/option-value/option-value.module';
-import { OptionModule } from './modules/prod/option/option.module';
-import { ProductVariantModule } from './modules/prod/product-variant/product-variant.module';
-import { ProductsModule } from './modules/prod/product/product.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import mysqlConfig from './config/mysql.conf';
-import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtAccessGuard } from './modules/auth/guards/jwt-access.guard';
-import { PermissionsGuard } from './modules/permission/guards/permission.guard';
-
-console.log(mysqlConfig);
+import { StaffsModule } from './modules/staffs/staffs.module';
+import { JwtAuthStrategy } from './strategies/auth.strategy';
+import { ErrorExceptionFilter } from './exception-filters/http-exception.filter';
+import { LocationRegionsModule } from './modules/location-regions/location-regions.module';
+import { StoresModule } from './modules/stores/stores.module';
+import pgConfig from './configs/pg.config';
 
 @Module({
   imports: [
-    // Config
+    //
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env`,
-      load: [mysqlConfig],
+      load: [pgConfig],
+      envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
     }),
 
-    // Database/ORM
+    //
     TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const mysqlConfig = configService.get<TypeOrmModuleOptions>('mysql');
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => {
+        const pgConfig = config.get<TypeOrmModuleOptions>('postgres') || null;
 
-        if (!mysqlConfig) {
-          throw new NotFoundException('MySQL configuration not found');
-        }
+        if (!pgConfig) throw new NotFoundException('Database name not found in environment variables');
 
-        return mysqlConfig;
+        return pgConfig;
       },
     }),
-
-    // JWT
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_ACCESS_SECRET || 'JWT_ACCESS_SECRET',
-      signOptions: { expiresIn: '1h' },
-    }),
-
-    // Application modules
-    UserModule,
+    StaffsModule,
     AuthModule,
-    TokenModule,
-    ProductsModule,
-    RoleModule,
-    PermissionModule,
-    ProductVariantModule,
-    OptionValueModule,
-    OptionModule,
+    LocationRegionsModule,
+    StoresModule,
   ],
-  controllers: [AppController, UploadController],
+  controllers: [AppController],
   providers: [
     AppService,
-
-    // 1. Chạy đầu tiên – Kiểm tra JWT
+    JwtAuthStrategy,
     {
-      provide: APP_GUARD,
-      useClass: JwtAccessGuard,
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        // Tùy chọn 0: Bật tính năng loại bỏ các thuộc tính không được định nghĩa trong DTO và trả về lỗi nếu có
+        forbidNonWhitelisted: true,
+        // Tùy chọn 1: Loại bỏ các thuộc tính không được định nghĩa trong DTO
+        whitelist: true,
+        // Tùy chọn 2: Biến đổi dữ liệu đầu vào thành instance của DTO
+        transform: true,
+        // Tùy chọn 3: Nếu bạn muốn chuyển đổi chuỗi thành kiểu dữ liệu nguyên thủy
+        // Ví dụ: '123' thành 123 nếu bạn dùng @IsNumber() trên tham số query
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
     },
-
-    // 2. Chạy thứ hai – Kiểm tra Permission
     {
-      provide: APP_GUARD,
-      useClass: PermissionsGuard,
+      provide: APP_FILTER,
+      useClass: ErrorExceptionFilter,
     },
-
-    // Global interceptor
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: OvInterceptor,
-    },
-    UploadService,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // Add global middleware
-    consumer
-      .apply(LogMiddleware)
-      .forRoutes({ path: '*path', method: RequestMethod.POST });
-  }
-}
+export class AppModule {}
