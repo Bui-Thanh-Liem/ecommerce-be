@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config/dist/config.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import bcrypt from 'bcrypt';
+import { genSalt, hash } from 'bcrypt';
 import { Repository } from 'typeorm';
+import { StoresService } from '../stores/stores.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
-import { ConfigService } from '@nestjs/config/dist/config.service';
-import { StoresService } from '../stores/stores.service';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -41,6 +41,10 @@ export class StaffsService implements OnModuleInit {
 
   async findByEmail(email: string) {
     return await this.staffRepo.findOneBy({ email });
+  }
+
+  async findByPhone(phone: string) {
+    return await this.staffRepo.findOneBy({ phone });
   }
 
   findAll({ page, limit, email }: { page: string; limit: string; email?: string }) {
@@ -103,8 +107,8 @@ export class StaffsService implements OnModuleInit {
     const staff = await this.findByEmail(adminEmail);
     if (!staff) {
       //
-      const salt = await bcrypt.genSalt();
-      const hashPassword = await bcrypt.hash(adminPassword, salt);
+      const salt = await genSalt();
+      const hashPassword = await hash(adminPassword, salt);
 
       //
       const adminStaff = this.staffRepo.create({

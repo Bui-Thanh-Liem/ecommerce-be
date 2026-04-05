@@ -2,12 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { LocationRegionsService } from './location-regions.service';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
+import { Permissions } from 'src/decorators/permission.decorator';
+import { permissionsSeed } from '../permissions/seeding';
 
 @Controller('location-regions')
 export class LocationRegionsController {
   constructor(private readonly locationRegionsService: LocationRegionsService) {}
 
   @Post()
+  @Permissions([permissionsSeed.roles.create])
   async create(@Body() createLocationRegionDto: CreateLocationRegionDto) {
     return await this.locationRegionsService.create(createLocationRegionDto);
   }

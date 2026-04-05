@@ -18,18 +18,14 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          let token: string | null = null;
-
-          if (req.session?.token) {
-            token = req.session.token;
-          }
-
-          this.logger.debug('Extracting JWT from session:::', token);
-          return token;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const token = req.cookies?.token; // Lấy token từ cookie
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return token || null;
         },
       ]),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      secretOrKey: configService.get('JWT_SECRET') || 'key-secret',
+      secretOrKey: configService.get('JWT_ACCESS_SECRET') || 'key-secret',
     });
   }
 
@@ -40,9 +36,6 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     //
     this.logger.debug('Validating JWT payload:::', payload);
-    return {
-      id: user.id,
-      email: user.email,
-    };
+    return user;
   }
 }

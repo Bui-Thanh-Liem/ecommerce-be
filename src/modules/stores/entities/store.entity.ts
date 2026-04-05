@@ -1,7 +1,7 @@
 import { LocationRegionEntity } from 'src/modules/location-regions/entities/location-region.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { IStore } from 'src/shared/interfaces/models/store.interface';
-import { IphoneStore } from 'src/shared/interfaces/phone-store.interface';
+import { IPhoneStore } from 'src/shared/interfaces/phone-store.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('stores')
@@ -9,14 +9,14 @@ export class StoreEntity extends BaseEntity implements IStore {
   @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, { nullable: false })
   locationRegion: LocationRegionEntity;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   address: string;
 
   @Column('jsonb')
-  phone: IphoneStore[];
+  phone: IPhoneStore[];
 
   @Column()
   openingHours: string;

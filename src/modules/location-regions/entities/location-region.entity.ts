@@ -5,7 +5,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'ty
 
 @Entity('location_regions')
 export class LocationRegionEntity extends BaseEntity implements ILocationRegion {
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column({ type: 'enum', enum: LocationRegionType })

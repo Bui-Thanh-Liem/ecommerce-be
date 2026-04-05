@@ -1,20 +1,11 @@
 @root=http://localhost:3000/api/v1
 
-### Auth signup
-POST {{root}}/auth/signup
-content-type: application/json
-
-{
-    "email": "liems@gmail.com",
-    "password": "password123"
-}
-
 ### User signin
 POST {{root}}/auth/signin
 content-type: application/json
 
 {
-    "email": "liemdev@gmail.com",
+    "phone": "1234567890",
     "password": "admin123"
 }
 

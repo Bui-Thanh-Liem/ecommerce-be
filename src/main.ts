@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { AppLogger } from './logger/app.logger';
 import cookieParser from 'cookie-parser';
 
+console.log('process.env.PORT :::', process.env.PORT);
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new AppLogger(),

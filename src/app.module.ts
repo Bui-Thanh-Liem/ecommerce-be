@@ -1,16 +1,23 @@
 import { Module, NotFoundException, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './modules/auth/auth.module';
-import { StaffsModule } from './modules/staffs/staffs.module';
-import { JwtAuthStrategy } from './strategies/auth.strategy';
-import { ErrorExceptionFilter } from './exception-filters/http-exception.filter';
-import { LocationRegionsModule } from './modules/location-regions/location-regions.module';
-import { StoresModule } from './modules/stores/stores.module';
 import pgConfig from './configs/pg.config';
+import { ErrorExceptionFilter } from './exception-filters/http-exception.filter';
+import { JwtAuthGuard } from './guards/auth.guard';
+import { RoleGuard } from './guards/role.guard';
+import { OvInterceptor } from './interceptors/ov.interceptor';
+import { AuthModule } from './modules/auth/auth.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { LocationRegionsModule } from './modules/location-regions/location-regions.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { StaffTokensModule } from './modules/staff-tokens/staff-tokens.module';
+import { StaffsModule } from './modules/staffs/staffs.module';
+import { StoresModule } from './modules/stores/stores.module';
+import { JwtAuthStrategy } from './strategies/auth.strategy';
 
 @Module({
   imports: [
@@ -37,6 +44,10 @@ import pgConfig from './configs/pg.config';
     AuthModule,
     LocationRegionsModule,
     StoresModule,
+    StaffTokensModule,
+    PermissionsModule,
+    RolesModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [
@@ -61,6 +72,18 @@ import pgConfig from './configs/pg.config';
     {
       provide: APP_FILTER,
       useClass: ErrorExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: OvInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
   ],
 })

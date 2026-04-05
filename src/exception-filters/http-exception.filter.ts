@@ -38,7 +38,7 @@ export class ErrorExceptionFilter implements ExceptionFilter {
 
       status = _exception.getStatus();
       message = typeof resErr === 'string' ? resErr : resErr.message;
-      error = typeof resErr === 'string' ? resErr : resErr.error || error;
+      error = 'App Error';
       ownDev.stack = _exception.stack;
     }
 

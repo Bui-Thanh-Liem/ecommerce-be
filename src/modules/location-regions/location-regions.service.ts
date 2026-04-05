@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { LocationRegionEntity } from './entities/location-region.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class LocationRegionsService {
@@ -14,7 +20,13 @@ export class LocationRegionsService {
 
   async create(createLocationRegionDto: CreateLocationRegionDto) {
     //
-    const { parent: parentId } = createLocationRegionDto;
+    const { parent: parentId, name } = createLocationRegionDto;
+
+    //
+    const existingRegion = await this.locationRegionRepo.findOneBy({ name });
+    if (existingRegion) {
+      throw new ConflictException(`Location region with name "${name}" already exists`);
+    }
 
     // Nếu có parentId, tìm kiếm parent region
     if (parentId) {

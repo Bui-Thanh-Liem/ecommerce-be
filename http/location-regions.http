@@ -6,8 +6,7 @@ content-type: application/json
 
 {
     "name": "District 1",
-    "type": "district",
-    "parent": "a362ec31-bda6-4917-9916-4efc4ca4bc64"
+    "type": "district"
 }
 
 ### Get all location regions

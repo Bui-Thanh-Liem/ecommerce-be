@@ -1,6 +1,5 @@
-import { SetMetadata } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 // Tạo decorator để gán permissions cho route handler
-export const IS_PERMISSION_KEY = 'permissions';
-export const Permissions = (...permissions: string[]) =>
-  SetMetadata(IS_PERMISSION_KEY, permissions);
+// Cách viết mới của setMetadata
+export const Permissions = Reflector.createDecorator<string[]>();

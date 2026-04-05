@@ -1,13 +1,16 @@
 import { registerAs } from '@nestjs/config';
-import dotenv from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSourceOptions } from 'typeorm';
-import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
+import dotenv from 'dotenv';
 import { LocationRegionEntity } from 'src/modules/location-regions/entities/location-region.entity';
+import { PermissionEntity } from 'src/modules/permissions/entities/permission.entity';
+import { RoleEntity } from 'src/modules/roles/entities/role.entity';
+import { StaffTokenEntity } from 'src/modules/staff-tokens/entities/staff-token.entity';
+import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
 import { StoreEntity } from 'src/modules/stores/entities/store.entity';
+import { DataSourceOptions } from 'typeorm';
 
 //
-const isProd = process.env.NODE_ENV === 'prod';
+const isProd = process.env.NODE_ENV === 'production';
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'dev'}` });
 
 //
@@ -20,7 +23,7 @@ export const pgConfig: DataSourceOptions = {
   database: process.env.POSTGRES_DB || 'ecommerce',
   synchronize: !isProd,
   // logging: true,
-  entities: [StaffEntity, StoreEntity, LocationRegionEntity],
+  entities: [StaffEntity, RoleEntity, PermissionEntity, StaffTokenEntity, StoreEntity, LocationRegionEntity],
   migrations: ['dist/src/migrations/*.js'],
   migrationsTableName: 'migrations-storage',
   poolSize: 10,

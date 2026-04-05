@@ -1,57 +1,47 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { Serializer } from 'src/interceptors/serializer.interceptor';
 import { CurrentStaff } from '../../decorators/current-staff.decorator';
 import { StaffEntity } from '../staffs/entities/staff.entity';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dtos/auth.dto';
-import { SigninStaffDto } from './dtos/signin-user.dto';
-import { GoogleAuthGuard } from './guards/google.guard';
-import { JwtAuthGuard } from '../../guards/auth.guard';
+import { SigninStaffDto } from './dtos/signin-staff.dto';
 import { LocalAuthGuard } from './guards/local.guard';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('auth')
 @Serializer(AuthDto)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('signin')
   @UseGuards(LocalAuthGuard)
-  signIn(
+  async signIn(
     @Body() signInDto: SigninStaffDto, // Giữ lại cho ValidationPipe - Swagger
     @CurrentStaff() currentStaff: StaffEntity,
     @Res() res: Response,
   ) {
-    const { user, token } = this.authService.signIn(currentStaff);
+    const { staff, token } = await this.authService.signIn(currentStaff);
 
     // Set token in cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'prod',
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
 
-    return res.json({ user, token });
-  }
-
-  @Get('google')
-  @UseGuards(GoogleAuthGuard)
-  async googleLogin() {}
-
-  @Get('google/callback')
-  @UseGuards(GoogleAuthGuard)
-  googleCallback(@Req() req: Request, @CurrentStaff() currentStaff: StaffEntity) {
-    return currentStaff;
+    return res.json({ staff, token });
   }
 
   @Post('signout')
-  signOut(@Res() res: Response) {
+  async signOut(@Res() res: Response, @CurrentStaff() currentStaff: StaffEntity) {
+    await this.authService.signOut(currentStaff.id);
     res.clearCookie('token');
-    return { message: 'Signed out successfully' };
+    return res.json({ message: 'Signed out successfully' });
   }
 
   @Get('whoami')
-  @UseGuards(JwtAuthGuard)
   whoami(@CurrentStaff() staff: StaffEntity) {
     return staff;
   }

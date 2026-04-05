@@ -1,12 +1,12 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
 import { Serializer } from 'src/interceptors/serializer.interceptor';
 import { CreateStaffDto } from './dto/create-staff.dto';
+import { StaffDto } from './dto/staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import { UserDto } from './dto/user.dto';
 import { StaffsService } from './staffs.service';
 
-// @UseInterceptors(new SerializerInterceptor(UserDto))
-@Serializer(UserDto)
+// @UseInterceptors(new SerializerInterceptor(StaffDto))
+@Serializer(StaffDto)
 @Controller('staffs')
 export class StaffsController {
   constructor(private readonly staffsService: StaffsService) {}
