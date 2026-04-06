@@ -14,7 +14,7 @@ export class StaffTokenEntity extends BaseEntity implements IStaffToken {
   @Column({ type: 'enum', enum: StaffTokenType })
   type: StaffTokenType;
 
-  @Column()
+  @Column({ type: 'text' })
   token: string;
 
   @Column({ type: 'timestamp' })

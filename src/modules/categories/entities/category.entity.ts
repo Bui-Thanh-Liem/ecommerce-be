@@ -5,13 +5,13 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('categories')
 export class CategoryEntity extends BaseEntity implements ICategory {
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
   @Column({ type: 'text', nullable: true })
   desc?: string | null;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', length: 150 })
   slug: string;
 
   @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true })

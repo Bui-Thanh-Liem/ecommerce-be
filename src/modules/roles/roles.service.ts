@@ -1,10 +1,10 @@
-import { BadGatewayException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { PermissionsService } from '../permissions/permissions.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { In, Repository } from 'typeorm';
 import { RoleEntity } from './entities/role.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { PermissionsService } from '../permissions/permissions.service';
 
 @Injectable()
 export class RolesService {
@@ -23,7 +23,7 @@ export class RolesService {
     if (permissionIdsSet.length > 0) {
       const isValidPermissions = await this.permissionService.checkExistByIds(permissionIdsSet);
       if (!isValidPermissions) {
-        throw new BadGatewayException('One or more permissions do not exist');
+        throw new NotFoundException('One or more permissions do not exist');
       }
     }
 
@@ -73,7 +73,7 @@ export class RolesService {
     if (permissionIdsSet.length > 0) {
       const isValidPermissions = await this.permissionService.checkExistByIds(permissionIdsSet);
       if (!isValidPermissions) {
-        throw new BadGatewayException('One or more permissions do not exist');
+        throw new NotFoundException('One or more permissions do not exist');
       }
     }
 

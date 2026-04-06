@@ -7,16 +7,16 @@ import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 @Entity('roles')
 @Index('idx_active_roles', ['name'], { where: '"isActive" = \'true\'' })
 export class RoleEntity extends BaseEntity implements IRole {
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', length: 100 })
   name: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
   desc: string;
 
   @Column({ unique: true, type: 'int', generated: 'increment' })
   code: number;
 
-  @ManyToMany(() => PermissionEntity, (permission) => permission.roles)
+  @ManyToMany(() => PermissionEntity, (permission) => permission.roles, { onDelete: 'SET NULL' })
   @JoinTable({
     name: 'role_permission',
     joinColumn: { name: 'role_id', referencedColumnName: 'id' },

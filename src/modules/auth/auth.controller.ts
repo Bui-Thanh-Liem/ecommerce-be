@@ -20,7 +20,8 @@ export class AuthController {
   async signIn(
     @Body() signInDto: SigninStaffDto, // Giữ lại cho ValidationPipe - Swagger
     @CurrentStaff() currentStaff: StaffEntity,
-    @Res() res: Response,
+    // eslint-disable-next-line max-len
+    @Res({ passthrough: true }) res: Response, // nếu không có passthrough, thì phải dùng res.json() để trả về response, còn có thì vẫn trả về object bình thường và Nest sẽ tự chuyển thành response (có interceptor)
   ) {
     const { staff, token } = await this.authService.signIn(currentStaff);
 
@@ -31,14 +32,14 @@ export class AuthController {
       sameSite: 'lax',
     });
 
-    return res.json({ staff, token });
+    return { staff, token };
   }
 
   @Post('signout')
-  async signOut(@Res() res: Response, @CurrentStaff() currentStaff: StaffEntity) {
+  async signOut(@Res({ passthrough: true }) res: Response, @CurrentStaff() currentStaff: StaffEntity) {
     await this.authService.signOut(currentStaff.id);
     res.clearCookie('token');
-    return res.json({ message: 'Signed out successfully' });
+    return true;
   }
 
   @Get('whoami')

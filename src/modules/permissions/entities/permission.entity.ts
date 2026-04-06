@@ -9,7 +9,7 @@ export class PermissionEntity extends BaseEntity implements IPermission {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'text' })
   desc: string;
 
   @Column({ unique: true })

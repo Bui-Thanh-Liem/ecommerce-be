@@ -4,8 +4,11 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '../permissions/seeding';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { RoleDto } from './dto/role.dto';
 
 @Controller('roles')
+@Serializer(RoleDto)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 

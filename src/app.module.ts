@@ -82,7 +82,7 @@ const isProd = process.env.NODE_ENV === 'production';
         // Tùy chọn 3: Nếu bạn muốn chuyển đổi chuỗi thành kiểu dữ liệu nguyên thủy
         // Ví dụ: '123' thành 123 nếu bạn dùng @IsNumber() trên tham số query
         transformOptions: {
-          enableImplicitConversion: true,
+          enableImplicitConversion: true, // Cho phép chuyển đổi ngầm định, ví dụ: '1' thành true nếu dùng @IsInt()
         },
       }),
     },

@@ -1,12 +1,26 @@
-import { ArrayNotEmpty, IsArray, IsBoolean, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { Trim } from '@/decorators/trim.decorator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateRoleDto {
   @MaxLength(100)
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   name: string;
 
-  @MaxLength(200)
+  @IsOptional()
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   desc: string;
 
   @IsArray() // Mảng chứa các ID của permissions liên quan đến role này

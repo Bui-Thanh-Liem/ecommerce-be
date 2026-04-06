@@ -1,13 +1,15 @@
-import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { Trim } from '@/decorators/trim.decorator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   @MaxLength(100)
   name: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(1255)
   desc?: string;
 
   @IsOptional()

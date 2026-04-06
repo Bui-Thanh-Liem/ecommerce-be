@@ -6,16 +6,16 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity('staffs')
 export class StaffEntity extends BaseEntity implements IStaff {
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar', length: 50 })
   fullName: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', length: 20 })
   phone: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', length: 100 })
   email: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   password: string;
 
   @ManyToMany(() => RoleEntity, (role) => role.staffs, { nullable: true })

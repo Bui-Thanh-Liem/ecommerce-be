@@ -1,0 +1,33 @@
+@root=http://localhost:3000/api/v1
+
+### Create brands
+POST {{root}}/brands
+content-type: application/json
+
+{
+    "name": "Brand MY",
+    "logoUrl": "https://example.com/logo.png",
+    "country": "USA"
+}
+
+### Get all brands
+GET {{root}}/brands
+content-type: application/json
+
+### Get a brand by id
+GET {{root}}/brands/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json
+
+### Update a brand
+PATCH {{root}}/brands/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json
+
+{
+    "name": "Brand 33 Updated",
+    "logoUrl": "https://example.com/new-logo.png",
+    "country": "Canada"
+}
+
+### Delete a brand
+DELETE {{root}}/brands/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json

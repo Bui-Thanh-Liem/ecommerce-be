@@ -1,5 +1,6 @@
 import { CallHandler, ExecutionContext, NestInterceptor, UseInterceptors } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { Response } from 'express';
 import { map, Observable } from 'rxjs';
 
 interface ClassConstructor {
@@ -14,11 +15,20 @@ export class SerializerInterceptor implements NestInterceptor {
   constructor(private dto: any) {}
 
   intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
+    const res = context.switchToHttp().getResponse<Response>();
+    const statusCode = res.statusCode;
+
     return next.handle().pipe(
       map((data: any) => {
-        return plainToInstance(this.dto, data, {
-          excludeExtraneousValues: true,
-        });
+        return {
+          statusCode,
+          message: 'Success ✅✅✅',
+          metadata: plainToInstance(this.dto, data, {
+            excludeExtraneousValues: true,
+            // Thêm option này để xử lý tốt cả Array và Object đơn lẻ
+            enableImplicitConversion: true,
+          }),
+        };
       }),
     );
   }

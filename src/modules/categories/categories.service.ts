@@ -1,3 +1,4 @@
+import { stringToSlug } from '@/utils/string-to-slug.util';
 import {
   BadRequestException,
   ConflictException,
@@ -5,12 +6,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { Not, Repository } from 'typeorm';
-import { stringToSlug } from '@/utils/string-to-slug.util';
 
 @Injectable()
 export class CategoriesService {
@@ -23,7 +23,7 @@ export class CategoriesService {
     const { name, parent: parentId, ...rest } = createCategoryDto;
     const slug = stringToSlug(name);
 
-    // Kiểm tra nếu có parentId thì phải tồn tại category cha
+    // Kiểm tra tên category đã tồn tại chưa
     const existingCategory = await this.categoryRepo.exists({ where: { slug } });
     if (existingCategory) {
       throw new ConflictException('Category with this name already exists');
@@ -71,7 +71,7 @@ export class CategoriesService {
         where: { slug, id: Not(id) },
       });
       if (existingCategory) {
-        throw new ConflictException('Another category with this name already exists');
+        throw new ConflictException('Category with this name already exists');
       }
     }
 

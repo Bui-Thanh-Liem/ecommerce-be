@@ -1,16 +1,17 @@
-import { registerAs } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import dotenv from 'dotenv';
+import { BrandEntity } from '@/modules/brands/entities/brand.entity';
+import { CategoryEntity } from '@/modules/categories/entities/category.entity';
+import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
 import { PermissionEntity } from '@/modules/permissions/entities/permission.entity';
+import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { RoleEntity } from '@/modules/roles/entities/role.entity';
 import { StaffTokenEntity } from '@/modules/staff-tokens/entities/staff-token.entity';
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
+import { registerAs } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import dotenv from 'dotenv';
 import { DataSourceOptions } from 'typeorm';
-import { CategoryEntity } from '@/modules/categories/entities/category.entity';
-import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
-import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 
 //
 const isProd = process.env.NODE_ENV === 'production';
@@ -36,6 +37,7 @@ export const pgConfig: DataSourceOptions = {
     CategoryEntity,
     InventoryEntity,
     ProductEntity,
+    BrandEntity,
   ],
   migrations: ['dist/src/migrations/*.js'],
   migrationsTableName: 'migrations-storage',

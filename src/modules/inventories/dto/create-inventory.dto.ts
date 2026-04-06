@@ -1,5 +1,5 @@
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
-import { IsEnum, IsInt, IsUUID } from 'class-validator';
+import { IsEnum, IsInt, IsUUID, Min } from 'class-validator';
 
 export class CreateInventoryDto {
   @IsUUID('4')
@@ -9,9 +9,11 @@ export class CreateInventoryDto {
   product: string;
 
   @IsInt()
+  @Min(0)
   quantity: number;
 
   @IsInt()
+  @Min(0)
   minStockLevel: number;
 
   @IsEnum(InventoryStockType, { message: 'stockType must be a valid InventoryStockType' })

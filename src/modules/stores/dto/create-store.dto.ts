@@ -1,24 +1,30 @@
+import { Trim } from '@/decorators/trim.decorator';
+import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
   IsLatitude,
   IsLongitude,
+  IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 
 class PhoneStoreDto implements IPhoneStore {
   @MaxLength(50)
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   name: string;
 
   @MaxLength(20)
   @IsString()
+  @IsNotEmpty()
+  @Trim()
   phone: string;
 }
 
@@ -28,18 +34,26 @@ export class CreateStoreDto {
 
   @MaxLength(100)
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   name: string;
 
   @MaxLength(200)
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   address: string;
 
   @MaxLength(10) // Ví dụ: "08:00"
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   openingHours: string;
 
   @MaxLength(10) // Ví dụ: "22:00"
   @IsString()
+  @Trim()
+  @IsNotEmpty()
   closingHours: string;
 
   @IsLatitude() // Kiểm tra giá trị latitude hợp lệ

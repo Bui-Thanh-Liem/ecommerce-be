@@ -1,30 +1,11 @@
-import { Exclude, Expose } from 'class-transformer';
+import { StaffDto } from '@/modules/staffs/dto/staff.dto';
+import { Expose, Type } from 'class-transformer';
 
 export class AuthDto {
   @Expose()
-  id: string;
+  @Type(() => StaffDto)
+  staff: StaffDto;
 
   @Expose()
-  email: string;
-
-  @Expose()
-  phone: string;
-
-  @Expose()
-  fullName: string;
-
-  @Expose()
-  store: string;
-
-  @Expose()
-  isActive: boolean;
-
-  @Expose()
-  isAdmin: boolean;
-
-  @Expose()
-  admin: boolean;
-
-  @Exclude()
-  password: string;
+  token: string;
 }

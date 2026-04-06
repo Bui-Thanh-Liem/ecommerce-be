@@ -99,4 +99,26 @@ export const permissionsSeed = {
       code: '018',
     },
   },
+  category: {
+    create: {
+      name: 'create:categories',
+      desc: 'Tạo danh mục',
+      code: '019',
+    },
+    read: {
+      name: 'read:categories',
+      desc: 'Xem danh mục',
+      code: '020',
+    },
+    update: {
+      name: 'update:categories',
+      desc: 'Cập nhật danh mục',
+      code: '021',
+    },
+    delete: {
+      name: 'delete:categories',
+      desc: 'Xóa danh mục',
+      code: '022',
+    },
+  },
 };

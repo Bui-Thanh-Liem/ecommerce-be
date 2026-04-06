@@ -5,10 +5,9 @@ POST {{root}}/roles
 content-type: application/json
 
 {
-    "name": "Sub Admin",
-    "desc": "Quản trị viên phụ",
-    "permissions": ["184dbc05-a0dd-4df0-a3cd-0e2bc9755cb5", "1870eef2-0402-4982-bd53-406ca71f93a4"],
-    "isActive": true
+    "name": "Store Manager",
+    "desc": "Quản lý cửa hàng",
+    "permissions": ["dbb545cf-b3fc-4260-bf53-5e6d682bb0a2"]
 }
 
 ### Get all roles
