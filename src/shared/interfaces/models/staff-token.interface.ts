@@ -1,4 +1,4 @@
-import { StaffTokenType } from 'src/shared/enums/staff-token-type.enum';
+import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
 import { IBase } from '../base.interface';
 import { IStaff } from './staff.interface';
 

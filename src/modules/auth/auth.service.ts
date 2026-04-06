@@ -3,7 +3,7 @@ import { compare } from 'bcrypt';
 import { StaffTokensService } from '../staff-tokens/staff-tokens.service';
 import { StaffEntity } from '../staffs/entities/staff.entity';
 import { StaffsService } from '../staffs/staffs.service';
-import { StaffTokenType } from 'src/shared/enums/staff-token-type.enum';
+import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
 
 @Injectable()
 export class AuthService {

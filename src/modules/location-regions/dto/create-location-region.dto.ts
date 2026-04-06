@@ -1,12 +1,12 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
-import { LocationRegionType } from 'src/shared/enums/location-regions.enum';
+import { LocationRegionType } from '@/shared/enums/location-regions.enum';
 
 export class CreateLocationRegionDto {
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @IsEnum(LocationRegionType)
+  @IsEnum(LocationRegionType, { message: 'type must be a valid LocationRegionType' })
   type: LocationRegionType;
 
   @IsOptional()

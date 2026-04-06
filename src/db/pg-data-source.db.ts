@@ -1,4 +1,4 @@
-import { pgConfig } from 'src/configs/pg.config';
+import { pgConfig } from '@/configs/pg.config';
 import { DataSource } from 'typeorm';
 
 //

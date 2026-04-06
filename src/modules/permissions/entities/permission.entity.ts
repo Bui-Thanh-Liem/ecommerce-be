@@ -1,6 +1,6 @@
-import { RoleEntity } from 'src/modules/roles/entities/role.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { IPermission } from 'src/shared/interfaces/models/permission.interface';
+import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { IPermission } from '@/shared/interfaces/models/permission.interface';
 import { Column, Entity, Index, ManyToMany } from 'typeorm';
 
 @Entity('permissions')

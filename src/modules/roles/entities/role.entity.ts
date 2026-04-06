@@ -1,17 +1,20 @@
-import { PermissionEntity } from 'src/modules/permissions/entities/permission.entity';
-import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { IRole } from 'src/shared/interfaces/models/role.interface';
+import { PermissionEntity } from '@/modules/permissions/entities/permission.entity';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { IRole } from '@/shared/interfaces/models/role.interface';
 import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity('roles')
 @Index('idx_active_roles', ['name'], { where: '"isActive" = \'true\'' })
 export class RoleEntity extends BaseEntity implements IRole {
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
   desc: string;
+
+  @Column({ unique: true, type: 'int', generated: 'increment' })
+  code: number;
 
   @ManyToMany(() => PermissionEntity, (permission) => permission.roles)
   @JoinTable({

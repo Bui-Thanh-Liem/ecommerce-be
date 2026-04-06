@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateStaffDto {
   @IsString()
@@ -23,4 +23,8 @@ export class CreateStaffDto {
 
   @IsUUID('4')
   store: string;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  roles: string[];
 }

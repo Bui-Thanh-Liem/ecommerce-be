@@ -7,7 +7,7 @@ console.log('process.env.PORT :::', process.env.PORT);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: new AppLogger(),
+    logger: undefined, // Disable default logger
   });
   // Add global prefix
   app.setGlobalPrefix('api/v1');

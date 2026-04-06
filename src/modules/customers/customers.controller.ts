@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { CurrentStaff } from 'src/decorators/current-staff.decorator';
+import { CurrentStaff } from '@/decorators/current-staff.decorator';
 import { StaffEntity } from '../staffs/entities/staff.entity';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';

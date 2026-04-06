@@ -2,8 +2,9 @@ import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/com
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
-import { IStaff } from 'src/shared/interfaces/models/staff.interface';
+import { IS_PUBLIC_KEY } from '@/decorators/public.decorator';
+import { IStaff } from '@/shared/interfaces/models/staff.interface';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -11,15 +12,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  handleRequest(err, staff, info, context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest<Request>();
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
-
-    // Nếu route được đánh dấu là public, bỏ qua việc kiểm tra token
     if (isPublic) {
       return true; // Cho phép truy cập mà không cần token
     }
+    console.log('#1. JwtAuthGuard - canActivate called');
+    return super.canActivate(context);
+  }
 
+  handleRequest(err, staff, info, context: ExecutionContext) {
+    console.log('#3. JwtAuthGuard - handleRequest called');
+    const request = context.switchToHttp().getRequest<Request>();
+
+    // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized
     if (err || !staff) {
       throw new UnauthorizedException(info || 'Unauthorized');
     }

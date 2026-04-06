@@ -2,9 +2,9 @@ import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/commo
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
-import { Permissions } from 'src/decorators/permission.decorator';
-import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
-import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
+import { Permissions } from '@/decorators/permission.decorator';
+import { IS_PUBLIC_KEY } from '@/decorators/public.decorator';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -22,7 +22,6 @@ export class RoleGuard implements CanActivate {
 
     // Cho phép truy cập mà không cần kiểm tra quyền
     if (isPublic || staff?.isAdmin) return true;
-
     console.log('Permissions required:', permissionsRequired);
 
     return false;

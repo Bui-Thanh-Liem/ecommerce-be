@@ -1,12 +1,12 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import dotenv from 'dotenv';
-import { LocationRegionEntity } from 'src/modules/location-regions/entities/location-region.entity';
-import { PermissionEntity } from 'src/modules/permissions/entities/permission.entity';
-import { RoleEntity } from 'src/modules/roles/entities/role.entity';
-import { StaffTokenEntity } from 'src/modules/staff-tokens/entities/staff-token.entity';
-import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
-import { StoreEntity } from 'src/modules/stores/entities/store.entity';
+import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
+import { PermissionEntity } from '@/modules/permissions/entities/permission.entity';
+import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { StaffTokenEntity } from '@/modules/staff-tokens/entities/staff-token.entity';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { DataSourceOptions } from 'typeorm';
 
 //

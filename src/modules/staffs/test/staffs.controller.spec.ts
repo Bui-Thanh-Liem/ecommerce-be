@@ -1,14 +1,14 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../auth.service';
-import { UsersController } from '../staffs.controller';
-import { UsersService } from '../staffs.service';
+import { StaffsController } from '../staffs.controller';
+import { StaffsService } from '../staffs.service';
+import { AuthService } from '@/modules/auth/auth.service';
 
-describe('UsersController', () => {
-  let controller: UsersController;
+describe('StaffsController', () => {
+  let controller: StaffsController;
 
-  const _userService: Partial<UsersService> = {
-    findOne: jest.fn().mockImplementation((id) =>
+  const _staffService: Partial<StaffsService> = {
+    findOne: jest.fn().mockImplementation((id: string) =>
       Promise.resolve({
         id,
         email: 'test@test.com',
@@ -17,7 +17,7 @@ describe('UsersController', () => {
   };
 
   const _authService: Partial<AuthService> = {
-    signIn: jest.fn().mockImplementation((id) =>
+    signIn: jest.fn().mockImplementation((id: string) =>
       Promise.resolve({
         id,
         email: 'test@test.com',
@@ -27,11 +27,11 @@ describe('UsersController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
+      controllers: [StaffsController],
       providers: [
         {
-          provide: UsersService,
-          useValue: _userService,
+          provide: StaffsService,
+          useValue: _staffService,
         },
         {
           provide: AuthService,
@@ -40,16 +40,16 @@ describe('UsersController', () => {
       ],
     }).compile();
 
-    controller = module.get<UsersController>(UsersController);
+    controller = module.get<StaffsController>(StaffsController);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  it('find user throw error if user not found', async () => {
+  it('find staff throw error if staff not found', async () => {
     // Override
-    _userService.findOne = jest.fn().mockResolvedValueOnce(null);
+    _staffService.findOne = jest.fn().mockResolvedValueOnce(null);
 
     //
     await expect(controller.findOne('1')).rejects.toThrow(NotFoundException);

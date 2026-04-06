@@ -1,0 +1,33 @@
+@root=http://localhost:3000/api/v1
+
+### Create staffs
+POST {{root}}/staffs
+content-type: application/json
+
+{
+    "fullName": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "123123",
+    "password": "abc123@",
+    "store": "4e2088e9-3ba7-4c00-b155-a17dcc1a1096"
+}
+
+### Get all staffs
+GET {{root}}/staffs?page=1&limit=10&email=
+content-type: application/json
+
+### Get a staff by id
+GET {{root}}/staffs/cce78cd1-6228-45e8-bbcc-03f38271b3e0
+content-type: application/json
+
+### Update a staff by id
+PATCH {{root}}/staffs/cce78cd1-6228-45e8-bbcc-03f38271b3e0
+content-type: application/json
+
+{
+    "roles": ["0c3aed0a-e4f3-413e-816f-34e374247657"]
+}
+
+### Delete a staff by id
+DELETE {{root}}/staffs/41276689-58a2-4e3a-a0a1-af0cbb209b3f
+content-type: application/json

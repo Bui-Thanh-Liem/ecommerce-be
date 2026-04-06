@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IStaff } from 'src/shared/interfaces/models/staff.interface';
+import { IStaff } from '@/shared/interfaces/models/staff.interface';
 
 //
 @Injectable()

@@ -50,6 +50,10 @@ export class LocationRegionsService {
     return await this.locationRegionRepo.find({ relations: ['parent', 'children'] });
   }
 
+  async exists(id: string): Promise<boolean> {
+    return await this.locationRegionRepo.exists({ where: { id } });
+  }
+
   async findOne(id: string) {
     const locationRegion = await this.locationRegionRepo.findOne({
       where: { id },

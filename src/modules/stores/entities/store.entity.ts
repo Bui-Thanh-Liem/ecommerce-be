@@ -1,7 +1,7 @@
-import { LocationRegionEntity } from 'src/modules/location-regions/entities/location-region.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { IStore } from 'src/shared/interfaces/models/store.interface';
-import { IPhoneStore } from 'src/shared/interfaces/phone-store.interface';
+import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { IStore } from '@/shared/interfaces/models/store.interface';
+import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('stores')

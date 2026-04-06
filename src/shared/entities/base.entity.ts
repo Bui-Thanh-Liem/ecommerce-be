@@ -27,17 +27,17 @@ export abstract class BaseEntity implements IBase {
   version: number;
 
   @AfterInsert()
-  handlerAfterInsert() {
+  handlerAfterInsert(): void {
     this.logInsert();
   }
 
   @AfterUpdate()
-  handlerAfterUpdate() {
+  handlerAfterUpdate(): void {
     this.logUpdate();
   }
 
   @AfterRemove()
-  handlerAfterRemove() {
+  handlerAfterRemove(): void {
     this.logRemove();
   }
 

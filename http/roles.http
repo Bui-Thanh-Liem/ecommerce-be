@@ -1,0 +1,34 @@
+@root=http://localhost:3000/api/v1
+
+### Create a new role
+POST {{root}}/roles
+content-type: application/json
+
+{
+    "name": "Sub Admin",
+    "desc": "Quản trị viên phụ",
+    "permissions": ["184dbc05-a0dd-4df0-a3cd-0e2bc9755cb5", "1870eef2-0402-4982-bd53-406ca71f93a4"],
+    "isActive": true
+}
+
+### Get all roles
+GET {{root}}/roles
+content-type: application/json
+
+### Get a role by id
+GET {{root}}/roles/:id
+content-type: application/json
+
+### Update a role
+PATCH {{root}}/roles/0c3aed0a-e4f3-413e-816f-34e374247657
+content-type: application/json
+
+{
+    "name": "Sub Admin 2",
+    "desc": "Quản trị viên phụ",
+    "permissions": ["a95a0d6d-906a-46ad-a494-0f18469bcc6b", "a95a0d6d-906a-46ad-a494-0f18469bcc6b"]
+}
+
+### Delete a role
+DELETE {{root}}/roles/:id
+content-type: application/json

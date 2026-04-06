@@ -5,7 +5,7 @@ POST {{root}}/stores
 content-type: application/json
 
 {
-    "locationRegion": "a03b220c-1941-4000-9694-24d3c1155716",
+    "locationRegion": "49aeaa74-95e0-42b3-9524-5af986f64ea8",
     "name": "Store 1",
     "address": "123 Main St",
     "openingHours": "08:00",
@@ -26,7 +26,7 @@ GET {{root}}/stores?page=1&limit=10
 content-type: application/json
 
 ### Get a store by id
-GET {{root}}/stores/a03b220c-1941-4000-9694-24d3c1155716
+GET {{root}}/stores/4e2088e9-3ba7-4c00-b155-a17dcc1a1096
 content-type: application/json
 
 ### Update a store by id

@@ -1,7 +1,7 @@
-import { RoleEntity } from 'src/modules/roles/entities/role.entity';
-import { StoreEntity } from 'src/modules/stores/entities/store.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { IStaff } from 'src/shared/interfaces/models/staff.interface';
+import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { StoreEntity } from '@/modules/stores/entities/store.entity';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { IStaff } from '@/shared/interfaces/models/staff.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity('staffs')

@@ -4,9 +4,10 @@ import { StaffsController } from './staffs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StaffEntity } from './entities/staff.entity';
 import { StoresModule } from '../stores/stores.module';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([StaffEntity]), StoresModule],
+  imports: [RolesModule, TypeOrmModule.forFeature([StaffEntity]), StoresModule],
   controllers: [StaffsController],
   providers: [StaffsService],
   exports: [StaffsService],

@@ -1,7 +1,7 @@
-import { StaffEntity } from 'src/modules/staffs/entities/staff.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { StaffTokenType } from 'src/shared/enums/staff-token-type.enum';
-import { IStaffToken } from 'src/shared/interfaces/models/staff-token.interface';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { IStaffToken } from '@/shared/interfaces/models/staff-token.interface';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity('staff_tokens')

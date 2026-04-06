@@ -10,7 +10,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { IPhoneStore } from 'src/shared/interfaces/phone-store.interface';
+import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 
 class PhoneStoreDto implements IPhoneStore {
   @MaxLength(50)

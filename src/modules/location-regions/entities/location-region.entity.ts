@@ -1,6 +1,6 @@
-import { BaseEntity } from 'src/shared/entities/base.entity';
-import { LocationRegionType } from 'src/shared/enums/location-regions.enum';
-import { ILocationRegion } from 'src/shared/interfaces/models/location-region.interface';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { LocationRegionType } from '@/shared/enums/location-regions.enum';
+import { ILocationRegion } from '@/shared/interfaces/models/location-region.interface';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
 @Entity('location_regions')

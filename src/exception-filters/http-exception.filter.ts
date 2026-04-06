@@ -16,7 +16,7 @@ export class ErrorExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
-    const isDev = process.env.NODE_ENV === 'dev';
+    const isDev = process.env.NODE_ENV === 'development';
 
     //
     let status = HttpStatus.INTERNAL_SERVER_ERROR;

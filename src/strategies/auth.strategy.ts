@@ -1,12 +1,13 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { StaffsService } from 'src/modules/staffs/staffs.service';
-import { IJwtPayload } from 'src/shared/interfaces/jwt-payload.interface';
+import { StaffsService } from '@/modules/staffs/staffs.service';
+import { IJwtPayload } from '@/shared/interfaces/jwt-payload.interface';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 
-// chỉ sử dụng jwt hoặc cookie session, không nên dùng cả 2 (hiện tại là học)
+// JWT Strategy để xác thực người dùng dựa trên token JWT
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   private readonly logger = new Logger(JwtAuthStrategy.name);
@@ -15,27 +16,38 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     private configService: ConfigService,
     private userService: StaffsService,
   ) {
+    const secret = configService.get<string>('JWT_ACCESS_SECRET');
+    if (!secret) {
+      throw new BadRequestException('JWT_ACCESS_SECRET is not defined in environment variables');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const token = req.cookies?.token; // Lấy token từ cookie
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return token || null;
+          const token: string | null = (req.cookies as { token?: string })?.token ?? null;
+          if (!token) {
+            this.logger.error('Không tìm thấy token trong cookie');
+            throw new UnauthorizedException('No token found in cookies');
+          }
+          return token;
         },
       ]),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      secretOrKey: configService.get('JWT_ACCESS_SECRET') || 'key-secret',
+      secretOrKey: secret,
     });
   }
 
-  async validate(payload: IJwtPayload): Promise<unknown> {
-    // check in database (cached) if user exists and is valid
-    const user = await this.userService.findOne(payload.userId);
-    if (!user?.id) throw new UnauthorizedException('Invalid token');
+  async validate(payload: IJwtPayload): Promise<StaffEntity> {
+    console.log('#2. JwtAuthStrategy - validate payload :::', payload);
 
-    //
-    this.logger.debug('Validating JWT payload:::', payload);
+    // 1. Check database xem user còn tồn tại hay không
+    const user = await this.userService.findOne(payload.userId);
+
+    // 2. Nếu không thấy, chặn ngay tại đây
+    if (!user) {
+      throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị xóa');
+    }
+
+    // 3. Nếu OK, trả về user. Object này sẽ được truyền vào handleRequest
     return user;
   }
 }

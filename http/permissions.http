@@ -1,0 +1,14 @@
+@root=http://localhost:3000/api/v1
+
+### Get all permissions
+GET {{root}}/permissions
+content-type: application/json
+
+### Update a permission
+PATCH {{root}}/permissions/:id
+content-type: application/json
+
+{
+    "name": "update:permissions",
+    "desc": "Cập nhật quyền"
+}
