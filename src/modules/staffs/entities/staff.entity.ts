@@ -36,14 +36,14 @@ export class StaffEntity extends BaseEntity implements IStaff {
   isAdmin: boolean;
 
   logInsert() {
-    console.log(`Đã chèn thành công Staff có Email: ${this.email}`);
+    this.logger.debug(`Đã chèn thành công Staff có Email: ${this.email}`);
   }
 
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công Staff có Email: ${this.email}`);
+    this.logger.debug(`Đã cập nhật thành công Staff có Email: ${this.email}`);
   }
 
   logRemove(): void {
-    console.log(`Đã xóa thành công Staff có Email: ${this.email}`);
+    this.logger.debug(`Đã xóa thành công Staff có Email: ${this.email}`);
   }
 }

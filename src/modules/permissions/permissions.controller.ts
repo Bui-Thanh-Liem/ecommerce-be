@@ -12,13 +12,13 @@ export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @Get()
-  @Permissions([permissionsSeed.permissions.view.code])
+  @Permissions(permissionsSeed.permissions.view.code)
   findAll() {
     return this.permissionsService.findAll();
   }
 
   @Patch(':id')
-  @Permissions([permissionsSeed.permissions.update.code])
+  @Permissions(permissionsSeed.permissions.update.code)
   update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
     return this.permissionsService.update(id, updatePermissionDto);
   }

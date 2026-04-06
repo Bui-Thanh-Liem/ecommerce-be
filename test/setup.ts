@@ -1,7 +1,10 @@
+import { Logger } from '@nestjs/common';
 import { rm } from 'fs/promises';
 import { join } from 'path';
 
 global.beforeEach(async () => {
+  const logger = new Logger('TestSetup');
+
   // Reset all mocks before each test
   jest.clearAllMocks();
 
@@ -9,6 +12,6 @@ global.beforeEach(async () => {
   try {
     await rm(join(__dirname, '..', 'test.sqlite'), { force: true });
   } catch (error) {
-    console.log('Error when delete file test.sqlite');
+    logger.debug('Error when delete file test.sqlite', error);
   }
 });

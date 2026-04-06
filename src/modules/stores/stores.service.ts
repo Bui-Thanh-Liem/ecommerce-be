@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,8 @@ import { LocationRegionsService } from '../location-regions/location-regions.ser
 
 @Injectable()
 export class StoresService {
+  private readonly logger = new Logger(StoresService.name);
+
   constructor(
     @InjectRepository(StoreEntity)
     private storeRepo: Repository<StoreEntity>,
@@ -98,7 +100,7 @@ export class StoresService {
     try {
       return await this.storeRepo.save(store);
     } catch (error) {
-      console.log(error);
+      this.logger.debug(`Failed to update store with ID ${id}`, error);
       throw new NotFoundException(`Failed to update store with ID ${id}`);
     }
   }

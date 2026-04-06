@@ -18,14 +18,23 @@ import { StaffTokensModule } from './modules/staff-tokens/staff-tokens.module';
 import { StaffsModule } from './modules/staffs/staffs.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { JwtAuthStrategy } from './strategies/auth.strategy';
+import { InventoriesModule } from './modules/inventories/inventories.module';
+import { ProductsModule } from './modules/products-SPU/products.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { ProductVariantsModule } from './modules/product-variants-SKU/product-variants.module';
+import { ProductItemsModule } from './modules/product-items-SERIAL/product-items.module';
+import { ProductImagesModule } from './modules/product-images/product-images.module';
+import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
 
+const isProd = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
     //
     ConfigModule.forRoot({
       isGlobal: true,
       load: [pgConfig],
-      envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
+      envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
     //
@@ -48,6 +57,14 @@ import { JwtAuthStrategy } from './strategies/auth.strategy';
     PermissionsModule,
     RolesModule,
     CustomersModule,
+    InventoriesModule,
+    ProductsModule,
+    CategoriesModule,
+    BrandsModule,
+    ProductVariantsModule,
+    ProductItemsModule,
+    ProductImagesModule,
+    ProductPromotionsModule,
   ],
   controllers: [AppController],
   providers: [

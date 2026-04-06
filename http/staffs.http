@@ -8,8 +8,9 @@ content-type: application/json
     "fullName": "John Doe",
     "email": "john.doe@example.com",
     "phone": "123123",
-    "password": "abc123@",
-    "store": "4e2088e9-3ba7-4c00-b155-a17dcc1a1096"
+    "password": "admin123",
+    "store": "4e2088e9-3ba7-4c00-b155-a17dcc1a1096",
+    "roles": ["0c3aed0a-e4f3-413e-816f-34e374247657"]
 }
 
 ### Get all staffs
@@ -17,7 +18,7 @@ GET {{root}}/staffs?page=1&limit=10&email=
 content-type: application/json
 
 ### Get a staff by id
-GET {{root}}/staffs/cce78cd1-6228-45e8-bbcc-03f38271b3e0
+GET {{root}}/staffs/1a2ffb7c-15a4-4a5f-9380-53e140429e8c
 content-type: application/json
 
 ### Update a staff by id
@@ -29,5 +30,5 @@ content-type: application/json
 }
 
 ### Delete a staff by id
-DELETE {{root}}/staffs/41276689-58a2-4e3a-a0a1-af0cbb209b3f
+DELETE {{root}}/staffs/c418524e-c7b3-4fe4-8cf7-dc4793c31970
 content-type: application/json

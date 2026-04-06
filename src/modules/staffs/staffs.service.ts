@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { genSalt, hash } from 'bcrypt';
@@ -11,6 +11,8 @@ import { RolesService } from '../roles/roles.service';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
+  private readonly logger = new Logger(StaffsService.name);
+
   constructor(
     @InjectRepository(StaffEntity)
     private staffRepo: Repository<StaffEntity>,
@@ -27,7 +29,7 @@ export class StaffsService implements OnModuleInit {
   }
 
   async create(createStaffDto: CreateStaffDto) {
-    const { store: storeId, roles: roleIds, ...rest } = createStaffDto;
+    const { store: storeId, roles: roleIds, password, ...rest } = createStaffDto;
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
@@ -45,9 +47,14 @@ export class StaffsService implements OnModuleInit {
       }
     }
 
+    // Hash password trước khi lưu vào database
+    const salt = await genSalt();
+    const hashPassword = await hash(password, salt);
+
     // Tạo mới staff với store nếu có
     const staff = this.staffRepo.create({
       ...rest,
+      password: hashPassword,
       store: storeId ? { id: storeId } : null,
       roles: roleIds ? roleIds.map((id) => ({ id })) : [],
     });
@@ -62,9 +69,20 @@ export class StaffsService implements OnModuleInit {
     return await this.staffRepo.findOneBy({ phone });
   }
 
-  findAll({ page, limit, email }: { page: string; limit: string; email?: string }) {
-    return this.staffRepo.find({
+  async findAll({ page, limit, email }: { page: string; limit: string; email?: string }) {
+    return await this.staffRepo.find({
       where: email ? { email } : {},
+      relations: { store: true, roles: { permissions: true } },
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        email: true,
+        isActive: true,
+        isAdmin: true,
+        store: { id: true, name: true },
+        roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
+      },
       take: parseInt(limit),
       skip: (parseInt(page) - 1) * parseInt(limit),
     });
@@ -79,7 +97,7 @@ export class StaffsService implements OnModuleInit {
     if (!id) return null;
     return await this.staffRepo.findOne({
       where: { id },
-      relations: ['staff_role', 'store'],
+      relations: { store: true, roles: { permissions: true } },
       select: {
         id: true,
         fullName: true,
@@ -98,7 +116,7 @@ export class StaffsService implements OnModuleInit {
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      console.log('typeof :::', typeof storeId);
+      this.logger.debug('typeof :::', typeof storeId);
       const store = await this.storesService.exists([storeId]);
       if (!store) {
         throw new NotFoundException(`Store with ID ${storeId} not found`);
@@ -167,9 +185,9 @@ export class StaffsService implements OnModuleInit {
       });
       await this.staffRepo.save(adminStaff);
 
-      console.log('Admin staff created with email:', adminStaff.email);
+      this.logger.debug('Admin staff created with email:', adminStaff.email);
     } else {
-      console.log('Admin staff already exists with email:', adminEmail);
+      this.logger.debug('Admin staff already exists with email:', adminEmail);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 
 export interface IOvResult {
@@ -9,12 +9,14 @@ export interface IOvResult {
 
 @Injectable()
 export class OvInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(OvInterceptor.name);
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
-    console.log('Before... -> controller ::: 0ms');
+    this.logger.debug('Before... -> controller ::: 0ms');
     return next.handle().pipe(
       tap(() => {
-        console.log(`After::: ${Date.now() - now} ms`);
+        this.logger.debug(`After::: ${Date.now() - now} ms`);
       }),
     );
   }

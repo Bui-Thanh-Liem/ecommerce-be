@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionEntity } from './entities/location-region.entity';
@@ -66,7 +66,17 @@ export class LocationRegionsService {
   }
 
   async update(id: string, updateLocationRegionDto: UpdateLocationRegionDto) {
-    const { parent: parentId, ...rest } = updateLocationRegionDto;
+    const { name, parent: parentId, ...rest } = updateLocationRegionDto;
+
+    // 0. Kiểm tra nếu có name thì phải unique
+    if (name) {
+      const existingCategory = await this.locationRegionRepo.exists({
+        where: { name, id: Not(id) },
+      });
+      if (existingCategory) {
+        throw new ConflictException('Another location region with this name already exists');
+      }
+    }
 
     // 1. Chặn lỗi logic: Không được phép chọn chính mình làm cha (circular reference)
     if (parentId && parentId === id) {
@@ -84,6 +94,7 @@ export class LocationRegionsService {
     // 3. Gán thủ công để đảm bảo TypeORM hiểu đây là quan hệ Entity, không phải String
     const locationRegion = await this.locationRegionRepo.preload({
       id,
+      name,
       ...rest,
       parent: parentId ? { id: parentId } : undefined,
     });

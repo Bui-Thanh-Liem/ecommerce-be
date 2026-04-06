@@ -1,5 +1,5 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { LocationRegionType } from '@/shared/enums/location-regions.enum';
+import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { ILocationRegion } from '@/shared/interfaces/models/location-region.interface';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
@@ -24,12 +24,12 @@ export class LocationRegionEntity extends BaseEntity implements ILocationRegion 
   children?: LocationRegionEntity[];
 
   logInsert(): void {
-    console.log(`Đã chèn thành công LocationRegion có name: ${this.name}`);
+    this.logger.debug(`Đã chèn thành công LocationRegion có name: ${this.name}`);
   }
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công LocationRegion có name: ${this.name}`);
+    this.logger.debug(`Đã cập nhật thành công LocationRegion có name: ${this.name}`);
   }
   logRemove(): void {
-    console.log(`Đã xóa thành công LocationRegion có name: ${this.name}`);
+    this.logger.debug(`Đã xóa thành công LocationRegion có name: ${this.name}`);
   }
 }

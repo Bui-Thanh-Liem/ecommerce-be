@@ -1,0 +1,32 @@
+@root=http://localhost:3000/api/v1
+
+### Create categories
+POST {{root}}/categories
+content-type: application/json
+
+{
+    "name": "Category 33",
+    "desc": "Description for category 33",
+    "parent": "09a1d330-17d1-4d4e-a235-c50d6d197272"
+}
+
+### Get all categories
+GET {{root}}/categories
+content-type: application/json
+
+### Get a category by id
+GET {{root}}/categories/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json
+
+### Update a category
+PATCH {{root}}/categories/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json
+
+{
+    "name": "Category 33 Updated",
+    "desc": "Updated description for category 33"
+}
+
+### Delete a category
+DELETE {{root}}/categories/2dd8a7c3-08c4-41d9-87a4-e95763ab7855
+content-type: application/json

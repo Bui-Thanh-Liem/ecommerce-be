@@ -22,12 +22,12 @@ export class PermissionEntity extends BaseEntity implements IPermission {
   roles?: RoleEntity[] | undefined;
 
   logInsert(): void {
-    console.log(`Đã chèn thành công Permission có name: ${this.name}`);
+    this.logger.debug(`Đã chèn thành công Permission có name: ${this.name}`);
   }
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công Permission có name: ${this.name}`);
+    this.logger.debug(`Đã cập nhật thành công Permission có name: ${this.name}`);
   }
   logRemove(): void {
-    console.log(`Đã xóa thành công Permission có name: ${this.name}`);
+    this.logger.debug(`Đã xóa thành công Permission có name: ${this.name}`);
   }
 }

@@ -1,6 +1,7 @@
+import { SerializerDto } from '@/shared/dtos/serializer.dto';
 import { Expose } from 'class-transformer';
 
-export class PermissionDto {
+export class PermissionDto extends SerializerDto {
   @Expose()
   id: string;
 

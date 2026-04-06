@@ -37,14 +37,14 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: IJwtPayload): Promise<StaffEntity> {
-    console.log('#2. JwtAuthStrategy - validate payload :::', payload);
+    this.logger.debug('#2. JwtAuthStrategy - validate called');
 
     // 1. Check database xem user còn tồn tại hay không
-    const user = await this.userService.findOne(payload.userId);
+    const user = await this.userService.findOne(payload.staffId);
 
     // 2. Nếu không thấy, chặn ngay tại đây
     if (!user) {
-      throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị xóa');
+      throw new UnauthorizedException('User not found');
     }
 
     // 3. Nếu OK, trả về user. Object này sẽ được truyền vào handleRequest

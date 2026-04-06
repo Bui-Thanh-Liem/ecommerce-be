@@ -8,10 +8,13 @@ import { StaffTokenEntity } from '@/modules/staff-tokens/entities/staff-token.en
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { DataSourceOptions } from 'typeorm';
+import { CategoryEntity } from '@/modules/categories/entities/category.entity';
+import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
+import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 
 //
 const isProd = process.env.NODE_ENV === 'production';
-dotenv.config({ path: `.env.${process.env.NODE_ENV || 'dev'}` });
+dotenv.config({ path: isProd ? '.env' : '.env.dev' });
 
 //
 export const pgConfig: DataSourceOptions = {
@@ -23,7 +26,17 @@ export const pgConfig: DataSourceOptions = {
   database: process.env.POSTGRES_DB || 'ecommerce',
   synchronize: !isProd,
   // logging: true,
-  entities: [StaffEntity, RoleEntity, PermissionEntity, StaffTokenEntity, StoreEntity, LocationRegionEntity],
+  entities: [
+    StaffEntity,
+    RoleEntity,
+    PermissionEntity,
+    StaffTokenEntity,
+    StoreEntity,
+    LocationRegionEntity,
+    CategoryEntity,
+    InventoryEntity,
+    ProductEntity,
+  ],
   migrations: ['dist/src/migrations/*.js'],
   migrationsTableName: 'migrations-storage',
   poolSize: 10,

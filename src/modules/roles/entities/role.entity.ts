@@ -31,12 +31,12 @@ export class RoleEntity extends BaseEntity implements IRole {
   staffs?: StaffEntity[] | undefined;
 
   logInsert(): void {
-    console.log(`Đã chèn thành công Role có name: ${this.name}`);
+    this.logger.debug(`Đã chèn thành công Role có name: ${this.name}`);
   }
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công Role có name: ${this.name}`);
+    this.logger.debug(`Đã cập nhật thành công Role có name: ${this.name}`);
   }
   logRemove(): void {
-    console.log(`Đã xóa thành công Role có name: ${this.name}`);
+    this.logger.debug(`Đã xóa thành công Role có name: ${this.name}`);
   }
 }

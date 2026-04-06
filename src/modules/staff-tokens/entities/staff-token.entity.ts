@@ -30,12 +30,12 @@ export class StaffTokenEntity extends BaseEntity implements IStaffToken {
   ipAddress: string;
 
   logInsert(): void {
-    console.log(`Đã chèn thành công StaffToken có ipAddress: ${this.ipAddress}`);
+    this.logger.debug(`Đã chèn thành công StaffToken có ipAddress: ${this.ipAddress}`);
   }
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công StaffToken có ipAddress: ${this.ipAddress}`);
+    this.logger.debug(`Đã cập nhật thành công StaffToken có ipAddress: ${this.ipAddress}`);
   }
   logRemove(): void {
-    console.log(`Đã xóa thành công StaffToken có ipAddress: ${this.ipAddress}`);
+    this.logger.debug(`Đã xóa thành công StaffToken có ipAddress: ${this.ipAddress}`);
   }
 }

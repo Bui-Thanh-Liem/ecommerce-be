@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -8,6 +8,8 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(private readonly reflector: Reflector) {
     super();
   }
@@ -17,12 +19,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true; // Cho phép truy cập mà không cần token
     }
-    console.log('#1. JwtAuthGuard - canActivate called');
+    this.logger.debug('#1. JwtAuthGuard - canActivate called');
     return super.canActivate(context);
   }
 
   handleRequest(err, staff, info, context: ExecutionContext) {
-    console.log('#3. JwtAuthGuard - handleRequest called');
+    this.logger.debug('#3. JwtAuthGuard - handleRequest called');
     const request = context.switchToHttp().getRequest<Request>();
 
     // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized

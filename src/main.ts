@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { AppLogger } from './logger/app.logger';
 import cookieParser from 'cookie-parser';
 
-console.log('process.env.PORT :::', process.env.PORT);
-
 async function bootstrap() {
+  const isProd = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
-    logger: undefined, // Disable default logger
+    logger: isProd ? new AppLogger() : undefined,
   });
+
   // Add global prefix
   app.setGlobalPrefix('api/v1');
 

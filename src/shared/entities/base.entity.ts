@@ -9,8 +9,11 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { IBase } from '../interfaces/base.interface';
+import { Logger } from '@nestjs/common';
 
 export abstract class BaseEntity implements IBase {
+  protected readonly logger = new Logger(this.constructor.name);
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

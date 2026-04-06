@@ -16,14 +16,20 @@ export class RoleGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<Request>();
 
     //
-    const staff = req.user as StaffEntity;
-    const permissionsRequired = this.reflector.get<string[]>(Permissions, context.getHandler());
+    const staff = req.staff as StaffEntity;
+    const permissionCodeRequired = this.reflector.get<string>(Permissions, context.getHandler());
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
 
     // Cho phép truy cập mà không cần kiểm tra quyền
     if (isPublic || staff?.isAdmin) return true;
-    console.log('Permissions required:', permissionsRequired);
 
+    // Nếu không có permissionsRequired, cho phép truy cập
+    const permissions = staff.roles.flatMap((role) => role.permissions);
+    const permissionCodes = permissions.map((p) => p.code);
+    this.logger.debug('permissionCodes:', JSON.stringify(permissionCodes));
+    this.logger.debug('Permission code required:', permissionCodeRequired);
+
+    // Nếu có permissionsRequired, kiểm tra xem staff có quyền hay không
     return false;
   }
 }

@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { QueryFailedError } from 'typeorm';
+import { EntityPropertyNotFoundError, QueryFailedError } from 'typeorm';
 
 interface IResponseHttpError {
   statusCode: number;
@@ -58,6 +58,27 @@ export class ErrorExceptionFilter implements ExceptionFilter {
       message = _exception.message || 'Type error occurred';
       error = 'Type Error';
       ownDev.stack = _exception.stack;
+    }
+
+    // 4. Các lỗi khác (có thể là lỗi custom throw new Error('...') hoặc lỗi runtime không phải TypeError)
+    else if (exception instanceof EntityPropertyNotFoundError) {
+      const _exception = exception as unknown as EntityPropertyNotFoundError;
+      status = HttpStatus.BAD_REQUEST;
+      message = _exception.message || 'Entity property not found';
+      error = 'Entity Property Error';
+      ownDev.stack = _exception.stack;
+    }
+
+    // 5. Nếu là lỗi bình thường (có thể là lỗi custom throw new Error('...'))
+    else if (exception instanceof Error) {
+      const _exception = exception as unknown as Error;
+      status = HttpStatus.BAD_REQUEST;
+      message = _exception.message || 'An error occurred';
+      error = 'Error';
+      ownDev.stack = _exception.stack;
+    } else {
+      // Nếu là lỗi không xác định, giữ nguyên status 500 và message mặc định
+      ownDev.exception = exception;
     }
 
     //

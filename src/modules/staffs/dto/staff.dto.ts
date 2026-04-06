@@ -1,6 +1,9 @@
-import { Exclude, Expose } from 'class-transformer';
+import { RoleDto } from '@/modules/roles/dto/role.dto';
+import { StoreDto } from '@/modules/stores/dto/store.dto';
+import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { Exclude, Expose, Type } from 'class-transformer';
 
-export class StaffDto {
+export class StaffDto extends SerializerDto {
   @Expose()
   id: string;
 
@@ -14,7 +17,12 @@ export class StaffDto {
   fullName: string;
 
   @Expose()
-  store: string;
+  @Type(() => StoreDto)
+  store: StoreDto;
+
+  @Expose()
+  @Type(() => RoleDto)
+  roles: RoleDto[];
 
   @Expose()
   isActive: boolean;

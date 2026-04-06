@@ -1,8 +1,10 @@
+import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
+import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IStore } from '@/shared/interfaces/models/store.interface';
 import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity implements IStore {
@@ -17,6 +19,12 @@ export class StoreEntity extends BaseEntity implements IStore {
 
   @Column('jsonb')
   phone: IPhoneStore[];
+
+  @OneToMany(() => StaffEntity, (staff) => staff.store)
+  staffs: StaffEntity[];
+
+  @OneToMany(() => InventoryEntity, (inventory) => inventory.store, { nullable: true, onDelete: 'SET NULL' })
+  inventories?: InventoryEntity[];
 
   @Column()
   openingHours: string;
@@ -34,12 +42,12 @@ export class StoreEntity extends BaseEntity implements IStore {
   isActive: boolean;
 
   logInsert(): void {
-    console.log(`Đã chèn thành công Store có name: ${this.name}`);
+    this.logger.debug(`Đã chèn thành công Store có name: ${this.name}`);
   }
   logUpdate(): void {
-    console.log(`Đã cập nhật thành công Store có name: ${this.name}`);
+    this.logger.debug(`Đã cập nhật thành công Store có name: ${this.name}`);
   }
   logRemove(): void {
-    console.log(`Đã xóa thành công Store có name: ${this.name}`);
+    this.logger.debug(`Đã xóa thành công Store có name: ${this.name}`);
   }
 }

@@ -11,7 +11,7 @@ export class LocalAuthGuard extends AuthGuard('local') {
     const request = context.switchToHttp().getRequest<Request>();
 
     if (err || !staff) {
-      throw new UnauthorizedException(info || 'Unauthorized');
+      throw new UnauthorizedException(err || 'Unauthorized');
     }
 
     // Thay vì để mặc định gán vào req.user, ta gán vào req.staff

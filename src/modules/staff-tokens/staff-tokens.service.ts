@@ -76,12 +76,12 @@ export class StaffTokensService {
 
     // Tạo access token và refresh token
     const accessToken = this.generateToken({
-      payload: { userId: staffId, type: StaffTokenType.ACCESS },
+      payload: { staffId, type: StaffTokenType.ACCESS },
       secretKey: this.configService.get<string>('JWT_ACCESS_SECRET') || 'key-secret',
       expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN') || '15m',
     });
     const refreshToken = this.generateToken({
-      payload: { userId: staffId, type: StaffTokenType.REFRESH },
+      payload: { staffId, type: StaffTokenType.REFRESH },
       secretKey: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh-key-secret',
       expiresIn: expiresInRefresh,
     });

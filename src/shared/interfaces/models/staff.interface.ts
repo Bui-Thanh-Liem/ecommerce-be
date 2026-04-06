@@ -7,8 +7,8 @@ export interface IStaff extends IBase {
   email: string;
   phone: string;
   password: string;
-  roles: IRole[];
   isActive: boolean;
   isAdmin: boolean;
+  roles: IRole[];
   store: IStore | null; // superAdmin thì null
 }

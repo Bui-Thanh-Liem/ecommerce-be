@@ -1,4 +1,4 @@
-import { LocationRegionType } from '@/shared/enums/location-regions.enum';
+import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { IBase } from '../base.interface';
 
 export interface ILocationRegion extends IBase {
