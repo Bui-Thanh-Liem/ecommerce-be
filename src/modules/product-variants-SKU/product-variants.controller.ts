@@ -19,16 +19,16 @@ export class ProductVariantsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productVariantsService.findOne(+id);
+    return this.productVariantsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductVariantDto: UpdateProductVariantDto) {
-    return this.productVariantsService.update(+id, updateProductVariantDto);
+    return this.productVariantsService.update(id, updateProductVariantDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productVariantsService.remove(+id);
+    return this.productVariantsService.remove(id);
   }
 }

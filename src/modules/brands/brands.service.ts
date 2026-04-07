@@ -1,7 +1,7 @@
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandEntity } from './entities/brand.entity';
@@ -15,6 +15,7 @@ export class BrandsService {
 
   async create(createBrandDto: CreateBrandDto) {
     const { name, ...rest } = createBrandDto;
+    const code = this.generateBrandCode(name);
     const slug = stringToSlug(name);
 
     // Kiểm tra tên brand đã tồn tại chưa
@@ -23,16 +24,28 @@ export class BrandsService {
       throw new ConflictException('Brand with this name already exists');
     }
 
+    // Tạo brand mới
     const brand = this.brandRepo.create({
       ...rest,
       slug,
       name,
+      code,
     });
     return await this.brandRepo.save(brand);
   }
 
   async findAll() {
     return await this.brandRepo.find();
+  }
+
+  async exists(ids: string[]) {
+    const brands = await this.brandRepo.find({ where: { id: In(ids) } });
+    return brands.length === ids.length;
+  }
+
+  async findCodeById(id: string) {
+    const brand = await this.brandRepo.findOne({ where: { id }, select: ['code'] });
+    return brand?.code;
   }
 
   async findOne(id: string) {
@@ -51,8 +64,14 @@ export class BrandsService {
       }
     }
 
-    //
-    const brand = await this.brandRepo.preload({ id, ...rest, name, slug: name ? stringToSlug(name) : undefined });
+    // Tạo brand mới
+    const brand = await this.brandRepo.preload({
+      id,
+      ...rest,
+      name,
+      slug: name ? stringToSlug(name) : undefined,
+      code: name ? this.generateBrandCode(name) : undefined,
+    });
     if (!brand) {
       throw new NotFoundException(`Brand with ID ${id} not found`);
     }
@@ -71,5 +90,13 @@ export class BrandsService {
       throw new NotFoundException(`Brand with ID ${id} not found`);
     }
     return await this.brandRepo.remove(brand);
+  }
+
+  private generateBrandCode(name: string): string {
+    return name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .substring(0, 5) // Lấy 5 ký tự đầu tiên
+      .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }
 }

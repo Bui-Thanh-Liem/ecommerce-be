@@ -1,3 +1,4 @@
+import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategory } from '@/shared/interfaces/models/category.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
@@ -14,11 +15,20 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ unique: true, type: 'varchar', length: 150 })
   slug: string;
 
+  @Column({ type: 'text' })
+  imageUrl: string;
+
+  @Column({ type: 'varchar', length: 150 })
+  code: string;
+
   @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true })
-  parent?: ICategory | null;
+  parent?: CategoryEntity | null;
 
   @OneToMany(() => CategoryEntity, (category) => category.parent)
-  children?: ICategory[] | null;
+  children?: CategoryEntity[] | null;
+
+  @OneToMany(() => ProductEntity, (product) => product.category)
+  products?: ProductEntity[] | null;
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Category có name: ${this.name}`);

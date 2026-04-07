@@ -1,7 +1,19 @@
+import { ProductStatus } from '@/shared/enums/product-status.enum';
 import { IBase } from '../base.interface';
-import { IInventory } from './inventory.interface';
+import { ICategory } from './category.interface';
+import { IBrand } from './brand.interface';
+import { IProductVariant } from './product-variant.interface';
 
 export interface IProduct extends IBase {
   name: string;
-  inventories?: IInventory[]; // Danh sách tồn kho của sản phẩm (nếu cần)
+  slug: string;
+  desc: string;
+  spu: string;
+  basePrice: number;
+  status: ProductStatus;
+  category: ICategory;
+  brand: IBrand;
+
+  //
+  productVariants?: IProductVariant[];
 }

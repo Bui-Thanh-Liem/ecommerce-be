@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
@@ -41,6 +41,7 @@ export class CategoriesService {
       ...rest,
       slug,
       name,
+      code: this.generateCategoryCode(name),
       parent: parentId ? { id: parentId } : null,
     });
     return this.categoryRepo.save(category);
@@ -48,6 +49,16 @@ export class CategoriesService {
 
   async findAll() {
     return await this.categoryRepo.find({ relations: ['parent', 'children'] });
+  }
+
+  async exists(ids: string[]) {
+    const categories = await this.categoryRepo.find({ where: { id: In(ids) } });
+    return categories.length === ids.length;
+  }
+
+  async findCodeById(id: string) {
+    const category = await this.categoryRepo.findOne({ where: { id }, select: ['code'] });
+    return category?.code;
   }
 
   async findOne(id: string) {
@@ -93,6 +104,7 @@ export class CategoriesService {
       id,
       name,
       slug: name ? stringToSlug(name) : undefined,
+      code: name ? this.generateCategoryCode(name) : undefined,
       ...rest,
       parent: parentId ? { id: parentId } : undefined,
     });
@@ -116,5 +128,16 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
     return await this.categoryRepo.remove(category);
+  }
+
+  private generateCategoryCode(name: string): string {
+    return name
+      .split(' ')
+      .map((word) => word.charAt(0))
+      .join('')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .substring(0, 5) // Lấy 5 ký tự đầu tiên
+      .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }
 }

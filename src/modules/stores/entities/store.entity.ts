@@ -1,5 +1,6 @@
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
+import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IStore } from '@/shared/interfaces/models/store.interface';
@@ -25,6 +26,9 @@ export class StoreEntity extends BaseEntity implements IStore {
 
   @OneToMany(() => InventoryEntity, (inventory) => inventory.store, { nullable: true, onDelete: 'SET NULL' })
   inventories?: InventoryEntity[];
+
+  @OneToMany(() => ProductItemEntity, (productItem) => productItem.store, { nullable: true, onDelete: 'SET NULL' })
+  productItems?: ProductItemEntity[];
 
   @Column()
   openingHours: string;

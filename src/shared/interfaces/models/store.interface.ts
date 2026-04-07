@@ -2,6 +2,7 @@ import { IBase } from '../base.interface';
 import { IPhoneStore } from '../phone-store.interface';
 import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
+import { IProductItem } from './product-item.interface';
 import { IStaff } from './staff.interface';
 
 // (1 store / 1 warehouse)
@@ -16,5 +17,8 @@ export interface IStore extends IBase {
   lat: number; // Vĩ độ
   lng: number; // Kinh độ
   isActive: boolean; // Cửa hàng có đang hoạt động hay không
+
+  // Quan hệ
   inventories?: IInventory[]; // Danh sách tồn kho của cửa hàng (nếu cần)
+  productItems?: IProductItem[]; // Danh sách sản phẩm cụ thể (nếu cần)
 }

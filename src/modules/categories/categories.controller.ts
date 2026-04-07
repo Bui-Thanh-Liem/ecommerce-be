@@ -13,31 +13,31 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @Permissions(permissionsSeed.category.create.name)
+  @Permissions(permissionsSeed.category.create.code)
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }
 
   @Get()
-  @Permissions(permissionsSeed.category.read.name)
+  @Permissions(permissionsSeed.category.read.code)
   findAll() {
     return this.categoriesService.findAll();
   }
 
   @Get(':id')
-  @Permissions(permissionsSeed.category.read.name)
+  @Permissions(permissionsSeed.category.read.code)
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
-  @Permissions(permissionsSeed.category.update.name)
+  @Permissions(permissionsSeed.category.update.code)
   update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')
-  @Permissions(permissionsSeed.category.delete.name)
+  @Permissions(permissionsSeed.category.delete.code)
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
   }

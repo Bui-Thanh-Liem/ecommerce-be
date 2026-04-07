@@ -1,16 +1,7 @@
-import { BrandEntity } from '@/modules/brands/entities/brand.entity';
-import { CategoryEntity } from '@/modules/categories/entities/category.entity';
-import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
-import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
-import { PermissionEntity } from '@/modules/permissions/entities/permission.entity';
-import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
-import { RoleEntity } from '@/modules/roles/entities/role.entity';
-import { StaffTokenEntity } from '@/modules/staff-tokens/entities/staff-token.entity';
-import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
-import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import dotenv from 'dotenv';
+import { join } from 'path';
 import { DataSourceOptions } from 'typeorm';
 
 //
@@ -27,19 +18,8 @@ export const pgConfig: DataSourceOptions = {
   database: process.env.POSTGRES_DB || 'ecommerce',
   synchronize: !isProd,
   // logging: true,
-  entities: [
-    StaffEntity,
-    RoleEntity,
-    PermissionEntity,
-    StaffTokenEntity,
-    StoreEntity,
-    LocationRegionEntity,
-    CategoryEntity,
-    InventoryEntity,
-    ProductEntity,
-    BrandEntity,
-  ],
-  migrations: ['dist/src/migrations/*.js'],
+  entities: [join(__dirname, '../**/**/*.entity{.ts,.js}')],
+  migrations: [join(__dirname, '../**/*.migration{.ts,.js}')],
   migrationsTableName: 'migrations-storage',
   poolSize: 10,
 };
