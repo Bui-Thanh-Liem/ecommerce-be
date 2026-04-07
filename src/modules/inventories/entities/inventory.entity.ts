@@ -1,9 +1,10 @@
+import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
 import { IInventory } from '@/shared/interfaces/models/inventory.interface';
-import { Column, Entity, Index, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('inventories')
 @Index(['store', 'productVariant'], { unique: true })
@@ -22,6 +23,9 @@ export class InventoryEntity extends BaseEntity implements IInventory {
 
   @Column({ type: 'enum', enum: InventoryStockType })
   stockType: InventoryStockType;
+
+  @OneToMany(() => ProductItemEntity, (productItem) => productItem.inventory)
+  productItems?: ProductItemEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Inventory có product: ${this.productVariant.sku}`);

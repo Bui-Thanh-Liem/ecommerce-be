@@ -10,5 +10,6 @@ import { ProductCodeModule } from '../product-code/product-code.module';
   imports: [TypeOrmModule.forFeature([ProductVariantEntity]), ProductsModule, ProductCodeModule],
   controllers: [ProductVariantsController],
   providers: [ProductVariantsService],
+  exports: [ProductVariantsService],
 })
 export class ProductVariantsModule {}

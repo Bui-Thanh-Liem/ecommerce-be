@@ -26,6 +26,7 @@ import { ProductVariantsModule } from './modules/product-variants-SKU/product-va
 import { ProductItemsModule } from './modules/product-items-SERIAL/product-items.module';
 import { ProductImagesModule } from './modules/product-images/product-images.module';
 import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
+import { VouchersModule } from './modules/vouchers/vouchers.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -65,6 +66,7 @@ const isProd = process.env.NODE_ENV === 'production';
     ProductItemsModule,
     ProductImagesModule,
     ProductPromotionsModule,
+    VouchersModule,
   ],
   controllers: [AppController],
   providers: [

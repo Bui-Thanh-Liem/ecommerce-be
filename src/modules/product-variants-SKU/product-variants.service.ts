@@ -3,7 +3,7 @@ import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductVariantEntity } from './entities/product-variant.entity';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { ProductsService } from '../products-SPU/products.service';
 import { ProductCodeService } from '../product-code/product-code.service';
 
@@ -39,6 +39,11 @@ export class ProductVariantsService {
 
   async findAll() {
     return this.productVariantRepo.find();
+  }
+
+  async exists(ids: string[]) {
+    const variants = await this.productVariantRepo.find({ where: { id: In(ids) } });
+    return variants.length === ids.length;
   }
 
   async findOne(id: string) {

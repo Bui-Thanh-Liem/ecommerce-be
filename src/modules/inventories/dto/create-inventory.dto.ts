@@ -1,12 +1,14 @@
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
-import { IsEnum, IsInt, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
 
 export class CreateInventoryDto {
   @IsUUID('4')
+  @IsNotEmpty()
   store: string; // warehouse
 
   @IsUUID('4')
-  product: string;
+  @IsNotEmpty()
+  productVariant: string;
 
   @IsInt()
   @Min(0)

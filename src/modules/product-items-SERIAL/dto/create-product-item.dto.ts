@@ -9,7 +9,7 @@ export class CreateProductItemDto {
 
   @IsNotEmpty()
   @IsUUID('4')
-  store: string;
+  inventory: string;
 
   @IsString()
   @IsNotEmpty()

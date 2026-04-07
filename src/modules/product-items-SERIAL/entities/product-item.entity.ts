@@ -1,5 +1,5 @@
+import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
-import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductItemStatus } from '@/shared/enums/product-item-status.enum';
 import { IProductItem } from '@/shared/interfaces/models/product-item.interface';
@@ -13,8 +13,8 @@ export class ProductItemEntity extends BaseEntity implements IProductItem {
   })
   productVariant: ProductVariantEntity;
 
-  @ManyToOne(() => StoreEntity, (store) => store.productItems)
-  store: StoreEntity;
+  @ManyToOne(() => InventoryEntity, (inventory) => inventory.productItems)
+  inventory: InventoryEntity;
 
   @Column({ unique: true })
   serialNumber: string;
