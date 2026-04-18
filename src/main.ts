@@ -18,6 +18,7 @@ async function bootstrap() {
 
   // Add cors
   app.enableCors({
+    credentials: true,
     allowedHeaders: ['Content-Type', 'x-api-key'],
   });
 
@@ -39,12 +40,23 @@ async function bootstrap() {
       'x-api-key',
     )
     .addSecurityRequirements('x-api-key') // Áp dụng bảo mật cho tất cả các endpoint
-    .addCookieAuth('token', {
-      in: 'cookie',
-      name: 'token',
-      type: 'apiKey',
-      description: 'Authentication token stored in cookie',
-    })
+
+    // Thêm bảo mật cookie cho Swagger UI
+    // Cho Swagger UI biết là cần gì
+    // Cấu hình hiện tại (Cookie) thì trình duyệt đã tự động gửi rồi.
+    .addCookieAuth(
+      'token',
+      {
+        in: 'cookie',
+        name: 'token',
+        type: 'apiKey',
+        description: 'Authentication token stored in cookie',
+      },
+      'cookie-auth',
+    )
+
+    .addSecurityRequirements('cookie-auth') // Áp dụng bảo mật cookie cho tất cả các endpoint
+
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/document', app, documentFactory, {
