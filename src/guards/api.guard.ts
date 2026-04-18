@@ -24,9 +24,12 @@ export class ApiGuard implements CanActivate {
       return true;
     }
 
+    // Nếu không có API key, trả về lỗi Forbidden
+    if (!apiKey) {
+      throw new ForbiddenException('API key is required');
+    }
+
     // Kiểm tra API key
-    this.logger.debug(`API Key from header: ${apiKey}`);
-    this.logger.debug(`API Key from config: ${this.configService.get('API_KEY')}`);
     if (apiKey !== this.configService.get('API_KEY')) {
       throw new ForbiddenException('Invalid API key');
     }
