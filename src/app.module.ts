@@ -27,6 +27,7 @@ import { ProductItemsModule } from './modules/product-items-SERIAL/product-items
 import { ProductImagesModule } from './modules/product-images/product-images.module';
 import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
+import { ApiGuard } from './guards/api.guard';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -50,8 +51,8 @@ const isProd = process.env.NODE_ENV === 'production';
         return pgConfig;
       },
     }),
-    StaffsModule,
     AuthModule,
+    StaffsModule,
     LocationRegionsModule,
     StoresModule,
     StaffTokensModule,
@@ -103,6 +104,10 @@ const isProd = process.env.NODE_ENV === 'production';
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiGuard,
     },
   ],
 })

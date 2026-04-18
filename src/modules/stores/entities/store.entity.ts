@@ -1,6 +1,7 @@
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { VoucherEntity } from '@/modules/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IStore } from '@/shared/interfaces/models/store.interface';
 import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
@@ -25,6 +26,9 @@ export class StoreEntity extends BaseEntity implements IStore {
 
   @OneToMany(() => InventoryEntity, (inventory) => inventory.store, { nullable: true, onDelete: 'SET NULL' })
   inventories?: InventoryEntity[];
+
+  @OneToMany(() => VoucherEntity, (voucher) => voucher.store, { nullable: true, onDelete: 'SET NULL' })
+  vouchers?: VoucherEntity[];
 
   @Column()
   openingHours: string;

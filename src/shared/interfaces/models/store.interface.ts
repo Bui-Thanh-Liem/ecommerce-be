@@ -4,6 +4,7 @@ import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
 import { IProductItem } from './product-item.interface';
 import { IStaff } from './staff.interface';
+import { IVoucher } from './voucher.interface';
 
 // (1 store / 1 warehouse)
 export interface IStore extends IBase {
@@ -21,4 +22,5 @@ export interface IStore extends IBase {
   // Quan hệ
   inventories?: IInventory[]; // Danh sách tồn kho của cửa hàng (nếu cần)
   productItems?: IProductItem[]; // Danh sách sản phẩm cụ thể (nếu cần)
+  vouchers?: IVoucher[]; // Danh sách voucher áp dụng cho cửa hàng (nếu cần)
 }

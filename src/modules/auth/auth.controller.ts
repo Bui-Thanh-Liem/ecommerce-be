@@ -44,6 +44,6 @@ export class AuthController {
 
   @Get('whoami')
   whoami(@CurrentStaff() staff: StaffEntity) {
-    return staff;
+    return { staff };
   }
 }

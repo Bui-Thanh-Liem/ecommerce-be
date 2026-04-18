@@ -1,6 +1,10 @@
+import { CustomerEntity } from '@/modules/customers/entities/customer.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
+import { IVoucher } from '@/shared/interfaces/models/voucher.interface';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity('vouchers')
 export class VoucherEntity extends BaseEntity implements IVoucher {
@@ -10,8 +14,8 @@ export class VoucherEntity extends BaseEntity implements IVoucher {
   @Column('decimal')
   discountValue: number;
 
-  @Column({ type: 'enum', enum: VoucherType }) // percentage | fixed_amount | free_ship
-  discountType: VoucherType;
+  @Column({ type: 'enum', enum: VoucherDiscountType }) // percentage | fixed_amount | free_ship
+  discountType: VoucherDiscountType;
 
   @Column({ type: 'timestamp' })
   startDate: Date;
@@ -37,4 +41,14 @@ export class VoucherEntity extends BaseEntity implements IVoucher {
 
   @ManyToOne(() => CustomerEntity, { nullable: true }) // Nếu là voucher cá nhân hóa
   customer: CustomerEntity;
+
+  logInsert(): void {
+    this.logger.debug(`Đã chèn thành công Voucher có code: ${this.code}`);
+  }
+  logUpdate(): void {
+    this.logger.debug(`Đã cập nhật thành công Voucher có code: ${this.code}`);
+  }
+  logRemove(): void {
+    this.logger.debug(`Đã xóa thành công Voucher có code: ${this.code}`);
+  }
 }

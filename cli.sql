@@ -1,3 +1,5 @@
+-- /sql
+
 -- 
 REVOKE CONNECT ON DATABASE shop FROM PUBLIC;
 
