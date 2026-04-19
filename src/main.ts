@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppLogger } from './logger/app.logger';
-import cookieParser from 'cookie-parser';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   //
@@ -56,6 +56,23 @@ async function bootstrap() {
     )
 
     .addSecurityRequirements('cookie-auth') // Áp dụng bảo mật cookie cho tất cả các endpoint
+
+    // Sắp xếp lại
+    .addTag('Auth')
+    .addTag('Staffs')
+    .addTag('Permissions')
+    .addTag('Roles')
+    .addTag('LocationRegions')
+    .addTag('Stores')
+    .addTag('Brands')
+    .addTag('Categories')
+    .addTag('Products') // SPU
+    .addTag('ProductImages')
+    .addTag('ProductVariants') // SKU
+    .addTag('Inventories')
+    .addTag('ProductItems') // SERIAL
+    .addTag('ProductPromotions')
+    .addTag('Vouchers')
 
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

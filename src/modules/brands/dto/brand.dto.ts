@@ -8,6 +8,9 @@ export class BrandDto {
   name: string;
 
   @Expose()
+  code: string;
+
+  @Expose()
   logoUrl: string;
 
   @Expose()

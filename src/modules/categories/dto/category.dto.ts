@@ -9,6 +9,9 @@ export class CategoryDto extends SerializerDto {
   name: string;
 
   @Expose()
+  code: string;
+
+  @Expose()
   slug: string;
 
   @Expose()

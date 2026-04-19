@@ -2,7 +2,7 @@ import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategory } from '@/shared/interfaces/models/category.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
 @Entity('categories')
 export class CategoryEntity extends BaseEntity implements ICategory {
@@ -21,7 +21,9 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ type: 'varchar', length: 150 })
   code: string;
 
-  @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true })
+  @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'parent' })
+  @TreeParent()
   parent?: CategoryEntity | null;
 
   @OneToMany(() => CategoryEntity, (category) => category.parent)

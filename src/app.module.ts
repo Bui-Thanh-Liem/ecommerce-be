@@ -28,6 +28,7 @@ import { ProductImagesModule } from './modules/product-images/product-images.mod
 import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
+import { S3Module } from './modules/s3/s3.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -53,21 +54,22 @@ const isProd = process.env.NODE_ENV === 'production';
     }),
     AuthModule,
     StaffsModule,
-    PermissionsModule,
     RolesModule,
+    PermissionsModule,
     LocationRegionsModule,
     StoresModule,
-    StaffTokensModule,
-    CustomersModule,
     InventoriesModule,
-    ProductsModule,
     CategoriesModule,
     BrandsModule,
+    ProductsModule,
     ProductVariantsModule,
     ProductItemsModule,
     ProductImagesModule,
     ProductPromotionsModule,
+    CustomersModule,
     VouchersModule,
+    StaffTokensModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [

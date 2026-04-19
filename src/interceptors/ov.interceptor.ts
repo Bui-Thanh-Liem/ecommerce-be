@@ -16,7 +16,7 @@ export class OvInterceptor implements NestInterceptor {
     this.logger.debug('Before... -> controller ::: 0ms');
     return next.handle().pipe(
       tap(() => {
-        this.logger.debug(`After::: ${Date.now() - now} ms`);
+        this.logger.debug(`After <- controller ::: ${Date.now() - now} ms`);
       }),
     );
   }

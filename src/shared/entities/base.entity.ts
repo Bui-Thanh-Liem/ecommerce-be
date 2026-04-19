@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { Exclude } from 'class-transformer';
 import {
   AfterInsert,
   AfterRemove,
@@ -9,9 +11,9 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { IBase } from '../interfaces/base.interface';
-import { Logger } from '@nestjs/common';
 
 export abstract class BaseEntity implements IBase {
+  @Exclude()
   protected readonly logger = new Logger(this.constructor.name);
 
   @PrimaryGeneratedColumn('uuid')

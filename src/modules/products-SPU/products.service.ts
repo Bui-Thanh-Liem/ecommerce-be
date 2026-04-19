@@ -1,13 +1,13 @@
+import { stringToSlug } from '@/utils/string-to-slug.util';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Not, Repository } from 'typeorm';
+import { BrandsService } from '../brands/brands.service';
+import { CategoriesService } from '../categories/categories.service';
+import { ProductCodeService } from '../product-code/product-code.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
-import { In, Not, Repository } from 'typeorm';
-import { CategoriesService } from '../categories/categories.service';
-import { BrandsService } from '../brands/brands.service';
-import { stringToSlug } from '@/utils/string-to-slug.util';
-import { ProductCodeService } from '../product-code/product-code.service';
 
 @Injectable()
 export class ProductsService {
@@ -43,7 +43,7 @@ export class ProductsService {
     const nextSeq = Number(queryResult[0].val);
 
     // 4. Sinh mã SPU
-    const spu = this.productCodeService.generateSPUCode(categoryCode, brandCode, nextSeq);
+    const spu = this.productCodeService.generateSPUCode(categoryCode, brandCode, slug, nextSeq);
 
     // 5. Tạo và lưu
     const product = this.productRepo.create({
@@ -59,7 +59,20 @@ export class ProductsService {
   }
 
   async findAll() {
-    return await this.productRepo.find();
+    return await this.productRepo.find({
+      relations: ['category', 'brand'],
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        desc: true,
+        basePrice: true,
+        status: true,
+        spu: true,
+        category: { id: true, name: true, slug: true, code: true },
+        brand: { id: true, name: true, slug: true, code: true },
+      },
+    });
   }
 
   async exists(ids: string[]) {
@@ -73,7 +86,7 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
-    return await this.productRepo.findOne({ where: { id } });
+    return await this.productRepo.findOne({ where: { id }, relations: ['category', 'brand'] });
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {

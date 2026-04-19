@@ -14,31 +14,43 @@ export class CategoriesController {
 
   @Post()
   @Permissions(permissionsSeed.category.create.code)
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    return await this.categoriesService.create(createCategoryDto);
   }
 
   @Get()
   @Permissions(permissionsSeed.category.read.code)
-  findAll() {
-    return this.categoriesService.findAll();
+  async findAll() {
+    return await this.categoriesService.findAll();
+  }
+
+  @Get('tree/:id')
+  @Permissions(permissionsSeed.category.read.code)
+  async getTreeDataByRootId(@Param('id') id?: string) {
+    return await this.categoriesService.getTreeData(id);
+  }
+
+  @Get('tree')
+  @Permissions(permissionsSeed.category.read.code)
+  async getTreeData() {
+    return await this.categoriesService.getTreeData();
   }
 
   @Get(':id')
   @Permissions(permissionsSeed.category.read.code)
-  findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
   @Permissions(permissionsSeed.category.update.code)
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(id, updateCategoryDto);
+  async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return await this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')
   @Permissions(permissionsSeed.category.delete.code)
-  remove(@Param('id') id: string) {
-    return this.categoriesService.remove(id);
+  async remove(@Param('id') id: string) {
+    return await this.categoriesService.remove(id);
   }
 }

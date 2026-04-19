@@ -1,4 +1,6 @@
+import { StaffDto } from '@/modules/staffs/dto/staff.dto';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { Request, Response } from 'express';
 import { EntityPropertyNotFoundError, QueryFailedError } from 'typeorm';
 
@@ -25,7 +27,7 @@ export class ErrorExceptionFilter implements ExceptionFilter {
     const ownDev: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
       path: req.url,
-      user: req.user || null,
+      staff: plainToInstance(StaffDto, req.staff) || null,
       body: req.body as Record<string, any>,
       queries: req.query as Record<string, any>,
       params: req.params as Record<string, any>,

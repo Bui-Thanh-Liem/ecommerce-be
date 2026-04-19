@@ -30,19 +30,28 @@ class PhoneStoreDto implements IPhoneStore {
 
 export class CreateStoreDto {
   @IsUUID('4')
-  locationRegion: string;
-
-  @MaxLength(100)
-  @IsString()
-  @Trim()
   @IsNotEmpty()
-  name: string;
+  provinceCity: string;
+
+  @IsUUID('4')
+  @IsNotEmpty()
+  districtTown: string;
+
+  @IsUUID('4')
+  @IsNotEmpty()
+  wardCommune: string;
 
   @MaxLength(200)
   @IsString()
   @Trim()
   @IsNotEmpty()
   address: string;
+
+  @MaxLength(100)
+  @IsString()
+  @Trim()
+  @IsNotEmpty()
+  name: string;
 
   @MaxLength(10) // Ví dụ: "08:00"
   @IsString()
@@ -57,9 +66,11 @@ export class CreateStoreDto {
   closingHours: string;
 
   @IsLatitude() // Kiểm tra giá trị latitude hợp lệ
+  @IsNotEmpty()
   lat: number;
 
   @IsLongitude() // Kiểm tra giá trị longitude hợp lệ
+  @IsNotEmpty()
   lng: number;
 
   @IsOptional()

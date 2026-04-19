@@ -7,7 +7,7 @@ export class ProductCodeService {
    * Format: [CATEGORY]-[BRAND]-[YYYY]-[SEQUENCE]
    * Ví dụ: DT-APL-2026-0001
    */
-  generateSPUCode(categoryCode: string, brandCode: string, sequence: number): string {
+  generateSPUCode(categoryCode: string, brandCode: string, slug: string, sequence: number): string {
     const year = new Date().getFullYear();
     const formattedSeq = sequence.toString().padStart(4, '0'); // Đảm bảo đủ 4 chữ số
     return `${categoryCode}-${brandCode}-${year}-${formattedSeq}`;

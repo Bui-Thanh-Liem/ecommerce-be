@@ -8,9 +8,12 @@ import { IVoucher } from './voucher.interface';
 
 // (1 store / 1 warehouse)
 export interface IStore extends IBase {
-  locationRegion: ILocationRegion;
-  name: string;
+  provinceCity: ILocationRegion;
+  districtTown: ILocationRegion;
+  wardCommune: ILocationRegion;
   address: string;
+
+  name: string;
   phone: IPhoneStore[];
   staffs: IStaff[];
   openingHours: string; // Ví dụ: "8:00 AM - 10:00 PM"

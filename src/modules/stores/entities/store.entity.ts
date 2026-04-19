@@ -9,8 +9,23 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity implements IStore {
-  @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, { nullable: false })
-  locationRegion: LocationRegionEntity;
+  @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, {
+    nullable: false,
+    onDelete: 'SET NULL',
+  })
+  provinceCity: LocationRegionEntity;
+
+  @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, {
+    nullable: false,
+    onDelete: 'SET NULL',
+  })
+  districtTown: LocationRegionEntity;
+
+  @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, {
+    nullable: false,
+    onDelete: 'SET NULL',
+  })
+  wardCommune: LocationRegionEntity;
 
   @Column({ unique: true })
   name: string;

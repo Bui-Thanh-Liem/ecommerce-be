@@ -16,7 +16,7 @@ export class LocationRegionEntity extends BaseEntity implements ILocationRegion 
     onDelete: 'SET NULL', // Quan trọng: Nếu xóa cha, con sẽ thành null thay vì bị xóa theo
     // onDelete: 'CASCADE', // Xóa cha là con "bay màu" luôn
   })
-  @JoinColumn({ name: 'parent_id' })
+  @JoinColumn({ name: 'parent' })
   @TreeParent()
   parent: LocationRegionEntity | null;
 
