@@ -38,7 +38,7 @@ export class ProductVariantsService {
   }
 
   async findAll() {
-    return this.productVariantRepo.find();
+    return await this.productVariantRepo.find();
   }
 
   async exists(ids: string[]) {
@@ -47,7 +47,7 @@ export class ProductVariantsService {
   }
 
   async findOne(id: string) {
-    return this.productVariantRepo.findOne({ where: { id } });
+    return await this.productVariantRepo.findOne({ where: { id } });
   }
 
   async update(id: string, updateProductVariantDto: UpdateProductVariantDto) {

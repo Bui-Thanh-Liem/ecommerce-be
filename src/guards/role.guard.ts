@@ -23,13 +23,20 @@ export class RoleGuard implements CanActivate {
     // Cho phép truy cập mà không cần kiểm tra quyền
     if (isPublic || staff?.isAdmin) return true;
 
-    // Nếu không có permissionsRequired, cho phép truy cập
+    // Nếu có permissionsRequired, kiểm tra xem staff có quyền hay không
     const permissions = staff.roles.flatMap((role) => role.permissions);
     const permissionCodes = permissions.map((p) => p.code);
     this.logger.debug('permissionCodes:', JSON.stringify(permissionCodes));
     this.logger.debug('Permission code required:', permissionCodeRequired);
 
-    // Nếu có permissionsRequired, kiểm tra xem staff có quyền hay không
+    // Nếu permissionCodeRequired không được định nghĩa, cho phép truy cập
+    const hasPermission = permissionCodes.some((code) => code === permissionCodeRequired);
+    if (!hasPermission) {
+      this.logger.warn(`Access denied for staff ${staff.id} - Missing permission: ${permissionCodeRequired}`);
+    }
+    return hasPermission;
+
+    //
     return false;
   }
 }

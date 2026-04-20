@@ -5,6 +5,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import pgConfig from './configs/pg.config';
+import s3ClientConfig from './configs/aws.config';
 import { ErrorExceptionFilter } from './exception-filters/http-exception.filter';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -29,6 +30,9 @@ import { ProductPromotionsModule } from './modules/product-promotions/product-pr
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
 import { S3Module } from './modules/s3/s3.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { OrderItemsModule } from './modules/order-items/order-items.module';
+import { MoMoModule } from './modules/momo/momo.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -36,7 +40,7 @@ const isProd = process.env.NODE_ENV === 'production';
     //
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [pgConfig],
+      load: [pgConfig, s3ClientConfig],
       envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
@@ -70,6 +74,9 @@ const isProd = process.env.NODE_ENV === 'production';
     VouchersModule,
     StaffTokensModule,
     S3Module,
+    OrdersModule,
+    OrderItemsModule,
+    MoMoModule,
   ],
   controllers: [AppController],
   providers: [

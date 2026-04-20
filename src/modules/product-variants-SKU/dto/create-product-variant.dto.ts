@@ -1,6 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { ISpecification } from '@/shared/interfaces/models/product-variant.interface';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -24,7 +25,7 @@ class SpecificationItemDto {
   @IsNotEmpty()
   @IsString()
   @Trim()
-  value: any;
+  value: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -56,6 +57,7 @@ class SpecificationDto implements ISpecification {
 
   @IsArray()
   @ArrayNotEmpty()
+  @ApiProperty({ type: [SpecificationItemDto] })
   @Type(() => SpecificationItemDto)
   items: [SpecificationItemDto];
 }

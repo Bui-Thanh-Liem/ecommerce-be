@@ -4,18 +4,18 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ProductCodeService {
   /**
-   * Format: [CATEGORY]-[BRAND]-[YYYY]-[SEQUENCE]
-   * Ví dụ: DT-APL-2026-0001
+   * Format: [CATEGORY]-[BRAND]-[SLUG]-[YYYY]-[SEQUENCE]
+   * Ví dụ: DT-APL-SLUG-2026-0001
    */
   generateSPUCode(categoryCode: string, brandCode: string, slug: string, sequence: number): string {
     const year = new Date().getFullYear();
     const formattedSeq = sequence.toString().padStart(4, '0'); // Đảm bảo đủ 4 chữ số
-    return `${categoryCode}-${brandCode}-${year}-${formattedSeq}`;
+    return `${categoryCode}-${brandCode}-${slug.toLocaleUpperCase()}-${year}-${formattedSeq}`;
   }
 
   /**
    * Format: [SPU]-[SKU-SPEC1]-[SKU-SPEC2]-...
-   * Ví dụ: DT-APL-2026-0001-BLU128
+   * Ví dụ: DT-APL-SLUG-2026-0001-BLU128
    */
   generateSKUCode(spuCode: string, specifications: ISpecification[]): string {
     //

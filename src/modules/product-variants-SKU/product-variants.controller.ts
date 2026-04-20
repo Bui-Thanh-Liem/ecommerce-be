@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProductVariantsService } from './product-variants.service';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { ProductVariantSKUDto } from './dto/product-variant-SKU.dto';
 
 @Controller('product-variants')
+@Serializer(ProductVariantSKUDto)
 export class ProductVariantsController {
   constructor(private readonly productVariantsService: ProductVariantsService) {}
 

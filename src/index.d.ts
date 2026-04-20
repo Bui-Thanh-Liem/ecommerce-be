@@ -1,3 +1,4 @@
+import 'multer';
 import { IStaff } from './shared/interfaces/models/staff.interface';
 
 declare global {

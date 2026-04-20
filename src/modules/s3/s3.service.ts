@@ -1,28 +1,21 @@
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CreateUploadUrlDto } from './dto/create-upload-url.dto';
+import { S3_CLIENT } from '@/shared/constants/s3.constant';
 
 @Injectable()
 export class S3Service {
-  private readonly s3Client: S3Client;
   private readonly bucketName = process.env.AWS_S3_BUCKET_NAME;
 
-  constructor() {
-    this.s3Client = new S3Client({
-      region: process.env.AWS_REGION,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
-    });
-  }
+  constructor(@Inject(S3_CLIENT) private readonly s3Client: S3Client) {}
 
   // 1. Upload file trực tiếp từ Server
   async uploadFile(file: Express.Multer.File, key: string) {
     const command = new PutObjectCommand({
-      Bucket: this.bucketName,
       Key: key,
       Body: file.buffer,
+      Bucket: this.bucketName,
       ContentType: file.mimetype,
     });
     return this.s3Client.send(command);
@@ -52,10 +45,10 @@ export class S3Service {
    * @param contentType Loại file (image/jpeg, video/mp4,...)
    * @param expiresIn Thời gian hết hạn của link (giây) - Mặc định 5 phút
    */
-  async createUploadUrl(key: string, contentType: string, expiresIn = 300) {
+  async createUploadUrl({ key, contentType, expiresIn = 300 }: CreateUploadUrlDto) {
     const command = new PutObjectCommand({
-      Bucket: this.bucketName,
       Key: key,
+      Bucket: this.bucketName,
       ContentType: contentType, // Quan trọng: Client phải gửi đúng loại này khi upload
     });
 

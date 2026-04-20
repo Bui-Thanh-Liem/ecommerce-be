@@ -17,7 +17,7 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   soldCount: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
