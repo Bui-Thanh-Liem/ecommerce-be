@@ -32,7 +32,9 @@ import { ApiGuard } from './guards/api.guard';
 import { S3Module } from './modules/s3/s3.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { OrderItemsModule } from './modules/order-items/order-items.module';
-import { MoMoModule } from './modules/momo/momo.module';
+import { MoMoModule } from './payments/momo/momo.module';
+import { VnpayModule } from './payments/vnpay/vnpay.module';
+import { ZalopayModule } from './payments/zalopay/zalopay.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -77,6 +79,8 @@ const isProd = process.env.NODE_ENV === 'production';
     OrdersModule,
     OrderItemsModule,
     MoMoModule,
+    VnpayModule,
+    ZalopayModule,
   ],
   controllers: [AppController],
   providers: [
