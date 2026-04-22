@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpCode, Get, Query, Res } from '@nestjs/commo
 import { MoMoService } from './momo.service';
 import { MoMoCreatePaymentDto, MoMoCreatePaymentResponseDto } from './dto/momo-create-payment.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
+import type { Response } from 'express';
 
 @Controller('momo')
 export class MoMoController {

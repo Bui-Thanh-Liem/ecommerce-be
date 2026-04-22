@@ -3,6 +3,7 @@ import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/pr
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
+import { VoucherStatus } from '@/shared/enums/voucher-status.enum';
 import { IVoucher } from '@/shared/interfaces/models/voucher.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
@@ -10,6 +11,9 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 export class VoucherEntity extends BaseEntity implements IVoucher {
   @Column({ unique: true })
   code: string; // VD: SALE2026, FREESHIPHN
+
+  @Column({ default: VoucherStatus.ACTIVE })
+  status: VoucherStatus;
 
   @Column('decimal')
   discountValue: number;
@@ -35,7 +39,7 @@ export class VoucherEntity extends BaseEntity implements IVoucher {
   @ManyToOne(() => StoreEntity, (store) => store.vouchers, { nullable: true })
   store: StoreEntity; // Voucher chỉ áp dụng cho 1 cửa hàng (optional)
 
-  @ManyToMany(() => ProductVariantEntity)
+  @ManyToMany(() => ProductVariantEntity, { nullable: true }) // Áp dụng cho sản phẩm cụ thể
   @JoinTable({ name: 'voucher_product_variants' }) // Bảng trung gian
   applicableVariants: ProductVariantEntity[]; // Áp dụng cho sản phẩm cụ thể
 

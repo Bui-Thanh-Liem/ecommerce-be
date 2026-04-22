@@ -2,8 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { VouchersService } from './vouchers.service';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { VoucherDto } from './dto/voucher.dto';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('vouchers')
+@Serializer(VoucherDto)
 export class VouchersController {
   constructor(private readonly vouchersService: VouchersService) {}
 
@@ -13,22 +17,23 @@ export class VouchersController {
   }
 
   @Get()
+  @ApiOkResponse({ type: [VoucherDto] })
   findAll() {
     return this.vouchersService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.vouchersService.findOne(+id);
+    return this.vouchersService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateVoucherDto: UpdateVoucherDto) {
-    return this.vouchersService.update(+id, updateVoucherDto);
+    return this.vouchersService.update(id, updateVoucherDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.vouchersService.remove(+id);
+    return this.vouchersService.remove(id);
   }
 }

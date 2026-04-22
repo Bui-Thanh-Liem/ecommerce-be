@@ -5,8 +5,11 @@ import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GoogleAuthGuard } from './guards/google.guard';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { CustomerDto } from './dto/customer.dto';
 
 @Controller('customers')
+@Serializer(CustomerDto)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
