@@ -3,7 +3,7 @@ import { IBase } from '../base.interface';
 import { IStaff } from './staff.interface';
 
 export interface IStaffToken extends IBase {
-  staffId: IStaff;
+  staff: IStaff;
   type: StaffTokenType;
   token: string;
   expiresAt: Date; // thời gian hết hạn của token

@@ -15,6 +15,12 @@ export class VoucherEntity extends BaseEntity implements IVoucher {
   @Column({ default: VoucherStatus.ACTIVE })
   status: VoucherStatus;
 
+  @Column({ type: 'text', nullable: true })
+  title?: string | undefined;
+
+  @Column({ type: 'text', nullable: true })
+  desc?: string | undefined;
+
   @Column('decimal')
   discountValue: number;
 

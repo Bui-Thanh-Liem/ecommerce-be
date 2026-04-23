@@ -46,6 +46,9 @@ export class ProductVariantSKUDto {
   price: number;
 
   @Expose()
+  vat: number;
+
+  @Expose()
   soldCount: number;
 
   @Expose()

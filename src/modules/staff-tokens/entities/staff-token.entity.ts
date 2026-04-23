@@ -5,11 +5,11 @@ import { IStaffToken } from '@/shared/interfaces/models/staff-token.interface';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity('staff_tokens')
-@Index('idx_active_staff_tokens', ['staffId'], { where: '"isRevoked" = \'false\'' })
+@Index('idx_active_staff_tokens', ['staff'], { where: '"isRevoked" = \'false\'' })
 export class StaffTokenEntity extends BaseEntity implements IStaffToken {
   @OneToOne(() => StaffEntity, (staff) => staff.id)
   @JoinColumn({ name: 'staff_id' })
-  staffId: StaffEntity;
+  staff: StaffEntity;
 
   @Column({ type: 'enum', enum: StaffTokenType })
   type: StaffTokenType;

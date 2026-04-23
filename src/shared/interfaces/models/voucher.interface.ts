@@ -10,6 +10,8 @@ export interface IVoucher extends IBase {
   discountValue: number;
   discountType: VoucherDiscountType; // percentage | fixed_amount | free_ship
   startDate: Date;
+  title?: string; // Tên voucher, ví dụ: "Giảm 20% cho đơn hàng từ 500k"
+  desc?: string; // Mô tả chi tiết về voucher
   endDate: Date;
   maxUses: number; // số lần tối đa được sử dụng cho voucher này, nếu là 0 thì không giới hạn
   usedCount: number; // số lần đã được sử dụng, sẽ tăng lên mỗi khi có đơn hàng áp dụng voucher này
