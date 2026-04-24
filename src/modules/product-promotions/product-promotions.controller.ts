@@ -19,16 +19,16 @@ export class ProductPromotionsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productPromotionsService.findOne(+id);
+    return this.productPromotionsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductPromotionDto: UpdateProductPromotionDto) {
-    return this.productPromotionsService.update(+id, updateProductPromotionDto);
+    return this.productPromotionsService.update(id, updateProductPromotionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productPromotionsService.remove(+id);
+    return this.productPromotionsService.remove(id);
   }
 }

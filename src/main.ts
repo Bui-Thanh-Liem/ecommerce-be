@@ -58,7 +58,9 @@ async function bootstrap() {
     .addSecurityRequirements('cookie-auth') // Áp dụng bảo mật cookie cho tất cả các endpoint
 
     // Sắp xếp lại
+    .addTag('App')
     .addTag('Auth')
+    .addTag('StaffTokens')
     .addTag('Staffs')
     .addTag('Permissions')
     .addTag('Roles')
@@ -72,6 +74,9 @@ async function bootstrap() {
     .addTag('Inventories')
     .addTag('ProductItems') // SERIAL
     .addTag('ProductPromotions')
+    .addTag('Customers')
+    .addTag('Orders')
+    .addTag('OrderItems')
     .addTag('Vouchers')
 
     .build();

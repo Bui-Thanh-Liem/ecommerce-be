@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { InventoriesService } from './inventories.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { InventoryDto } from './dto/inventory.dto';
 
 @Controller('inventories')
+@Serializer(InventoryDto)
 export class InventoriesController {
   constructor(private readonly inventoriesService: InventoriesService) {}
 

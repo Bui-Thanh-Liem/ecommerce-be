@@ -1,10 +1,13 @@
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
+import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
+import { PromotionEntity } from '@/modules/promotions/entities/promotion.entity';
+import { RatingEntity } from '@/modules/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IProductVariant, ISpecification } from '@/shared/interfaces/models/product-variant.interface';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -20,6 +23,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ type: 'int', default: 0 })
   soldCount: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: true })
+  vat?: number;
+
   @Column('decimal', { precision: 10, scale: 2 })
   discountPrice: number;
 
@@ -29,11 +35,21 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ type: 'jsonb', nullable: true })
   specifications: ISpecification[];
 
+  // Quan hệ với các entity khác
   @OneToMany(() => InventoryEntity, (inventory) => inventory.productVariant, { nullable: true, onDelete: 'SET NULL' })
   inventories?: InventoryEntity[];
 
   @OneToMany(() => ProductItemEntity, (productItem) => productItem.productVariant, { nullable: true })
   productItems?: ProductItemEntity[];
+
+  @OneToMany(() => RatingEntity, (rating) => rating.productVariant, { nullable: true })
+  ratings?: RatingEntity[];
+
+  @OneToMany(() => ProductPromotionEntity, (productPromotion) => productPromotion.productVariant, { nullable: true })
+  productPromotions?: ProductPromotionEntity[];
+
+  @ManyToMany(() => PromotionEntity, (promotion) => promotion.productHighlighted, { nullable: true })
+  promotions?: PromotionEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductVariant có sku: ${this.sku}`);

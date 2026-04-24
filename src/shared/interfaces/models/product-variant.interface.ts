@@ -3,6 +3,9 @@ import { IBase } from '../base.interface';
 import { IProduct } from './product.interface';
 import { IInventory } from './inventory.interface';
 import { IProductItem } from './product-item.interface';
+import { IRating } from './rating.inetrface';
+import { IProductPromotion } from './product-promotion.interface';
+import { IPromotion } from './promotion.interface';
 
 export interface ISpecificationItem {
   key: string; // Thuộc tính, ví dụ: "Màu sắc"
@@ -23,6 +26,7 @@ export interface IProductVariant extends IBase {
   sku: string;
   price: number;
   discountPrice: number;
+  vat?: number; // Thuế VAT (nếu có) được tính trên giá gốc (price), không tính trên giá đã giảm (discountPrice) %
   soldCount: number;
   conditions: ProductVariantCondition;
   specifications: ISpecification[];
@@ -30,4 +34,7 @@ export interface IProductVariant extends IBase {
   //
   inventories?: IInventory[];
   productItems?: IProductItem[];
+  ratings?: IRating[];
+  productPromotions?: IProductPromotion[];
+  promotions?: IPromotion[];
 }

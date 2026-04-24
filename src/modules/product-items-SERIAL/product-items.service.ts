@@ -71,7 +71,7 @@ export class ProductItemsService {
 
     // 2. Nếu có update SerialNumber, phải check xem có bị trùng với máy khác không
     if (serialNumber && serialNumber !== productItem.serialNumber) {
-      const serialExists = await this.productItemRepo.exist({
+      const serialExists = await this.productItemRepo.exists({
         where: { serialNumber, id: Not(id) }, // Loại trừ chính nó ra
       });
       if (serialExists) {

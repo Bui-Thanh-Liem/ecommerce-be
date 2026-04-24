@@ -1,3 +1,4 @@
+import { CategoryPromotionEntity } from '@/modules/category-promotion/entities/category-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategory } from '@/shared/interfaces/models/category.interface';
@@ -29,8 +30,12 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @OneToMany(() => CategoryEntity, (category) => category.parent)
   children?: CategoryEntity[] | null;
 
+  //
   @OneToMany(() => ProductEntity, (product) => product.category)
   products?: ProductEntity[] | null;
+
+  @OneToMany(() => CategoryPromotionEntity, (categoryPromotion) => categoryPromotion.category, { nullable: true })
+  categoryPromotions?: CategoryPromotionEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Category có name: ${this.name}`);

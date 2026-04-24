@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerEntity } from './entities/customer.entity';
@@ -32,6 +32,11 @@ export class CustomersService {
 
   async findOne(id: string) {
     return this.customerRepo.findOne({ where: { id } });
+  }
+
+  async exists(ids: string[]) {
+    const count = await this.customerRepo.countBy({ id: In(ids) });
+    return count === ids.length;
   }
 
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {

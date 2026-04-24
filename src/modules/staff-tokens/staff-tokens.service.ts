@@ -18,7 +18,7 @@ export class StaffTokensService {
 
   //
   async findAll() {
-    return await this.staffTokenRepo.find({ relations: ['staffId'] });
+    return await this.staffTokenRepo.find({ relations: ['staff'] });
   }
 
   // Revoke a token by marking it as revoked in the database
@@ -45,15 +45,15 @@ export class StaffTokensService {
   }
 
   // Delete all tokens of a staff (e.g., when they log out or when we want to invalidate all sessions)
-  async delete(userId: string, type: StaffTokenType) {
-    await this.staffTokenRepo.delete({ staffId: { id: userId }, type, isRevoked: false });
+  async delete(staffId: string, type: StaffTokenType) {
+    await this.staffTokenRepo.delete({ staff: { id: staffId }, type, isRevoked: false });
   }
 
   //
   async updateAuthToken(staffId: string) {
     // Tìm token hiện tại của staff
     const existingToken = await this.staffTokenRepo.findOne({
-      where: { staffId: { id: staffId }, type: StaffTokenType.REFRESH },
+      where: { staff: { id: staffId }, type: StaffTokenType.REFRESH },
     });
 
     // Nếu token đã bị thu hồi, không cho phép tạo token mới
@@ -86,10 +86,10 @@ export class StaffTokensService {
       expiresIn: expiresInRefresh,
     });
 
-    // Lưu token vào database
+    // Lưu refresh token vào database
     const staffToken = this.staffTokenRepo.create({
       token: refreshToken,
-      staffId: { id: staffId },
+      staff: { id: staffId },
       type: StaffTokenType.REFRESH,
       expiresAt: new Date(Date.now() + ms(expiresInRefresh)), // Tính thời gian hết hạn dựa trên expiresInRefresh
     });
