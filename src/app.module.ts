@@ -38,6 +38,9 @@ import { ZalopayModule } from './payments/zalopay/zalopay.module';
 import { RatingModule } from './modules/rating/rating.module';
 import { NavbarModule } from './modules/navbar/navbar.module';
 import { CustomerProductsModule } from './modules/customer-products/customer-products.module';
+import { PromotionsModule } from './modules/promotions/promotions.module';
+import { CampaignModule } from './modules/campaigns/campaigns.module';
+import { CategoryPromotionModule } from './modules/category-promotion/category-promotion.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -87,6 +90,9 @@ const isProd = process.env.NODE_ENV === 'production';
     RatingModule,
     NavbarModule,
     CustomerProductsModule,
+    PromotionsModule,
+    CampaignModule,
+    CategoryPromotionModule,
   ],
   controllers: [AppController],
   providers: [

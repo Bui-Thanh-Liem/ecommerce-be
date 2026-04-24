@@ -4,6 +4,8 @@ import { IProduct } from './product.interface';
 import { IInventory } from './inventory.interface';
 import { IProductItem } from './product-item.interface';
 import { IRating } from './rating.inetrface';
+import { IProductPromotion } from './product-promotion.interface';
+import { IPromotion } from './promotion.interface';
 
 export interface ISpecificationItem {
   key: string; // Thuộc tính, ví dụ: "Màu sắc"
@@ -33,4 +35,6 @@ export interface IProductVariant extends IBase {
   inventories?: IInventory[];
   productItems?: IProductItem[];
   ratings?: IRating[];
+  productPromotions?: IProductPromotion[];
+  promotions?: IPromotion[];
 }

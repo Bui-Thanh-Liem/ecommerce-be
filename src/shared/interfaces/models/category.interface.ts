@@ -1,4 +1,5 @@
 import { IBase } from '../base.interface';
+import { ICategoryPromotion } from './category-promotion.interface';
 import { IProduct } from './product.interface';
 
 export interface ICategory extends IBase {
@@ -12,4 +13,5 @@ export interface ICategory extends IBase {
 
   //
   products?: IProduct[] | null;
+  categoryPromotions?: ICategoryPromotion[] | null;
 }

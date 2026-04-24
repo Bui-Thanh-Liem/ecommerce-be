@@ -1,11 +1,13 @@
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
+import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
+import { PromotionEntity } from '@/modules/promotions/entities/promotion.entity';
 import { RatingEntity } from '@/modules/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IProductVariant, ISpecification } from '@/shared/interfaces/models/product-variant.interface';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -42,6 +44,12 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @OneToMany(() => RatingEntity, (rating) => rating.productVariant, { nullable: true })
   ratings?: RatingEntity[];
+
+  @OneToMany(() => ProductPromotionEntity, (productPromotion) => productPromotion.productVariant, { nullable: true })
+  productPromotions?: ProductPromotionEntity[];
+
+  @ManyToMany(() => PromotionEntity, (promotion) => promotion.productHighlighted, { nullable: true })
+  promotions?: PromotionEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductVariant có sku: ${this.sku}`);
