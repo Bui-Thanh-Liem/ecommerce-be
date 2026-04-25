@@ -1,3 +1,4 @@
+import { CartEntity } from '@/modules/carts/entities/cart.entity';
 import { CustomerEntity } from '@/modules/customers/entities/customer.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
@@ -51,6 +52,10 @@ export class VoucherEntity extends BaseEntity implements IVoucher {
 
   @ManyToOne(() => CustomerEntity, { nullable: true }) // Nếu là voucher cá nhân hóa
   customer: CustomerEntity;
+
+  //
+  @ManyToMany(() => CartEntity, (cart) => cart.vouchers, { nullable: true })
+  carts?: CartEntity[]; // Một voucher có thể được áp dụng cho nhiều giỏ hàng (nếu nhiều khách hàng sử dụng voucher này)
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Voucher có code: ${this.code}`);

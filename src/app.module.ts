@@ -41,6 +41,8 @@ import { CustomerProductsModule } from './modules/customer-products/customer-pro
 import { PromotionsModule } from './modules/promotions/promotions.module';
 import { CampaignModule } from './modules/campaigns/campaigns.module';
 import { CategoryPromotionModule } from './modules/category-promotion/category-promotion.module';
+import { CartsModule } from './modules/carts/carts.module';
+import { CartItemsModule } from './modules/cart-items/cart-items.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -93,6 +95,8 @@ const isProd = process.env.NODE_ENV === 'production';
     PromotionsModule,
     CampaignModule,
     CategoryPromotionModule,
+    CartsModule,
+    CartItemsModule,
   ],
   controllers: [AppController],
   providers: [

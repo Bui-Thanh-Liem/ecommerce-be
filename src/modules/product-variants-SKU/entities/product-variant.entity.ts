@@ -1,3 +1,4 @@
+import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
 import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
 import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
@@ -50,6 +51,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @ManyToMany(() => PromotionEntity, (promotion) => promotion.productHighlighted, { nullable: true })
   promotions?: PromotionEntity[];
+
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.productVariant)
+  cartItems?: CartItemEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductVariant có sku: ${this.sku}`);

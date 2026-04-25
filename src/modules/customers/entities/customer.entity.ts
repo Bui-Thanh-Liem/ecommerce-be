@@ -1,3 +1,4 @@
+import { CartEntity } from '@/modules/carts/entities/cart.entity';
 import { RatingEntity } from '@/modules/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICustomer } from '@/shared/interfaces/models/customer.interface';
@@ -17,6 +18,9 @@ export class CustomerEntity extends BaseEntity implements ICustomer {
   // Quan hệ với các entity khác
   @OneToMany(() => RatingEntity, (rating) => rating.customer, { nullable: true })
   ratings: RatingEntity[];
+
+  @OneToMany(() => CartEntity, (cart) => cart.customer, { nullable: true })
+  carts: CartEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Customer có fullname: ${this.fullname}`);

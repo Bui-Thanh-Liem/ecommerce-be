@@ -1,4 +1,5 @@
 import { BrandEntity } from '@/modules/brands/entities/brand.entity';
+import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { CategoryEntity } from '@/modules/categories/entities/category.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
@@ -34,6 +35,9 @@ export class ProductEntity extends BaseEntity implements IProduct {
 
   @OneToMany(() => ProductVariantEntity, (variant) => variant.product)
   productVariants?: ProductVariantEntity[];
+
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.product)
+  cartItems?: CartItemEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Product có name: ${this.name}`);

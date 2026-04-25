@@ -6,6 +6,7 @@ import { IProductItem } from './product-item.interface';
 import { IRating } from './rating.inetrface';
 import { IProductPromotion } from './product-promotion.interface';
 import { IPromotion } from './promotion.interface';
+import { ICartItem } from './cart-item.interface';
 
 export interface ISpecificationItem {
   key: string; // Thuộc tính, ví dụ: "Màu sắc"
@@ -37,4 +38,5 @@ export interface IProductVariant extends IBase {
   ratings?: IRating[];
   productPromotions?: IProductPromotion[];
   promotions?: IPromotion[];
+  cartItems?: ICartItem[];
 }
