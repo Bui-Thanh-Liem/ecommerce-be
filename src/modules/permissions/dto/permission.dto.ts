@@ -6,6 +6,9 @@ export class PermissionDto extends SerializerDto {
   id: string;
 
   @Expose()
+  keyGroup: string;
+
+  @Expose()
   name: string;
 
   @Expose()

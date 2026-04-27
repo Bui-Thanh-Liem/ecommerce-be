@@ -25,6 +25,7 @@ export class ApiGuard implements CanActivate {
     }
 
     // Nếu không có API key, trả về lỗi Forbidden
+    console.log('ApiGuard - API key from header::', apiKey);
     if (!apiKey) {
       throw new ForbiddenException('API key is required');
     }

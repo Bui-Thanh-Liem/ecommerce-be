@@ -27,6 +27,7 @@ export class AuthController {
 
     // Set token in cookie
     res.cookie('token', token, {
+      path: '/',
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',

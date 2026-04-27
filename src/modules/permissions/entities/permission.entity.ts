@@ -18,6 +18,9 @@ export class PermissionEntity extends BaseEntity implements IPermission {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ nullable: true })
+  keyGroup?: string;
+
   @ManyToMany(() => RoleEntity, (role) => role.permissions)
   roles?: RoleEntity[] | undefined;
 

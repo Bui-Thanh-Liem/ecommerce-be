@@ -45,6 +45,7 @@ export class PermissionsService implements OnModuleInit {
             name: permission.name,
             desc: permission.desc,
             code: permission.code,
+            keyGroup: permission.keyGroup,
           }),
         ),
       );

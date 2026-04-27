@@ -9,4 +9,5 @@ export interface IPermission extends IBase {
   isActive: boolean; // trạng thái hoạt động của quyền, giúp quản lý và kiểm soát quyền trong hệ thống.
   // eslint-disable-next-line max-len
   roles?: IRole[]; // danh sách mã vai trò mà quyền này thuộc về, giúp xác định những vai trò nào có quyền này trong hệ thống.
+  keyGroup?: string; // key nhóm quyền, giúp phân loại và tổ chức các quyền trong hệ thống.
 }

@@ -130,15 +130,15 @@ const isProd = process.env.NODE_ENV === 'production';
     },
     {
       provide: APP_GUARD,
+      useClass: ApiGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ApiGuard,
     },
   ],
 })

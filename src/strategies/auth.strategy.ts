@@ -25,6 +25,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
           const token: string | null = (req.cookies as { token?: string })?.token ?? null;
+          console.log('JwtAuthStrategy - cookie::', JSON.stringify(req.cookies), ' - token::', token);
           if (!token) {
             this.logger.error('Không tìm thấy token trong cookie');
             throw new UnauthorizedException('No token found in cookies');
