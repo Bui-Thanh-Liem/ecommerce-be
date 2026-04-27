@@ -21,7 +21,7 @@ export class RoleGuard implements CanActivate {
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
 
     // Cho phép truy cập mà không cần kiểm tra quyền
-    if (isPublic || staff?.isAdmin) return true;
+    if (isPublic || staff?.isSuperAdmin) return true;
 
     // Nếu có permissionsRequired, kiểm tra xem staff có quyền hay không
     const permissions = staff.roles.flatMap((role) => role.permissions);

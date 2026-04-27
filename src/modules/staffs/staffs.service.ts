@@ -1,4 +1,12 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { genSalt, hash } from 'bcrypt';
@@ -17,6 +25,7 @@ export class StaffsService implements OnModuleInit {
     @InjectRepository(StaffEntity)
     private staffRepo: Repository<StaffEntity>,
 
+    @Inject(forwardRef(() => StoresService))
     private readonly storesService: StoresService,
 
     private readonly configService: ConfigService,
@@ -79,7 +88,8 @@ export class StaffsService implements OnModuleInit {
         phone: true,
         email: true,
         isActive: true,
-        isAdmin: true,
+        isSuperAdmin: true,
+        isStoreAdmin: true,
         store: { id: true, name: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
       },
@@ -104,7 +114,8 @@ export class StaffsService implements OnModuleInit {
         phone: true,
         email: true,
         isActive: true,
-        isAdmin: true,
+        isSuperAdmin: true,
+        isStoreAdmin: true,
         store: { id: true, name: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
       },
@@ -177,7 +188,8 @@ export class StaffsService implements OnModuleInit {
 
       //
       const adminStaff = this.staffRepo.create({
-        isAdmin: true,
+        isSuperAdmin: true,
+        isStoreAdmin: false,
         email: adminEmail,
         phone: adminPhone,
         fullName: adminFullName,

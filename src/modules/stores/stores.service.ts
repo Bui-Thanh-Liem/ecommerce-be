@@ -1,10 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreEntity } from './entities/store.entity';
+import { StaffsService } from '../staffs/staffs.service';
 
 @Injectable()
 export class StoresService {
@@ -13,21 +14,30 @@ export class StoresService {
   constructor(
     @InjectRepository(StoreEntity)
     private storeRepo: Repository<StoreEntity>,
+
     private readonly locationService: LocationRegionsService,
+
+    @Inject(forwardRef(() => StaffsService))
+    private readonly staffService: StaffsService,
   ) {}
 
   async create(createStoreDto: CreateStoreDto) {
-    const { provinceCity, districtTown, wardCommune, ...rest } = createStoreDto;
+    const { provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = createStoreDto;
 
     // Tìm kiếm các region
-    const [provinceExists, districtExists, wardExists] = await Promise.all([
+    const [provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
       this.locationService.exists(provinceCity),
       this.locationService.exists(districtTown),
       this.locationService.exists(wardCommune),
+      this.staffService.exists([managerId]),
     ]);
 
     if (!provinceExists || !districtExists || !wardExists) {
       throw new NotFoundException('One or more location regions not found');
+    }
+
+    if (!managerExists) {
+      throw new NotFoundException('Manager not found');
     }
 
     // Tạo mới store với các region nếu có
@@ -36,6 +46,7 @@ export class StoresService {
       provinceCity: { id: provinceCity },
       districtTown: { id: districtTown },
       wardCommune: { id: wardCommune },
+      manager: { id: managerId },
     });
 
     return await this.storeRepo.save(store);
@@ -43,7 +54,7 @@ export class StoresService {
 
   async findAll() {
     return await this.storeRepo.find({
-      relations: ['provinceCity', 'districtTown', 'wardCommune'],
+      relations: ['provinceCity', 'districtTown', 'wardCommune', 'manager'],
       select: {
         id: true,
         name: true,
@@ -57,6 +68,7 @@ export class StoresService {
         provinceCity: { id: true, name: true },
         districtTown: { id: true, name: true },
         wardCommune: { id: true, name: true },
+        manager: { id: true, fullName: true },
       },
     });
   }
@@ -64,7 +76,7 @@ export class StoresService {
   async findOne(id: string) {
     return await this.storeRepo.findOne({
       where: { id },
-      relations: ['provinceCity', 'districtTown', 'wardCommune'],
+      relations: ['provinceCity', 'districtTown', 'wardCommune', 'manager'],
       select: {
         id: true,
         name: true,
@@ -78,6 +90,7 @@ export class StoresService {
         provinceCity: { id: true, name: true },
         districtTown: { id: true, name: true },
         wardCommune: { id: true, name: true },
+        manager: { id: true, fullName: true },
       },
     });
   }
@@ -88,7 +101,7 @@ export class StoresService {
   }
 
   async update(id: string, updateStoreDto: UpdateStoreDto) {
-    const { provinceCity, districtTown, wardCommune, ...rest } = updateStoreDto;
+    const { provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = updateStoreDto;
 
     // Tìm kiếm locationRegion
     if (provinceCity) {
@@ -112,12 +125,20 @@ export class StoresService {
       }
     }
 
+    if (managerId) {
+      const managerExists = await this.staffService.exists([managerId]);
+      if (!managerExists) {
+        throw new NotFoundException('Manager not found');
+      }
+    }
+
     const store = await this.storeRepo.preload({
       id,
       ...rest,
       provinceCity: provinceCity ? { id: provinceCity } : undefined,
       districtTown: districtTown ? { id: districtTown } : undefined,
       wardCommune: wardCommune ? { id: wardCommune } : undefined,
+      manager: managerId ? { id: managerId } : undefined,
     });
     if (!store) {
       throw new NotFoundException(`Store with ID ${id} not found`);

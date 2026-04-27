@@ -66,6 +66,7 @@ async function bootstrap() {
     .addTag('Roles')
     .addTag('LocationRegions')
     .addTag('Stores')
+    .addTag('Teams')
     .addTag('Brands')
     .addTag('Categories')
     .addTag('Products') // SPU
@@ -88,7 +89,7 @@ async function bootstrap() {
   });
 
   //
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
 }
 
 bootstrap();

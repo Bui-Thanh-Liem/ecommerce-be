@@ -2,7 +2,7 @@ import { IBase } from '../base.interface';
 import { IPhoneStore } from '../phone-store.interface';
 import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
-import { IProductItem } from './product-item.interface';
+import { IRole } from './role.interface';
 import { IStaff } from './staff.interface';
 import { IVoucher } from './voucher.interface';
 
@@ -12,18 +12,18 @@ export interface IStore extends IBase {
   districtTown: ILocationRegion;
   wardCommune: ILocationRegion;
   address: string;
-
   name: string;
   phone: IPhoneStore[];
-  staffs: IStaff[];
   openingHours: string; // Ví dụ: "8:00 AM - 10:00 PM"
   closingHours: string; // Ví dụ: "8:00 AM - 10:00 PM"
   lat: number; // Vĩ độ
   lng: number; // Kinh độ
   isActive: boolean; // Cửa hàng có đang hoạt động hay không
+  manager: IStaff; // Quản lý cửa hàng (có thể là một staff có vai trò quản lý)
 
   // Quan hệ
+  staffs: IStaff[];
+  roles?: IRole[]; // Các vai trò liên quan đến cửa hàng (nếu cần)
   inventories?: IInventory[]; // Danh sách tồn kho của cửa hàng (nếu cần)
-  productItems?: IProductItem[]; // Danh sách sản phẩm cụ thể (nếu cần)
   vouchers?: IVoucher[]; // Danh sách voucher áp dụng cho cửa hàng (nếu cần)
 }

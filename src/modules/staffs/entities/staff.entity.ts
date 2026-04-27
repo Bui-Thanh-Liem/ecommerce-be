@@ -1,8 +1,9 @@
 import { RoleEntity } from '@/modules/roles/entities/role.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
+import { TeamEntity } from '@/modules/teams/entities/team.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IStaff } from '@/shared/interfaces/models/staff.interface';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 
 @Entity('staffs')
 export class StaffEntity extends BaseEntity implements IStaff {
@@ -33,7 +34,20 @@ export class StaffEntity extends BaseEntity implements IStaff {
   isActive: boolean;
 
   @Column({ default: false })
-  isAdmin: boolean;
+  isSuperAdmin: boolean;
+
+  @Column({ default: false })
+  isStoreAdmin: boolean;
+
+  @OneToOne(() => StoreEntity, (store) => store.manager, { nullable: true })
+  managedStore: StoreEntity;
+
+  //
+  @OneToMany(() => TeamEntity, (team) => team.leader)
+  teamsLed: TeamEntity[];
+
+  @OneToMany(() => TeamEntity, (team) => team.members)
+  teamMemberships: TeamEntity[];
 
   logInsert() {
     this.logger.debug(`Đã chèn thành công Staff có Email: ${this.email}`);

@@ -1,5 +1,15 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateStaffDto {
   @IsString()
@@ -33,4 +43,8 @@ export class CreateStaffDto {
   @ArrayNotEmpty()
   @IsUUID('4', { each: true })
   roles: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  isStoreAdmin?: boolean;
 }

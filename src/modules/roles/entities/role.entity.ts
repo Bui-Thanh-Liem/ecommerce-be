@@ -1,5 +1,6 @@
 import { PermissionEntity } from '@/modules/permissions/entities/permission.entity';
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IRole } from '@/shared/interfaces/models/role.interface';
 import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
@@ -26,6 +27,14 @@ export class RoleEntity extends BaseEntity implements IRole {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @ManyToMany(() => StoreEntity, (store) => store.roles, { nullable: true })
+  @JoinTable({
+    name: 'role_store',
+    joinColumn: { name: 'role_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'store_id', referencedColumnName: 'id' },
+  })
+  store?: StoreEntity | undefined;
 
   @ManyToMany(() => StaffEntity, (staff) => staff.roles)
   staffs?: StaffEntity[] | undefined;

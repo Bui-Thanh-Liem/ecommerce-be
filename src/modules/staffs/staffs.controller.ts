@@ -45,7 +45,7 @@ export class StaffsController {
 
   @Delete(':id')
   @Permissions(permissionsSeed.staffs.delete.code)
-  remove(@Param('id') id: string) {
-    return this.staffsService.remove(id);
+  async remove(@Param('id') id: string) {
+    return await this.staffsService.remove(id);
   }
 }

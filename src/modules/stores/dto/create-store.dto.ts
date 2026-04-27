@@ -81,4 +81,8 @@ export class CreateStoreDto {
   @ValidateNested({ each: true }) // Validate từng object trong mảng
   @Type(() => PhoneStoreDto) // Chỉ định kiểu dữ liệu để transformer hiểu
   phone: PhoneStoreDto[];
+
+  @IsUUID('4')
+  @IsNotEmpty()
+  manager: string;
 }
