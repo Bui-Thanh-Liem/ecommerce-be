@@ -11,7 +11,7 @@ export interface IRole extends IBase {
   // eslint-disable-next-line max-len
   permissions: IPermission[]; // danh sách mã quyền mà vai trò này có, giúp xác định những hành động mà người dùng thuộc vai trò này được phép thực hiện trong hệ thống.
   // eslint-disable-next-line max-len
-  store?: IStore; // Vai trò có thể liên kết với một cửa hàng cụ thể, đặc biệt hữu ích trong các hệ thống đa cửa hàng, nơi mỗi cửa hàng có thể có các vai trò và quyền riêng biệt.
+  stores?: IStore[]; // nếu vai trò này chỉ áp dụng cho một cửa hàng cụ thể, trường này sẽ chứa thông tin về cửa hàng đó. Nếu vai trò này áp dụng cho tất cả cửa hàng, trường này có thể để trống hoặc null.
   staffs?: IStaff[];
   isActive: boolean;
 }

@@ -4,9 +4,10 @@ import { RolesController } from './roles.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
 import { PermissionsModule } from '../permissions/permissions.module';
+import { StoresModule } from '../stores/stores.module';
 
 @Module({
-  imports: [PermissionsModule, TypeOrmModule.forFeature([RoleEntity])],
+  imports: [PermissionsModule, TypeOrmModule.forFeature([RoleEntity]), StoresModule],
   controllers: [RolesController],
   providers: [RolesService],
   exports: [RolesService],

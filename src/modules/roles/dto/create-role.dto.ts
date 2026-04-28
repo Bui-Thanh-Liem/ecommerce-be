@@ -33,4 +33,9 @@ export class CreateRoleDto {
   @IsBoolean()
   @Type(() => Boolean)
   isActive: boolean;
+
+  @IsArray()
+  @IsOptional()
+  @IsUUID('4', { each: true })
+  stores?: string[];
 }

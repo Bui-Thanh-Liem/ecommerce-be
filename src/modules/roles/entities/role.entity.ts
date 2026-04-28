@@ -34,7 +34,7 @@ export class RoleEntity extends BaseEntity implements IRole {
     joinColumn: { name: 'role_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'store_id', referencedColumnName: 'id' },
   })
-  store?: StoreEntity | undefined;
+  stores?: StoreEntity[] | undefined;
 
   @ManyToMany(() => StaffEntity, (staff) => staff.roles)
   staffs?: StaffEntity[] | undefined;

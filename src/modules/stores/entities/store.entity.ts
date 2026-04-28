@@ -66,7 +66,7 @@ export class StoreEntity extends BaseEntity implements IStore {
   @OneToMany(() => VoucherEntity, (voucher) => voucher.store, { nullable: true, onDelete: 'SET NULL' })
   vouchers?: VoucherEntity[];
 
-  @ManyToMany(() => RoleEntity, (role) => role.store, { nullable: true })
+  @ManyToMany(() => RoleEntity, (role) => role.stores, { nullable: true })
   roles?: RoleEntity[] | undefined;
 
   logInsert(): void {
