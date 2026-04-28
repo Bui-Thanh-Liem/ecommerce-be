@@ -1,4 +1,5 @@
 import { Trim } from '@/decorators/trim.decorator';
+import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -30,5 +31,6 @@ export class CreateRoleDto {
 
   @IsOptional()
   @IsBoolean()
+  @Type(() => Boolean)
   isActive: boolean;
 }

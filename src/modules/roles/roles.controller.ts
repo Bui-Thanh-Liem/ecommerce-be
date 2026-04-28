@@ -14,31 +14,31 @@ export class RolesController {
 
   @Post()
   @Permissions(permissionsSeed.roles.create.code)
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
+  async create(@Body() createRoleDto: CreateRoleDto) {
+    return await this.rolesService.create(createRoleDto);
   }
 
   @Get()
   @Permissions(permissionsSeed.roles.read.code)
-  findAll() {
-    return this.rolesService.findAll();
+  async findAll() {
+    return await this.rolesService.findAll();
   }
 
   @Get(':id')
   @Permissions(permissionsSeed.roles.read.code)
-  findOne(@Param('id') id: string) {
-    return this.rolesService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.rolesService.findOne(id);
   }
 
   @Patch(':id')
   @Permissions(permissionsSeed.roles.update.code)
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(id, updateRoleDto);
+  async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+    return await this.rolesService.update(id, updateRoleDto);
   }
 
   @Delete(':id')
   @Permissions(permissionsSeed.roles.delete.code)
-  remove(@Param('id') id: string) {
-    return this.rolesService.remove(id);
+  async remove(@Param('id') id: string) {
+    return await this.rolesService.remove(id);
   }
 }

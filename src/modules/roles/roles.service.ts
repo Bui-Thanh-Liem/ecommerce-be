@@ -41,8 +41,9 @@ export class RolesService {
       select: {
         id: true,
         name: true,
+        desc: true,
         isActive: true,
-        permissions: { id: true, name: true, code: true, isActive: true },
+        permissions: { id: true, name: true, desc: true, code: true, isActive: true, keyGroup: true },
       },
     });
   }
@@ -59,8 +60,9 @@ export class RolesService {
       select: {
         id: true,
         name: true,
+        desc: true,
         isActive: true,
-        permissions: { id: true, name: true, code: true, isActive: true },
+        permissions: { id: true, name: true, desc: true, code: true, isActive: true },
       },
     });
   }

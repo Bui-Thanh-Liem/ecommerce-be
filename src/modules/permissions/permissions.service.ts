@@ -40,13 +40,15 @@ export class PermissionsService implements OnModuleInit {
       const permissions = Object.values(permissionsSeed).flatMap((permission) => Object.values(permission));
       await Promise.all(
         permissions.map((permission) =>
-          this.permissionRepo.save({
-            isActive: true,
-            name: permission.name,
-            desc: permission.desc,
-            code: permission.code,
-            keyGroup: permission.keyGroup,
-          }),
+          this.permissionRepo.save(
+            this.permissionRepo.create({
+              isActive: true,
+              name: permission.name,
+              desc: permission.desc,
+              code: permission.code,
+              keyGroup: permission.keyGroup,
+            }),
+          ),
         ),
       );
     }

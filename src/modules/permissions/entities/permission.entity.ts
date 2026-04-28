@@ -21,7 +21,7 @@ export class PermissionEntity extends BaseEntity implements IPermission {
   @Column({ nullable: true })
   keyGroup?: string;
 
-  @ManyToMany(() => RoleEntity, (role) => role.permissions)
+  @ManyToMany(() => RoleEntity, (role) => role.permissions, { nullable: true })
   roles?: RoleEntity[] | undefined;
 
   logInsert(): void {
