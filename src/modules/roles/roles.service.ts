@@ -56,7 +56,7 @@ export class RolesService {
 
   async findAll() {
     return await this.rolesRepo.find({
-      relations: ['permissions', 'store'],
+      relations: ['permissions', 'stores'],
       select: {
         id: true,
         name: true,
@@ -76,7 +76,7 @@ export class RolesService {
   async findOne(id: string) {
     return await this.rolesRepo.findOne({
       where: { id },
-      relations: ['permissions', 'store'],
+      relations: ['permissions', 'stores'],
       select: {
         id: true,
         name: true,

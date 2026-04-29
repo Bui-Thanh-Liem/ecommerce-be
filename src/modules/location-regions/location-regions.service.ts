@@ -6,21 +6,27 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionEntity } from './entities/location-region.entity';
+import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 
 @Injectable()
-export class LocationRegionsService {
+export class LocationRegionsService implements OnModuleInit {
   logger = new Logger(LocationRegionsService.name);
 
   constructor(
     @InjectRepository(LocationRegionEntity)
     private locationRegionRepo: Repository<LocationRegionEntity>,
   ) {}
+
+  async onModuleInit() {
+    await this.initializeData();
+  }
 
   async create(createLocationRegionDto: CreateLocationRegionDto) {
     //
@@ -188,5 +194,23 @@ export class LocationRegionsService {
       throw new NotFoundException(`Location region with ID ${id} not found`);
     }
     return await this.locationRegionRepo.remove(locationRegion);
+  }
+
+  async initializeData() {
+    const existingRoot = await this.locationRegionRepo.exists({ where: { type: LocationRegionType.ROOT } });
+    if (existingRoot) {
+      this.logger.debug('Root location region already exists. Skipping initialization.');
+      return existingRoot;
+    }
+
+    const rootRegion = this.locationRegionRepo.create({
+      parent: null,
+      name: 'World',
+      type: LocationRegionType.ROOT,
+    });
+
+    await this.locationRegionRepo.save(rootRegion);
+    this.logger.debug('Initialized root location region with name "World".');
+    return rootRegion;
   }
 }
