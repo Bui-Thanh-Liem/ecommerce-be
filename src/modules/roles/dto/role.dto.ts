@@ -11,6 +11,9 @@ export class RoleDto extends SerializerDto {
   name: string;
 
   @Expose()
+  desc: string;
+
+  @Expose()
   @Type(() => PermissionDto)
   permissions: PermissionDto[];
 

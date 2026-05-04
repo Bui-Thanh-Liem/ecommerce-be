@@ -18,5 +18,5 @@ export interface IStaff extends IBase {
   teamsLed?: ITeam[];
   directManager: IStaff; // Quản lý trực tiếp của nhân viên
   // eslint-disable-next-line max-len
-  workLocationID: string; // Nếu là nhân viên store thì đây là Store_ID, nếu là nhân viên lưu động thì có thể để là "Regional" hoặc "HQ"
+  workLocationID: string; // Nếu là nhân viên store thì đây là Store_ID, nếu là nhân viên lưu động thì có thể để là "Regional" hoặc "Headquarters"
 }

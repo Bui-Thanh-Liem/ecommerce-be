@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In, Not, Repository } from 'typeorm';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { PermissionEntity } from './entities/permission.entity';
-import { In, Repository } from 'typeorm';
 import { permissionsSeed } from './seeding';
 
 @Injectable()
@@ -26,12 +26,19 @@ export class PermissionsService implements OnModuleInit {
   }
 
   async update(id: string, updatePermissionDto: UpdatePermissionDto) {
-    const permission = await this.permissionRepo.findOneBy({ id });
-    if (!permission) {
-      throw new NotFoundException('Permission not found');
+    if (updatePermissionDto.name) {
+      const existing = await this.permissionRepo.exists({ where: { name: updatePermissionDto.name, id: Not(id) } });
+      if (existing) {
+        throw new NotFoundException('Another permission with this name already exists');
+      }
     }
 
-    return await this.permissionRepo.update(id, updatePermissionDto);
+    const updated = await this.permissionRepo.preload({ id, ...updatePermissionDto });
+    if (!updated) {
+      throw new NotFoundException('Permission not found for update');
+    }
+
+    return await this.permissionRepo.save(updated);
   }
 
   async initPermissions() {

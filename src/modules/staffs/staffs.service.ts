@@ -204,12 +204,13 @@ export class StaffsService implements OnModuleInit {
 
       //
       const adminStaff = this.staffRepo.create({
-        isSuperAdmin: true,
-        isStoreAdmin: false,
         email: adminEmail,
         phone: adminPhone,
-        fullName: adminFullName,
+        isSuperAdmin: true,
+        isStoreAdmin: false,
         password: hashPassword,
+        fullName: adminFullName,
+        workLocationID: 'Headquarters',
       });
       await this.staffRepo.save(adminStaff);
 

@@ -6,7 +6,7 @@ import { Column, Entity, Index, ManyToMany } from 'typeorm';
 @Entity('permissions')
 @Index('idx_active_permissions', ['name', 'code'], { where: '"isActive" = \'true\'' })
 export class PermissionEntity extends BaseEntity implements IPermission {
-  @Column()
+  @Column({ type: 'varchar', unique: true, length: 100 })
   name: string;
 
   @Column({ type: 'text' })
@@ -18,7 +18,7 @@ export class PermissionEntity extends BaseEntity implements IPermission {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   keyGroup?: string;
 
   @ManyToMany(() => RoleEntity, (role) => role.permissions, { nullable: true })
