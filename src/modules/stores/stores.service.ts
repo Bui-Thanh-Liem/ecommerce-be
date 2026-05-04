@@ -22,7 +22,21 @@ export class StoresService {
   ) {}
 
   async create(createStoreDto: CreateStoreDto) {
-    const { provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = createStoreDto;
+    const { provinceCity, districtTown, wardCommune, manager: managerId, name, address, ...rest } = createStoreDto;
+
+    //
+    const existingStore = await this.storeRepo.exists({ where: [{ name }, { address }] });
+    if (existingStore) {
+      throw new NotFoundException('Store with the same name or address already exists');
+    }
+
+    //
+    const isManagerAssigned = await this.storeRepo.exists({
+      where: { manager: { id: managerId } },
+    });
+    if (isManagerAssigned) {
+      throw new NotFoundException('Manager is already assigned to another store');
+    }
 
     // Tìm kiếm các region
     const [provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
@@ -43,13 +57,20 @@ export class StoresService {
     // Tạo mới store với các region nếu có
     const store = this.storeRepo.create({
       ...rest,
+      name,
+      address,
       provinceCity: { id: provinceCity },
       districtTown: { id: districtTown },
       wardCommune: { id: wardCommune },
       manager: { id: managerId },
     });
 
-    return await this.storeRepo.save(store);
+    const savedStore = await this.storeRepo.save(store);
+
+    // Cập nhật lại thông tin store cho manager
+    await this.staffService.update(managerId, { store: savedStore.id });
+
+    return savedStore;
   }
 
   async findAll() {

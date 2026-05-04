@@ -22,8 +22,8 @@ export class CreateTeamDto {
   @IsNotEmpty()
   members: string[];
 
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
   store: string;
 
   @IsOptional()

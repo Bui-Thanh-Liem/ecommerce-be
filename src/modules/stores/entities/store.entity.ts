@@ -34,6 +34,9 @@ export class StoreEntity extends BaseEntity implements IStore {
   @Column({ unique: true })
   address: string;
 
+  @Column({ type: 'text', nullable: true })
+  imageUrl?: string;
+
   @Column('jsonb')
   phone: IPhoneStore[];
 

@@ -25,6 +25,11 @@ export class TeamsController {
     return await this.teamsService.findOne(id);
   }
 
+  @Get('store/:storeId')
+  async findAllByStoreId(@Param('storeId') storeId: string) {
+    return await this.teamsService.findAllByStoreId(storeId);
+  }
+
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
     return await this.teamsService.update(id, updateTeamDto);

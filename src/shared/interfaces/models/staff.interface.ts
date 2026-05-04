@@ -13,7 +13,10 @@ export interface IStaff extends IBase {
   isStoreAdmin: boolean;
   roles: IRole[];
   store: IStore | null; // superAdmin thì null
-  managedStore?: IStore;
+  managedStore?: IStore; // Store mà Staff này quản lý (nếu có)
   teamMemberships?: ITeam[];
   teamsLed?: ITeam[];
+  directManager: IStaff; // Quản lý trực tiếp của nhân viên
+  // eslint-disable-next-line max-len
+  workLocationID: string; // Nếu là nhân viên store thì đây là Store_ID, nếu là nhân viên lưu động thì có thể để là "Regional" hoặc "HQ"
 }

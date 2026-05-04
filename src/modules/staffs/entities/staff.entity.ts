@@ -17,6 +17,9 @@ export class StaffEntity extends BaseEntity implements IStaff {
   email: string;
 
   @Column({ type: 'varchar', length: 255 })
+  workLocationID: string;
+
+  @Column({ type: 'varchar', length: 255 })
   password: string;
 
   @ManyToMany(() => RoleEntity, (role) => role.staffs, { nullable: true })
@@ -29,6 +32,9 @@ export class StaffEntity extends BaseEntity implements IStaff {
 
   @ManyToOne(() => StoreEntity, (store) => store.id, { nullable: true }) // superAdmin thì null
   store: StoreEntity | null; //  1 Staff thì thuộc 1 Store, còn Store có thể có nhiều Staff, superAdmin thì null
+
+  @ManyToOne(() => StaffEntity, (staff) => staff.id, { nullable: true })
+  directManager: StaffEntity;
 
   @Column({ default: true })
   isActive: boolean;

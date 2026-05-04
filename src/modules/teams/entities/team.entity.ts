@@ -30,8 +30,8 @@ export class TeamEntity extends BaseEntity implements ITeam {
   })
   members: StaffEntity[];
 
-  @ManyToOne(() => StoreEntity, (store) => store.id, { nullable: false })
-  store: StoreEntity;
+  @ManyToOne(() => StoreEntity, (store) => store.id, { nullable: true })
+  store: StoreEntity | null;
 
   @Column({ type: 'enum', enum: TeamStatus, default: TeamStatus.ACTIVE })
   status: TeamStatus;

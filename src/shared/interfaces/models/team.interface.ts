@@ -8,6 +8,6 @@ export interface ITeam extends IBase {
   desc: string;
   leader: IStaff;
   members: IStaff[];
-  store: IStore;
+  store: IStore | null;
   status: TeamStatus;
 }

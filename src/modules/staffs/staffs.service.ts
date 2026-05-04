@@ -38,7 +38,7 @@ export class StaffsService implements OnModuleInit {
   }
 
   async create(createStaffDto: CreateStaffDto) {
-    const { store: storeId, roles: roleIds, password, ...rest } = createStaffDto;
+    const { store: storeId, roles: roleIds, directManager: directManagerId, password, ...rest } = createStaffDto;
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
@@ -56,6 +56,12 @@ export class StaffsService implements OnModuleInit {
       }
     }
 
+    // Nếu có directManagerId, tìm kiếm nhân viên quản lý
+    const directManager = await this.exists([directManagerId]);
+    if (!directManager) {
+      throw new NotFoundException(`Direct manager with ID ${directManagerId} not found`);
+    }
+
     // Hash password trước khi lưu vào database
     const salt = await genSalt();
     const hashPassword = await hash(password, salt);
@@ -64,6 +70,7 @@ export class StaffsService implements OnModuleInit {
     const staff = this.staffRepo.create({
       ...rest,
       password: hashPassword,
+      directManager: { id: directManagerId },
       store: storeId ? { id: storeId } : null,
       roles: roleIds ? roleIds.map((id) => ({ id })) : [],
     });
@@ -123,7 +130,7 @@ export class StaffsService implements OnModuleInit {
   }
 
   async update(id: string, updateStaffDto: UpdateStaffDto) {
-    const { store: storeId, roles: roleIds, ...rest } = updateStaffDto;
+    const { store: storeId, roles: roleIds, directManager: directManagerId, ...rest } = updateStaffDto;
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
@@ -142,12 +149,21 @@ export class StaffsService implements OnModuleInit {
       }
     }
 
+    // Nếu có directManagerId, tìm kiếm nhân viên quản lý
+    if (directManagerId) {
+      const directManager = await this.exists([directManagerId]);
+      if (!directManager) {
+        throw new NotFoundException(`Direct manager with ID ${directManagerId} not found`);
+      }
+    }
+
     // Cập nhật staff với store nếu có
     const staff = await this.staffRepo.preload({
       id,
       ...rest,
       store: storeId ? { id: storeId } : undefined,
       roles: roleIds ? roleIds.map((id) => ({ id })) : [],
+      directManager: directManagerId ? { id: directManagerId } : undefined,
     });
     if (!staff) {
       throw new NotFoundException(`Staff with ID ${id} not found`);

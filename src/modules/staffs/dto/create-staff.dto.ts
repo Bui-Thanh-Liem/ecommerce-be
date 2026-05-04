@@ -21,6 +21,11 @@ export class CreateStaffDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
+  workLocationID: string;
+
+  @IsString()
+  @Trim()
+  @IsNotEmpty()
   @MaxLength(20)
   phone: string;
 
@@ -38,6 +43,9 @@ export class CreateStaffDto {
 
   @IsUUID('4')
   store: string;
+
+  @IsUUID('4')
+  directManager: string;
 
   @IsArray()
   @ArrayNotEmpty()

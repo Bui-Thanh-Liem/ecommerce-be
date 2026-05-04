@@ -33,15 +33,17 @@ export class TeamsService {
     }
 
     // Validate that the store exists
-    const store = await this.storesService.exists([storeId]);
-    if (!store) {
-      throw new NotFoundException('Store not found');
+    if (storeId) {
+      const store = await this.storesService.exists([storeId]);
+      if (!store) {
+        throw new NotFoundException('Store not found');
+      }
     }
 
     const team = this.teamRepository.create({
       ...rest,
-      store: { id: storeId },
       leader: { id: leaderId },
+      store: storeId ? { id: storeId } : null,
       members: membersIds.map((id) => ({ id })),
     });
     return await this.teamRepository.save(team);
@@ -53,6 +55,13 @@ export class TeamsService {
 
   async findOne(id: string) {
     return await this.teamRepository.findOne({ where: { id }, relations: ['leader', 'members', 'store'] });
+  }
+
+  async findAllByStoreId(storeId: string) {
+    return await this.teamRepository.find({
+      where: { store: { id: storeId } },
+      relations: ['leader', 'members', 'store'],
+    });
   }
 
   async update(id: string, updateTeamDto: UpdateTeamDto) {

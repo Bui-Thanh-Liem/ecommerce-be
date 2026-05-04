@@ -11,6 +11,7 @@ export interface IStore extends IBase {
   provinceCity: ILocationRegion;
   districtTown: ILocationRegion;
   wardCommune: ILocationRegion;
+  imageUrl?: string; // URL hình ảnh đại diện của cửa hàng
   address: string;
   name: string;
   phone: IPhoneStore[];

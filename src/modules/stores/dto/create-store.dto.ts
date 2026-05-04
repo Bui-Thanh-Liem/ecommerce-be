@@ -53,6 +53,11 @@ export class CreateStoreDto {
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
+  @IsString()
+  @Trim()
+  imageUrl?: string;
+
   @MaxLength(10) // Ví dụ: "08:00"
   @IsString()
   @Trim()

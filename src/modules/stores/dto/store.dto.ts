@@ -27,6 +27,9 @@ export class StoreDto extends SerializerDto {
   name: string;
 
   @Expose()
+  imageUrl: string;
+
+  @Expose()
   address: string;
 
   @Expose()
