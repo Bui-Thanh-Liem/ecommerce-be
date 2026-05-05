@@ -6,6 +6,7 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreEntity } from './entities/store.entity';
 import { StaffsService } from '../staffs/staffs.service';
+import { StaffEntity } from '../staffs/entities/staff.entity';
 
 @Injectable()
 export class StoresService {
@@ -21,8 +22,17 @@ export class StoresService {
     private readonly staffService: StaffsService,
   ) {}
 
-  async create(createStoreDto: CreateStoreDto) {
-    const { provinceCity, districtTown, wardCommune, manager: managerId, name, address, ...rest } = createStoreDto;
+  async create(createStoreDto: CreateStoreDto, currentStaff: StaffEntity) {
+    const {
+      country,
+      provinceCity,
+      districtTown,
+      wardCommune,
+      manager: managerId,
+      name,
+      address,
+      ...rest
+    } = createStoreDto;
 
     //
     const existingStore = await this.storeRepo.exists({ where: [{ name }, { address }] });
@@ -39,14 +49,15 @@ export class StoresService {
     }
 
     // Tìm kiếm các region
-    const [provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
+    const [countryExists, provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
+      this.locationService.exists(country),
       this.locationService.exists(provinceCity),
       this.locationService.exists(districtTown),
       this.locationService.exists(wardCommune),
       this.staffService.exists([managerId]),
     ]);
 
-    if (!provinceExists || !districtExists || !wardExists) {
+    if (!countryExists || !provinceExists || !districtExists || !wardExists) {
       throw new NotFoundException('One or more location regions not found');
     }
 
@@ -59,6 +70,7 @@ export class StoresService {
       ...rest,
       name,
       address,
+      country: { id: country },
       provinceCity: { id: provinceCity },
       districtTown: { id: districtTown },
       wardCommune: { id: wardCommune },
@@ -68,7 +80,7 @@ export class StoresService {
     const savedStore = await this.storeRepo.save(store);
 
     // Cập nhật lại thông tin store cho manager
-    await this.staffService.update(managerId, { store: savedStore.id });
+    await this.staffService.update(managerId, { store: savedStore.id }, currentStaff);
 
     return savedStore;
   }
@@ -122,9 +134,16 @@ export class StoresService {
   }
 
   async update(id: string, updateStoreDto: UpdateStoreDto) {
-    const { provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = updateStoreDto;
+    const { country, provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = updateStoreDto;
 
     // Tìm kiếm locationRegion
+    if (country) {
+      const countryExists = await this.locationService.exists(country);
+      if (!countryExists) {
+        throw new NotFoundException('Country not found');
+      }
+    }
+
     if (provinceCity) {
       const provinceExists = await this.locationService.exists(provinceCity);
       if (!provinceExists) {
@@ -156,6 +175,7 @@ export class StoresService {
     const store = await this.storeRepo.preload({
       id,
       ...rest,
+      country: country ? { id: country } : undefined,
       provinceCity: provinceCity ? { id: provinceCity } : undefined,
       districtTown: districtTown ? { id: districtTown } : undefined,
       wardCommune: wardCommune ? { id: wardCommune } : undefined,

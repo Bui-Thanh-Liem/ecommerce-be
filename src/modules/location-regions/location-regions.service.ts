@@ -61,6 +61,20 @@ export class LocationRegionsService implements OnModuleInit {
     return await this.locationRegionRepo.find({ relations: ['parent', 'children'] });
   }
 
+  async getRegions(queryParams: { parentId?: string; type?: LocationRegionType }) {
+    const query = this.locationRegionRepo.createQueryBuilder('lr');
+
+    console.log('getRegions ::: params = ', queryParams);
+
+    if (queryParams.parentId) {
+      query.andWhere('lr.parent = :parentId', { parentId: queryParams.parentId });
+    } else if (queryParams.type) {
+      query.andWhere('lr.type = :type', { type: queryParams.type });
+    }
+
+    return query.getMany();
+  }
+
   async exists(id: string): Promise<boolean> {
     return await this.locationRegionRepo.exists({ where: { id } });
   }

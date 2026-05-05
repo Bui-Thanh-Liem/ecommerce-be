@@ -14,6 +14,12 @@ export class StoreEntity extends BaseEntity implements IStore {
     nullable: false,
     onDelete: 'SET NULL',
   })
+  country: LocationRegionEntity;
+
+  @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, {
+    nullable: false,
+    onDelete: 'SET NULL',
+  })
   provinceCity: LocationRegionEntity;
 
   @ManyToOne(() => LocationRegionEntity, (locationRegion) => locationRegion.id, {

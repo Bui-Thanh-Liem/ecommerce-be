@@ -31,6 +31,10 @@ class PhoneStoreDto implements IPhoneStore {
 export class CreateStoreDto {
   @IsUUID('4')
   @IsNotEmpty()
+  country: string;
+
+  @IsUUID('4')
+  @IsNotEmpty()
   provinceCity: string;
 
   @IsUUID('4')

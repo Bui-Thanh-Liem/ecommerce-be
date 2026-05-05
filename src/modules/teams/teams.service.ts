@@ -3,9 +3,10 @@ import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamEntity } from './entities/team.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { StaffsService } from '../staffs/staffs.service';
 import { StoresService } from '../stores/stores.service';
+import { QueryDto } from '@/shared/dtos/query.dto';
 
 @Injectable()
 export class TeamsService {
@@ -49,19 +50,18 @@ export class TeamsService {
     return await this.teamRepository.save(team);
   }
 
-  async findAll() {
-    return await this.teamRepository.find({ relations: ['leader', 'members', 'store'] });
+  async findAll(query: QueryDto & { store: string }) {
+    const findOptions: FindManyOptions<TeamEntity> = { relations: ['leader', 'members', 'store'] };
+
+    if (query?.store) {
+      findOptions.where = { store: { id: query.store } };
+    }
+
+    return await this.teamRepository.find(findOptions);
   }
 
   async findOne(id: string) {
     return await this.teamRepository.findOne({ where: { id }, relations: ['leader', 'members', 'store'] });
-  }
-
-  async findAllByStoreId(storeId: string) {
-    return await this.teamRepository.find({
-      where: { store: { id: storeId } },
-      relations: ['leader', 'members', 'store'],
-    });
   }
 
   async update(id: string, updateTeamDto: UpdateTeamDto) {

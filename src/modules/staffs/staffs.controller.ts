@@ -6,6 +6,9 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffsService } from './staffs.service';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '../permissions/seeding';
+import { CurrentStaff } from '@/decorators/current-staff.decorator';
+import { StaffEntity } from './entities/staff.entity';
+import { QueryDto } from '@/shared/dtos/query.dto';
 
 // @UseInterceptors(new SerializerInterceptor(StaffDto))
 @Serializer(StaffDto)
@@ -21,8 +24,8 @@ export class StaffsController {
 
   @Get()
   @Permissions(permissionsSeed.staffs.read.code)
-  findAll(@Query('page') page: string = '1', @Query('limit') limit: string = '10', @Query('email') email: string) {
-    return this.staffsService.findAll({ page, limit, email });
+  findAll(@Query() query: QueryDto, @Query('email') email: string) {
+    return this.staffsService.findAll({ ...query, email });
   }
 
   @Get(':id')
@@ -39,8 +42,12 @@ export class StaffsController {
 
   @Patch(':id')
   @Permissions(permissionsSeed.staffs.update.code)
-  async update(@Param('id') id: string, @Body() updateStaffDto: UpdateStaffDto) {
-    return await this.staffsService.update(id, updateStaffDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateStaffDto: UpdateStaffDto,
+    @CurrentStaff() currentStaff: StaffEntity,
+  ) {
+    return await this.staffsService.update(id, updateStaffDto, currentStaff);
   }
 
   @Delete(':id')

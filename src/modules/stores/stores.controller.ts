@@ -6,6 +6,8 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { StoreDto } from './dto/store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoresService } from './stores.service';
+import { StaffEntity } from '../staffs/entities/staff.entity';
+import { CurrentStaff } from '@/decorators/current-staff.decorator';
 
 @Controller('stores')
 @Serializer(StoreDto)
@@ -14,8 +16,8 @@ export class StoresController {
 
   @Post()
   @Permissions(permissionsSeed.stores.create.code)
-  async create(@Body() createStoreDto: CreateStoreDto) {
-    return await this.storesService.create(createStoreDto);
+  async create(@Body() createStoreDto: CreateStoreDto, @CurrentStaff() currentStaff: StaffEntity) {
+    return await this.storesService.create(createStoreDto, currentStaff);
   }
 
   @Get()

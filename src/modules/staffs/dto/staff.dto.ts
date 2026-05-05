@@ -25,6 +25,10 @@ export class StaffDto extends SerializerDto {
   roles: RoleDto[];
 
   @Expose()
+  @Type(() => StaffDto)
+  directManager: StaffDto;
+
+  @Expose()
   isActive: boolean;
 
   @Expose()

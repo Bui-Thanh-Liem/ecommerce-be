@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -16,6 +17,7 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
 import { RolesService } from '../roles/roles.service';
+import { QueryDto } from '@/shared/dtos/query.dto';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -39,6 +41,20 @@ export class StaffsService implements OnModuleInit {
 
   async create(createStaffDto: CreateStaffDto) {
     const { store: storeId, roles: roleIds, directManager: directManagerId, password, ...rest } = createStaffDto;
+
+    //
+    const [existingStaffByEmail, existingStaffByPhone] = await Promise.all([
+      this.staffRepo.exists({ where: { email: createStaffDto.email } }),
+      this.staffRepo.exists({ where: { phone: createStaffDto.phone } }),
+    ]);
+
+    if (existingStaffByEmail) {
+      throw new BadRequestException('Staff with this email already exists');
+    }
+
+    if (existingStaffByPhone) {
+      throw new BadRequestException('Staff with this phone already exists');
+    }
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
@@ -85,10 +101,10 @@ export class StaffsService implements OnModuleInit {
     return await this.staffRepo.findOneBy({ phone });
   }
 
-  async findAll({ page, limit, email }: { page: string; limit: string; email?: string }) {
+  async findAll({ page, limit, email }: QueryDto & { email?: string }) {
     return await this.staffRepo.find({
       where: email ? { email } : {},
-      relations: { store: true, roles: { permissions: true } },
+      relations: { store: true, roles: { permissions: true }, directManager: true },
       select: {
         id: true,
         fullName: true,
@@ -98,10 +114,11 @@ export class StaffsService implements OnModuleInit {
         isSuperAdmin: true,
         isStoreAdmin: true,
         store: { id: true, name: true },
+        directManager: { id: true, fullName: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
       },
-      take: parseInt(limit),
-      skip: (parseInt(page) - 1) * parseInt(limit),
+      take: limit,
+      skip: (page - 1) * limit,
     });
   }
 
@@ -114,7 +131,7 @@ export class StaffsService implements OnModuleInit {
     if (!id) return null;
     return await this.staffRepo.findOne({
       where: { id },
-      relations: { store: true, roles: { permissions: true } },
+      relations: { store: true, roles: { permissions: true }, directManager: true },
       select: {
         id: true,
         fullName: true,
@@ -124,17 +141,22 @@ export class StaffsService implements OnModuleInit {
         isSuperAdmin: true,
         isStoreAdmin: true,
         store: { id: true, name: true },
+        directManager: { id: true, fullName: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
       },
     });
   }
 
-  async update(id: string, updateStaffDto: UpdateStaffDto) {
+  async update(id: string, updateStaffDto: UpdateStaffDto, currentStaff: StaffEntity) {
     const { store: storeId, roles: roleIds, directManager: directManagerId, ...rest } = updateStaffDto;
+
+    // Ngăn không cho nhân viên tự hủy kích hoạt tài khoản của chính mình
+    if (rest.isActive === false && currentStaff.id === id) {
+      throw new BadRequestException('You cannot deactivate yourself');
+    }
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      this.logger.debug('typeof :::', typeof storeId);
       const store = await this.storesService.exists([storeId]);
       if (!store) {
         throw new NotFoundException(`Store with ID ${storeId} not found`);
