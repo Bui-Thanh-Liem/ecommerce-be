@@ -143,4 +143,82 @@ export const permissionsSeed = {
       code: '022',
     },
   },
+  team: {
+    create: {
+      keyGroup: 'Đội nhóm',
+      name: 'create:teams',
+      desc: 'Tạo đội nhóm',
+      code: '023',
+    },
+    read: {
+      keyGroup: 'Đội nhóm',
+      name: 'read:teams',
+      desc: 'Xem đội nhóm',
+      code: '024',
+    },
+    update: {
+      keyGroup: 'Đội nhóm',
+      name: 'update:teams',
+      desc: 'Cập nhật đội nhóm',
+      code: '025',
+    },
+    delete: {
+      keyGroup: 'Đội nhóm',
+      name: 'delete:teams',
+      desc: 'Xóa đội nhóm',
+      code: '026',
+    },
+  },
+  brand: {
+    create: {
+      keyGroup: 'Thương hiệu',
+      name: 'create:brands',
+      desc: 'Tạo thương hiệu',
+      code: '027',
+    },
+    read: {
+      keyGroup: 'Thương hiệu',
+      name: 'read:brands',
+      desc: 'Xem thương hiệu',
+      code: '028',
+    },
+    update: {
+      keyGroup: 'Thương hiệu',
+      name: 'update:brands',
+      desc: 'Cập nhật thương hiệu',
+      code: '029',
+    },
+    delete: {
+      keyGroup: 'Thương hiệu',
+      name: 'delete:brands',
+      desc: 'Xóa thương hiệu',
+      code: '030',
+    },
+  },
+  campaign: {
+    create: {
+      keyGroup: 'Chiến dịch',
+      name: 'create:campaigns',
+      desc: 'Tạo chiến dịch',
+      code: '031',
+    },
+    read: {
+      keyGroup: 'Chiến dịch',
+      name: 'read:campaigns',
+      desc: 'Xem chiến dịch',
+      code: '032',
+    },
+    update: {
+      keyGroup: 'Chiến dịch',
+      name: 'update:campaigns',
+      desc: 'Cập nhật chiến dịch',
+      code: '033',
+    },
+    delete: {
+      keyGroup: 'Chiến dịch',
+      name: 'delete:campaigns',
+      desc: 'Xóa chiến dịch',
+      code: '034',
+    },
+  },
 };

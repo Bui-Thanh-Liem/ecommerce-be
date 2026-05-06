@@ -1,6 +1,6 @@
 import { IntersectionType } from '@nestjs/mapped-types';
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsString, Max } from 'class-validator';
+import { IsOptional, Max } from 'class-validator';
 
 class QueryBaseDto {
   @IsOptional()
