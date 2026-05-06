@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { TeamDto } from './dto/team.dto';
-import { QueryDto } from '@/shared/dtos/query.dto';
+import { TeamQueryDto } from './dto/query-team.dto';
 
 @Controller('teams')
 @Serializer(TeamDto)
@@ -17,11 +17,8 @@ export class TeamsController {
   }
 
   @Get()
-  async findAll(@Query() query: QueryDto, @Query('store', new ParseUUIDPipe({ version: '4' })) store: string) {
-    return await this.teamsService.findAll({
-      ...query,
-      store,
-    });
+  async findAll(@Query() query: TeamQueryDto) {
+    return await this.teamsService.findAll(query);
   }
 
   @Get(':id')

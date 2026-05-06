@@ -17,7 +17,6 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
 import { RolesService } from '../roles/roles.service';
-import { QueryDto } from '@/shared/dtos/query.dto';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -101,9 +100,8 @@ export class StaffsService implements OnModuleInit {
     return await this.staffRepo.findOneBy({ phone });
   }
 
-  async findAll({ page, limit, email }: QueryDto & { email?: string }) {
+  async findAll() {
     return await this.staffRepo.find({
-      where: email ? { email } : {},
       relations: { store: true, roles: { permissions: true }, directManager: true },
       select: {
         id: true,
@@ -117,8 +115,6 @@ export class StaffsService implements OnModuleInit {
         directManager: { id: true, fullName: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
       },
-      take: limit,
-      skip: (page - 1) * limit,
     });
   }
 

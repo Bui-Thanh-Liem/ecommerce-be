@@ -1,6 +1,5 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { TeamStatus } from '@/shared/enums/team-status.enum';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateTeamDto {
   @IsString()
@@ -27,6 +26,6 @@ export class CreateTeamDto {
   store: string;
 
   @IsOptional()
-  @IsEnum(TeamStatus)
-  status: TeamStatus;
+  @IsBoolean()
+  isActive: boolean;
 }

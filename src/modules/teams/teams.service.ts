@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamEntity } from './entities/team.entity';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { StaffsService } from '../staffs/staffs.service';
 import { StoresService } from '../stores/stores.service';
-import { QueryDto } from '@/shared/dtos/query.dto';
+import { TeamQueryDto } from './dto/query-team.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class TeamsService {
+  private readonly logger = new Logger(TeamsService.name);
+
   constructor(
     @InjectRepository(TeamEntity)
     private teamRepository: Repository<TeamEntity>,
@@ -20,6 +23,12 @@ export class TeamsService {
 
   async create(createTeamDto: CreateTeamDto) {
     const { leader: leaderId, members: membersIds, store: storeId, ...rest } = createTeamDto;
+
+    //
+    const teamWithSameName = await this.teamRepository.exists({ where: { name: rest.name } });
+    if (teamWithSameName) {
+      throw new NotFoundException('Team with the same name already exists');
+    }
 
     // Validate that the leader exists
     const leader = await this.staffsService.exists([leaderId]);
@@ -50,14 +59,30 @@ export class TeamsService {
     return await this.teamRepository.save(team);
   }
 
-  async findAll(query: QueryDto & { store: string }) {
-    const findOptions: FindManyOptions<TeamEntity> = { relations: ['leader', 'members', 'store'] };
+  async findAll(query: TeamQueryDto) {
+    const { page, limit, filters } = query;
+    console.log('filters?.store :::', filters);
 
-    if (query?.store) {
-      findOptions.where = { store: { id: query.store } };
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.teamRepository
+      .createQueryBuilder('team')
+      .leftJoinAndSelect('team.leader', 'leader')
+      .leftJoinAndSelect('team.members', 'members')
+      .leftJoinAndSelect('team.store', 'store');
+
+    // Apply filters if provided
+    if (filters?.store) {
+      queryBuilder.andWhere('team.store = :store', { store: filters.store as string });
+    } else {
+      queryBuilder.andWhere('team.store IS NULL');
     }
 
-    return await this.teamRepository.find(findOptions);
+    //
+    const [data, total] = await queryBuilder.take(take).skip(skip).getManyAndCount();
+    return data;
   }
 
   async findOne(id: string) {

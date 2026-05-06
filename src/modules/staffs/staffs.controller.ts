@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { StaffDto } from './dto/staff.dto';
@@ -8,7 +8,6 @@ import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '../permissions/seeding';
 import { CurrentStaff } from '@/decorators/current-staff.decorator';
 import { StaffEntity } from './entities/staff.entity';
-import { QueryDto } from '@/shared/dtos/query.dto';
 
 // @UseInterceptors(new SerializerInterceptor(StaffDto))
 @Serializer(StaffDto)
@@ -24,8 +23,8 @@ export class StaffsController {
 
   @Get()
   @Permissions(permissionsSeed.staffs.read.code)
-  findAll(@Query() query: QueryDto, @Query('email') email: string) {
-    return this.staffsService.findAll({ ...query, email });
+  findAll() {
+    return this.staffsService.findAll();
   }
 
   @Get(':id')

@@ -1,7 +1,6 @@
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { TeamStatus } from '@/shared/enums/team-status.enum';
 import { ITeam } from '@/shared/interfaces/models/team.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
@@ -33,8 +32,8 @@ export class TeamEntity extends BaseEntity implements ITeam {
   @ManyToOne(() => StoreEntity, (store) => store.id, { nullable: true })
   store: StoreEntity | null;
 
-  @Column({ type: 'enum', enum: TeamStatus, default: TeamStatus.ACTIVE })
-  status: TeamStatus;
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Team có tên: ${this.name}`);
