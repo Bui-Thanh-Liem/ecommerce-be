@@ -23,8 +23,9 @@ export class StaffsController {
 
   @Get()
   @Permissions(permissionsSeed.staffs.read.code)
-  findAll() {
-    return this.staffsService.findAll();
+  async findAll() {
+    const staffs = await this.staffsService.findAll();
+    return staffs;
   }
 
   @Get(':id')

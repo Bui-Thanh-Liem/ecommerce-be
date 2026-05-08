@@ -1,4 +1,5 @@
 import { LocationRegionDto } from '@/modules/location-regions/dto/location-region.dto';
+import { StaffDto } from '@/modules/staffs/dto/staff.dto';
 import { SerializerDto } from '@/shared/dtos/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 
@@ -19,6 +20,10 @@ export class StoreDto extends SerializerDto {
 
   @Expose()
   wardCommune: LocationRegionDto;
+
+  @Expose()
+  @Type(() => StaffDto)
+  manager: StaffDto;
 
   @Expose()
   id: string;

@@ -2,11 +2,15 @@ import { RoleEntity } from '@/modules/roles/entities/role.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
 import { TeamEntity } from '@/modules/teams/entities/team.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { IStaff } from '@/shared/interfaces/models/staff.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 
 @Entity('staffs')
 export class StaffEntity extends BaseEntity implements IStaff {
+  @Column({ nullable: true, type: 'text' })
+  avatarUrl: string | undefined;
+
   @Column({ nullable: true, type: 'varchar', length: 50 })
   fullName: string;
 
@@ -16,8 +20,8 @@ export class StaffEntity extends BaseEntity implements IStaff {
   @Column({ unique: true, type: 'varchar', length: 100 })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  workLocationID: string;
+  @Column({ type: 'enum', enum: StaffWorkLocationID })
+  workLocationID: StaffWorkLocationID;
 
   @Column({ type: 'varchar', length: 255 })
   password: string;

@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
@@ -130,6 +130,11 @@ export class StoresService {
 
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.storeRepo.countBy({ id: In(ids) });
+    return count === ids.length;
+  }
+
+  async existsNotManager(ids: string[]): Promise<boolean> {
+    const count = await this.storeRepo.countBy({ id: In(ids), manager: IsNull() });
     return count === ids.length;
   }
 

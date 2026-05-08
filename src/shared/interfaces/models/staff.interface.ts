@@ -1,9 +1,11 @@
+import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { IBase } from '../base.interface';
 import { IRole } from './role.interface';
 import { IStore } from './store.interface';
 import { ITeam } from './team.interface';
 
 export interface IStaff extends IBase {
+  avatarUrl?: string;
   fullName: string;
   email: string;
   phone: string;
@@ -18,5 +20,5 @@ export interface IStaff extends IBase {
   teamsLed?: ITeam[];
   directManager: IStaff; // Quản lý trực tiếp của nhân viên
   // eslint-disable-next-line max-len
-  workLocationID: string; // Nếu là nhân viên store thì đây là Store_ID, nếu là nhân viên lưu động thì có thể để là "Regional" hoặc "Headquarters"
+  workLocationID: StaffWorkLocationID;
 }

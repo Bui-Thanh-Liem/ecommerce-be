@@ -61,7 +61,7 @@ export class StoreEntity extends BaseEntity implements IStore {
   @Column({ default: true })
   isActive: boolean;
 
-  @OneToOne(() => StaffEntity, (staff) => staff.managedStore)
+  @OneToOne(() => StaffEntity, (staff) => staff.managedStore, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   manager: StaffEntity;
 

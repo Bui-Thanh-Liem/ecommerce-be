@@ -1,7 +1,13 @@
 import { Trim } from '@/decorators/trim.decorator';
+import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateStaffDto {
+  @IsOptional()
+  @IsString()
+  @Trim()
+  avatarUrl: string;
+
   @IsString()
   @Trim()
   @IsNotEmpty()
@@ -11,7 +17,7 @@ export class CreateStaffDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
-  workLocationID: string;
+  workLocationID: StaffWorkLocationID;
 
   @IsString()
   @Trim()

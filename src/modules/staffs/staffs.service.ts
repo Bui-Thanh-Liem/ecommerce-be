@@ -17,6 +17,7 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
 import { RolesService } from '../roles/roles.service';
+import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -57,9 +58,9 @@ export class StaffsService implements OnModuleInit {
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      const store = await this.storesService.exists([storeId]);
+      const store = await this.storesService.existsNotManager([storeId]);
       if (!store) {
-        throw new NotFoundException(`Store with ID ${storeId} not found`);
+        throw new NotFoundException(`Store with ID ${storeId} not found or the store already has a manager`);
       }
     }
 
@@ -106,10 +107,12 @@ export class StaffsService implements OnModuleInit {
       select: {
         id: true,
         fullName: true,
+        avatarUrl: true,
         phone: true,
         email: true,
         isActive: true,
         isSuperAdmin: true,
+        workLocationID: true,
         isStoreAdmin: true,
         store: { id: true, name: true },
         directManager: { id: true, fullName: true },
@@ -151,11 +154,15 @@ export class StaffsService implements OnModuleInit {
       throw new BadRequestException('You cannot deactivate yourself');
     }
 
+    if (id === directManagerId) {
+      throw new BadRequestException('A staff cannot be their own direct manager');
+    }
+
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      const store = await this.storesService.exists([storeId]);
+      const store = await this.storesService.existsNotManager([storeId]);
       if (!store) {
-        throw new NotFoundException(`Store with ID ${storeId} not found`);
+        throw new NotFoundException(`Store with ID ${storeId} not found or the store already has a manager`);
       }
     }
 
@@ -180,7 +187,7 @@ export class StaffsService implements OnModuleInit {
       id,
       ...rest,
       store: storeId ? { id: storeId } : undefined,
-      roles: roleIds ? roleIds.map((id) => ({ id })) : [],
+      roles: roleIds ? roleIds.map((id) => ({ id })) : undefined,
       directManager: directManagerId ? { id: directManagerId } : undefined,
     });
     if (!staff) {
@@ -228,7 +235,7 @@ export class StaffsService implements OnModuleInit {
         isStoreAdmin: false,
         password: hashPassword,
         fullName: adminFullName,
-        workLocationID: 'Headquarters',
+        workLocationID: StaffWorkLocationID.HEADQUARTERS,
       });
       await this.staffRepo.save(adminStaff);
 
