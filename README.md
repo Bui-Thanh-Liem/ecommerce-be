@@ -1,98 +1,81 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ecommerce-be
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Mô tả tổng quan
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Đây là hệ thống backend cho nền tảng thương mại điện tử được xây dựng với NestJS + TypeScript. Dự án cung cấp các API phục vụ đầy đủ cho quy trình kinh doanh từ người dùng tới quản trị, vận hành kho, đơn hàng, và tích hợp thanh toán. 
 
-## Description
+## Các tính năng nổi bật
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Quản lý sản phẩm:
+  - Sản phẩm, biến thể (SKU), số serial
+  - Ảnh sản phẩm, thương hiệu, danh mục
 
-## Project setup
+- Quản lý kho và tồn kho:
+  - Theo dõi số lượng hàng hóa, cập nhật tồn kho theo realtime
 
-```bash
-$ npm install
-```
+- Quản lý người dùng & phân quyền:
+  - Đăng ký, đăng nhập, phân quyền (role, permission)
+  - Hỗ trợ nhiều loại người dùng: khách hàng, nhân viên, quản lý
 
-## Compile and run the project
+- Quản lý đơn hàng:
+  - Tạo, cập nhật, theo dõi trạng thái đơn hàng
+  - Quản lý các mặt hàng trong đơn (order items)
 
-```bash
-# development
-$ npm run start
+- Quản lý giỏ hàng (Cart):
+  - Tạo và chỉnh sửa giỏ hàng, quản lý các mặt hàng trong giỏ
 
-# watch mode
-$ npm run start:dev
+- Tích hợp và xử lý thanh toán:
+  - Hỗ trợ các cổng thanh toán phổ biến tại VN: MoMo, VNPAY, ZaloPay
 
-# production mode
-$ npm run start:prod
-```
+- Quản lý khuyến mãi (Promotions/Campaigns/Vouchers):
+  - Tạo chương trình khuyến mãi, áp dụng voucher, campaign marketing
 
-## Run tests
+- Đánh giá (Rating), quản lý phản hồi từ người dùng
 
-```bash
-# unit tests
-$ npm run test
+- Quản lý ảnh với AWS S3
 
-# e2e tests
-$ npm run test:e2e
+- Các module bổ trợ: Nhóm nhân viên (teams), navbar động, quản lý khu vực địa lý, ...
 
-# test coverage
-$ npm run test:cov
-```
+## Công nghệ sử dụng
 
-## Deployment
+- **NestJS**: Framework Node.js mạnh mẽ với TypeScript cho phát triển backend hiện đại.
+- **TypeScript**: Ngôn ngữ lập trình mở rộng từ JavaScript, tăng tính an toàn và tối ưu phát triển.
+- **TypeORM**: ORM cho truy cập database và mapping object dễ dàng, sử dụng PostgreSQL hoặc SQLite.
+- **PostgreSQL / SQLite**: Database phục vụ lưu trữ và truy vấn dữ liệu chính.
+- **AWS S3 SDK**: Lưu trữ ảnh và file trên đám mây Amazon S3.
+- **Passport**: Hỗ trợ xác thực đa dạng (JWT, Facebook, Google, Local).
+- **Multer**: Xử lý upload file.
+- **Các cổng thanh toán tích hợp**: MoMo, VNPAY, ZaloPay.
+- **Các thư viện khác**:
+  - class-validator, class-transformer (validate dữ liệu)
+  - dotenv, cross-env (quản lý môi trường)
+  - winston (log)
+  - rxjs (xử lý bất đồng bộ)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Cài đặt và chạy dự án
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Cài đặt package
+npm install
+
+# Chạy chế độ phát triển
+npm run start:dev
+
+# Hoặc build và chạy server
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Cấu trúc dự án (tiêu biểu)
 
-## Resources
+- `src/modules`: Các module tách biệt theo chức năng (user, products, orders, payments, promotions, ...)
+- `src/guards`, `src/interceptors`, `src/exception-filters`: Bảo vệ route, xử lý lỗi và interceptor cho logic nghiệp vụ
+- `src/configs`: Các file cấu hình kết nối database, aws, biến môi trường...
 
-Check out a few resources that may come in handy when working with NestJS:
+## Đóng góp
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Để đóng góp hoặc cần thêm thông tin, vui lòng tạo issue hoặc PR trên repo này.
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Repo:** [Bui-Thanh-Liem/ecommerce-be](https://github.com/Bui-Thanh-Liem/ecommerce-be)
