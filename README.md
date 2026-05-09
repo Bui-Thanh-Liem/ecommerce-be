@@ -41,7 +41,7 @@
 - **NestJS**: Framework Node.js mạnh mẽ với TypeScript cho phát triển backend hiện đại.
 - **TypeScript**: Ngôn ngữ lập trình mở rộng từ JavaScript, tăng tính an toàn và tối ưu phát triển.
 - **TypeORM**: ORM cho truy cập database và mapping object dễ dàng, sử dụng PostgreSQL hoặc SQLite.
-- **PostgreSQL / SQLite**: Database phục vụ lưu trữ và truy vấn dữ liệu chính.
+- **PostgreSQL**: Database phục vụ lưu trữ và truy vấn dữ liệu chính.
 - **AWS S3 SDK**: Lưu trữ ảnh và file trên đám mây Amazon S3.
 - **Passport**: Hỗ trợ xác thực đa dạng (JWT, Facebook, Google, Local).
 - **Multer**: Xử lý upload file.
