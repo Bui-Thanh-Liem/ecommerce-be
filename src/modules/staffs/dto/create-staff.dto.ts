@@ -1,6 +1,17 @@
 import { Trim } from '@/decorators/trim.decorator';
+import { MAX_ROLES_IN_STAFF } from '@/shared/constants/staff.constant';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
-import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateStaffDto {
   @IsOptional()
@@ -45,13 +56,22 @@ export class CreateStaffDto {
   directManager: string;
 
   @IsOptional()
+  @IsUUID('4')
+  managedStore?: string;
+
+  @IsOptional()
   @IsArray()
+  @ArrayMaxSize(MAX_ROLES_IN_STAFF, { message: `A staff can have at most ${MAX_ROLES_IN_STAFF} roles.` })
   @IsUUID('4', { each: true })
   roles: string[];
 
   @IsOptional()
   @IsBoolean()
   isStoreAdmin?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isSubAdmin?: boolean;
 
   @IsOptional()
   @IsBoolean()

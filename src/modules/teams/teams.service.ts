@@ -8,6 +8,7 @@ import { StaffsService } from '../staffs/staffs.service';
 import { StoresService } from '../stores/stores.service';
 import { TeamQueryDto } from './dto/query-team.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class TeamsService {
@@ -59,7 +60,7 @@ export class TeamsService {
     return await this.teamRepository.save(team);
   }
 
-  async findAll(query: TeamQueryDto) {
+  async findAll(query: TeamQueryDto): Promise<IMetadata<TeamEntity>> {
     const { page, limit, filters } = query;
     console.log('filters?.store :::', filters);
 
@@ -82,7 +83,12 @@ export class TeamsService {
 
     //
     const [data, total] = await queryBuilder.take(take).skip(skip).getManyAndCount();
-    return data;
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string) {

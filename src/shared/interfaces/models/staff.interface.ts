@@ -12,6 +12,7 @@ export interface IStaff extends IBase {
   password: string;
   isActive: boolean;
   isSuperAdmin: boolean;
+  isSubAdmin: boolean;
   isStoreAdmin: boolean;
   roles: IRole[];
   store: IStore | null; // superAdmin thì null

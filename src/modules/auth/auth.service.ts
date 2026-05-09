@@ -36,7 +36,9 @@ export class AuthService {
     const { access } = await this.staffTokensService.updateAuthToken(staff.id);
 
     // Return staff data and token
-    return { staff, token: access };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...staffData } = staff;
+    return { staff: staffData, token: access };
   }
 
   // Sign out a staff by revoking the token

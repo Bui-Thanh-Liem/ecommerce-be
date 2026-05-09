@@ -6,7 +6,6 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreEntity } from './entities/store.entity';
 import { StaffsService } from '../staffs/staffs.service';
-import { StaffEntity } from '../staffs/entities/staff.entity';
 
 @Injectable()
 export class StoresService {
@@ -22,7 +21,7 @@ export class StoresService {
     private readonly staffService: StaffsService,
   ) {}
 
-  async create(createStoreDto: CreateStoreDto, currentStaff: StaffEntity) {
+  async create(createStoreDto: CreateStoreDto) {
     const {
       country,
       provinceCity,
@@ -35,9 +34,9 @@ export class StoresService {
     } = createStoreDto;
 
     //
-    const existingStore = await this.storeRepo.exists({ where: [{ name }, { address }] });
+    const existingStore = await this.storeRepo.exists({ where: [{ name }] });
     if (existingStore) {
-      throw new NotFoundException('Store with the same name or address already exists');
+      throw new NotFoundException('Store with the same name');
     }
 
     //
@@ -80,7 +79,7 @@ export class StoresService {
     const savedStore = await this.storeRepo.save(store);
 
     // Cập nhật lại thông tin store cho manager
-    await this.staffService.update(managerId, { store: savedStore.id }, currentStaff);
+    await this.staffService.updateAfterStoreCreate(managerId, savedStore.id);
 
     return savedStore;
   }

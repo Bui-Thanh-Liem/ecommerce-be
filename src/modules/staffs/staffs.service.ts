@@ -18,6 +18,9 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 import { StaffEntity } from './entities/staff.entity';
 import { RolesService } from '../roles/roles.service';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
+import { StaffQueryDto } from './dto/query-staff.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -58,9 +61,9 @@ export class StaffsService implements OnModuleInit {
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      const store = await this.storesService.existsNotManager([storeId]);
+      const store = await this.storesService.exists([storeId]);
       if (!store) {
-        throw new NotFoundException(`Store with ID ${storeId} not found or the store already has a manager`);
+        throw new NotFoundException(`Store with ID ${storeId} not found`);
       }
     }
 
@@ -86,6 +89,7 @@ export class StaffsService implements OnModuleInit {
     const staff = this.staffRepo.create({
       ...rest,
       password: hashPassword,
+      managedStore: undefined, // Mặc định khi tạo staff mới sẽ không gán managedStore, khi tạo store mới sẽ cập nhật
       directManager: { id: directManagerId },
       store: storeId ? { id: storeId } : null,
       roles: roleIds ? roleIds.map((id) => ({ id })) : [],
@@ -101,24 +105,56 @@ export class StaffsService implements OnModuleInit {
     return await this.staffRepo.findOneBy({ phone });
   }
 
-  async findAll() {
-    return await this.staffRepo.find({
-      relations: { store: true, roles: { permissions: true }, directManager: true },
-      select: {
-        id: true,
-        fullName: true,
-        avatarUrl: true,
-        phone: true,
-        email: true,
-        isActive: true,
-        isSuperAdmin: true,
-        workLocationID: true,
-        isStoreAdmin: true,
-        store: { id: true, name: true },
-        directManager: { id: true, fullName: true },
-        roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
-      },
-    });
+  async findAll(query: StaffQueryDto): Promise<IMetadata<StaffEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.staffRepo
+      .createQueryBuilder('staff')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('staff.store', 'store')
+      .leftJoinAndSelect('staff.directManager', 'directManager')
+      .leftJoinAndSelect('staff.roles', 'roles')
+      .leftJoinAndSelect('roles.permissions', 'permissions')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'staff.id',
+        'staff.fullName',
+        'staff.avatarUrl',
+        'staff.phone',
+        'staff.email',
+        'staff.isActive',
+        'staff.isSuperAdmin',
+        'staff.workLocationID',
+        'staff.isStoreAdmin',
+        'staff.isSubAdmin',
+        'store.id',
+        'store.name',
+        'directManager.id',
+        'directManager.fullName',
+        'roles.id',
+        'roles.name',
+        'permissions.id',
+        'permissions.name',
+        'permissions.code',
+      ])
+      .skip(skip)
+      .take(take)
+      .orderBy('staff.id', 'DESC'); // Nên có orderBy khi phân trang
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async exists(ids: string[]): Promise<boolean> {
@@ -139,6 +175,7 @@ export class StaffsService implements OnModuleInit {
         isActive: true,
         isSuperAdmin: true,
         isStoreAdmin: true,
+        isSubAdmin: true,
         store: { id: true, name: true },
         directManager: { id: true, fullName: true },
         roles: { id: true, name: true, permissions: { id: true, name: true, code: true } },
@@ -146,7 +183,7 @@ export class StaffsService implements OnModuleInit {
     });
   }
 
-  async update(id: string, updateStaffDto: UpdateStaffDto, currentStaff: StaffEntity) {
+  async update(id: string, updateStaffDto: UpdateStaffDto, currentStaff: StaffEntity, targetStaff: StaffEntity) {
     const { store: storeId, roles: roleIds, directManager: directManagerId, ...rest } = updateStaffDto;
 
     // Ngăn không cho nhân viên tự hủy kích hoạt tài khoản của chính mình
@@ -160,9 +197,9 @@ export class StaffsService implements OnModuleInit {
 
     // Nếu có storeId, tìm kiếm store
     if (storeId) {
-      const store = await this.storesService.existsNotManager([storeId]);
+      const store = await this.storesService.exists([storeId]);
       if (!store) {
-        throw new NotFoundException(`Store with ID ${storeId} not found or the store already has a manager`);
+        throw new NotFoundException(`Store with ID ${storeId} not found`);
       }
     }
 
@@ -182,35 +219,41 @@ export class StaffsService implements OnModuleInit {
       }
     }
 
-    // Cập nhật staff với store nếu có
-    const staff = await this.staffRepo.preload({
-      id,
+    // Cập nhật staff (không dùng preload, dùng merge do đã query ở SuperAdminGuard)
+    this.staffRepo.merge(targetStaff, {
       ...rest,
+      managedStore: undefined, // Mặc định khi cập nhật staff sẽ không gán managedStore, khi tạo store mới sẽ cập nhật
       store: storeId ? { id: storeId } : undefined,
       roles: roleIds ? roleIds.map((id) => ({ id })) : undefined,
       directManager: directManagerId ? { id: directManagerId } : undefined,
     });
-    if (!staff) {
-      throw new NotFoundException(`Staff with ID ${id} not found`);
-    }
 
     try {
-      return await this.staffRepo.save(staff);
+      return await this.staffRepo.save(targetStaff);
     } catch (error) {
       // Xử lý lỗi khác nếu cần
       throw new InternalServerErrorException('Error updating staff', (error as Error).message);
     }
   }
 
-  async remove(id: string) {
-    const staff = await this.staffRepo.findOneBy({ id });
+  /**
+   *
+   * @param staffId
+   * @param storeId
+   * @desc Đã kiểm tra tồn tại staff và store tại storeService rồi.
+   */
+  async updateAfterStoreCreate(staffId: string, storeId: string) {
+    await this.staffRepo.update(staffId, { managedStore: { id: storeId }, isStoreAdmin: true });
+  }
 
-    if (!staff) {
-      return null;
+  async remove(id: string, currentStaff: StaffEntity, targetStaff: StaffEntity) {
+    // Ngăn không cho nhân viên tự xóa tài khoản của chính mình
+    if (currentStaff.id === id) {
+      throw new BadRequestException('You cannot delete yourself');
     }
 
     // await this.staffRepo.delete(id); // command SQL
-    return await this.staffRepo.remove(staff);
+    return await this.staffRepo.remove(targetStaff); // TypeOrm
   }
 
   private async initializeAdminUser() {
@@ -232,6 +275,7 @@ export class StaffsService implements OnModuleInit {
         email: adminEmail,
         phone: adminPhone,
         isSuperAdmin: true,
+        isSubAdmin: false,
         isStoreAdmin: false,
         password: hashPassword,
         fullName: adminFullName,

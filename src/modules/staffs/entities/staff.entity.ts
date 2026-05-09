@@ -47,6 +47,9 @@ export class StaffEntity extends BaseEntity implements IStaff {
   isSuperAdmin: boolean;
 
   @Column({ default: false })
+  isSubAdmin: boolean;
+
+  @Column({ default: false })
   isStoreAdmin: boolean;
 
   @OneToOne(() => StoreEntity, (store) => store.manager, { nullable: true })

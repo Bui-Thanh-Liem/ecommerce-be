@@ -42,7 +42,13 @@ export class StaffDto extends SerializerDto {
   isAdmin: boolean;
 
   @Expose()
-  admin: boolean;
+  isSuperAdmin: boolean;
+
+  @Expose()
+  isSubAdmin: boolean;
+
+  @Expose()
+  isStoreAdmin: boolean;
 
   @Exclude()
   password: string;

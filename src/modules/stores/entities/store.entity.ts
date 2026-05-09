@@ -37,7 +37,7 @@ export class StoreEntity extends BaseEntity implements IStore {
   @Column({ unique: true })
   name: string;
 
-  @Column({ unique: true })
+  @Column({ type: 'text' })
   address: string;
 
   @Column({ type: 'text', nullable: true })
