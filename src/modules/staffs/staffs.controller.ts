@@ -29,10 +29,7 @@ export class StaffsController {
   @Serializer(StaffMetadataDto)
   @Permissions(permissionsSeed.staffs.read.code)
   async findAll(@Query() query: StaffQueryDto) {
-    const result = await this.staffsService.findAll(query);
-    console.log('StaffsController ~ findAll:', result);
-
-    return result;
+    return await this.staffsService.findAll(query);
   }
 
   @Get(':id')

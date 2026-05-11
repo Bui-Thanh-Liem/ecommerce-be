@@ -7,7 +7,7 @@ import { TeamDto } from './dto/team.dto';
 import { TeamQueryDto } from './dto/query-team.dto';
 import { permissionsSeed } from '../permissions/seeding';
 import { Permissions } from '@/decorators/permission.decorator';
-import { TeamMetadataDto } from './dto/metadata-staff.dto';
+import { TeamMetadataDto } from './dto/metadata-team.dto';
 
 @Controller('teams')
 @Serializer(TeamDto)

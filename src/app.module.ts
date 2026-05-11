@@ -44,6 +44,7 @@ import { CategoryPromotionModule } from './modules/category-promotion/category-p
 import { CartsModule } from './modules/carts/carts.module';
 import { CartItemsModule } from './modules/cart-items/cart-items.module';
 import { TeamsModule } from './modules/teams/teams.module';
+import { TeamCategoriesModule } from './modules/team-categories/team-categories.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -99,6 +100,7 @@ const isProd = process.env.NODE_ENV === 'production';
     CartsModule,
     CartItemsModule,
     TeamsModule,
+    TeamCategoriesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,6 +1,8 @@
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { StoreEntity } from '@/modules/stores/entities/store.entity';
+import { TeamCategoryEntity } from '@/modules/team-categories/entities/team-category.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { TeamType } from '@/shared/enums/team-type.enum';
 import { ITeam } from '@/shared/interfaces/models/team.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
@@ -11,6 +13,9 @@ export class TeamEntity extends BaseEntity implements ITeam {
 
   @Column({ type: 'text', nullable: true })
   desc: string;
+
+  @Column({ type: 'enum', enum: TeamType, default: TeamType.STORE })
+  type: TeamType;
 
   @ManyToOne(() => StaffEntity, (staff) => staff.teamsLed, { nullable: false })
   leader: StaffEntity;
@@ -31,6 +36,9 @@ export class TeamEntity extends BaseEntity implements ITeam {
 
   @ManyToOne(() => StoreEntity, (store) => store.id, { nullable: true })
   store: StoreEntity | null;
+
+  @ManyToOne(() => TeamCategoryEntity, (category) => category.teams, { nullable: false })
+  category: TeamCategoryEntity;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;

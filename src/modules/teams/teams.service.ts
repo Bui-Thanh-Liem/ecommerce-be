@@ -9,6 +9,8 @@ import { StoresService } from '../stores/stores.service';
 import { TeamQueryDto } from './dto/query-team.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { TeamType } from '@/shared/enums/team-type.enum';
+import { TeamCategoriesService } from '../team-categories/team-categories.service';
 
 @Injectable()
 export class TeamsService {
@@ -20,15 +22,22 @@ export class TeamsService {
 
     private readonly staffsService: StaffsService,
     private readonly storesService: StoresService,
+    private readonly teamCategoryService: TeamCategoriesService,
   ) {}
 
   async create(createTeamDto: CreateTeamDto) {
-    const { leader: leaderId, members: membersIds, store: storeId, ...rest } = createTeamDto;
+    const { leader: leaderId, members: membersIds, store: storeId, category: categoryId, ...rest } = createTeamDto;
 
     //
     const teamWithSameName = await this.teamRepository.exists({ where: { name: rest.name } });
     if (teamWithSameName) {
       throw new NotFoundException('Team with the same name already exists');
+    }
+
+    // Validate that the category exists
+    const category = await this.teamCategoryService.exists([categoryId]);
+    if (!category) {
+      throw new NotFoundException('Category not found');
     }
 
     // Validate that the leader exists
@@ -54,15 +63,16 @@ export class TeamsService {
     const team = this.teamRepository.create({
       ...rest,
       leader: { id: leaderId },
+      category: { id: categoryId },
       store: storeId ? { id: storeId } : null,
       members: membersIds.map((id) => ({ id })),
+      type: storeId ? TeamType.STORE : TeamType.HEADQUARTER,
     });
     return await this.teamRepository.save(team);
   }
 
   async findAll(query: TeamQueryDto): Promise<IMetadata<TeamEntity>> {
     const { page, limit, filters } = query;
-    console.log('filters?.store :::', filters);
 
     //
     const { take, skip } = calculatePagination(page, limit);
@@ -96,7 +106,15 @@ export class TeamsService {
   }
 
   async update(id: string, updateTeamDto: UpdateTeamDto) {
-    const { leader: leaderId, members: membersIds, store: storeId, ...rest } = updateTeamDto;
+    const { leader: leaderId, members: membersIds, store: storeId, category: categoryId, ...rest } = updateTeamDto;
+
+    // Validate that the category exists
+    if (categoryId) {
+      const category = await this.teamCategoryService.exists([categoryId]);
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+    }
 
     // Validate that the leader exists
     if (leaderId) {
@@ -127,6 +145,8 @@ export class TeamsService {
       ...rest,
       store: storeId ? { id: storeId } : undefined,
       leader: leaderId ? { id: leaderId } : undefined,
+      type: storeId ? TeamType.STORE : TeamType.HEADQUARTER,
+      category: categoryId ? { id: categoryId } : undefined,
       members: membersIds ? membersIds.map((id) => ({ id })) : undefined,
     });
     if (!team) {

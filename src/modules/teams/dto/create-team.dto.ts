@@ -27,6 +27,10 @@ export class CreateTeamDto {
   @IsUUID()
   store: string;
 
+  @IsNotEmpty()
+  @IsUUID()
+  category: string;
+
   @IsOptional()
   @IsBoolean()
   isActive: boolean;
