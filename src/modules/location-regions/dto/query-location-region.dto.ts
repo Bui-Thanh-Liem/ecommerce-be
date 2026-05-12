@@ -1,5 +1,15 @@
 import { createQueryDto } from '@/shared/dtos/query.dto';
+import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-class QueryFilterDto {}
+class LocationRegionFilterDto {
+  @IsOptional()
+  @IsString()
+  parent: string;
 
-export class LocationRegionQueryDto extends createQueryDto(QueryFilterDto) {}
+  @IsOptional()
+  @IsEnum(LocationRegionType)
+  type: LocationRegionType;
+}
+
+export class LocationRegionQueryDto extends createQueryDto(LocationRegionFilterDto) {}

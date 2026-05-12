@@ -1,10 +1,10 @@
 import { createQueryDto } from '@/shared/dtos/query.dto';
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 class TeamFilterDto {
   @IsOptional()
-  @IsUUID()
-  store?: string;
+  @IsString()
+  store: string;
 }
 
 export class TeamQueryDto extends createQueryDto(TeamFilterDto) {}

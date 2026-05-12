@@ -51,6 +51,8 @@ export class LocationRegionsService implements OnModuleInit {
       }
     }
 
+    console.log('Creating location region:', createLocationRegionDto);
+
     // Tạo mới region với parent nếu có
     const locationRegion = this.locationRegionRepo.create({
       ...createLocationRegionDto,
@@ -61,7 +63,8 @@ export class LocationRegionsService implements OnModuleInit {
   }
 
   async findAll(query: LocationRegionQueryDto): Promise<IMetadata<LocationRegionEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
+    console.log('Finding all location regions with query:', filters);
 
     //
     const { skip, take } = calculatePagination(page, limit);
@@ -81,12 +84,18 @@ export class LocationRegionsService implements OnModuleInit {
         'locationRegion.createdAt',
         'parent.id',
         'parent.name',
-      ])
+      ]);
 
-      // Phân trang và sắp xếp
-      .orderBy('locationRegion.createdAt', 'DESC')
-      .skip(skip)
-      .take(take);
+    // Áp dụng filter nếu có (ví dụ: filter theo type)
+    if (filters?.type) {
+      builder.andWhere('locationRegion.type = :type', { type: filters.type });
+    }
+    if (filters?.parent) {
+      builder.andWhere('locationRegion.parent = :parent', { parent: filters.parent });
+    }
+
+    // Phân trang và sắp xếp
+    builder.orderBy('locationRegion.createdAt', 'DESC').skip(skip).take(take);
 
     const [data, totalData] = await builder.getManyAndCount();
 
@@ -96,20 +105,6 @@ export class LocationRegionsService implements OnModuleInit {
       page,
       totalPage: Math.ceil(totalData / limit),
     };
-  }
-
-  async getRegions(queryParams: { parentId?: string; type?: LocationRegionType }) {
-    const query = this.locationRegionRepo.createQueryBuilder('lr');
-
-    console.log('getRegions ::: params = ', queryParams);
-
-    if (queryParams.parentId) {
-      query.andWhere('lr.parent = :parentId', { parentId: queryParams.parentId });
-    } else if (queryParams.type) {
-      query.andWhere('lr.type = :type', { type: queryParams.type });
-    }
-
-    return query.getMany();
   }
 
   async exists(id: string): Promise<boolean> {
@@ -129,6 +124,11 @@ export class LocationRegionsService implements OnModuleInit {
 
   async update(id: string, updateLocationRegionDto: UpdateLocationRegionDto) {
     const { name, parent: parentId, ...rest } = updateLocationRegionDto;
+
+    //
+    if (id === parentId) {
+      throw new BadRequestException('A location region cannot be its own parent');
+    }
 
     // 0. Kiểm tra nếu có name thì phải unique
     if (name) {
@@ -174,10 +174,13 @@ export class LocationRegionsService implements OnModuleInit {
     }
   }
 
-  async getTreeData(rootId?: string) {
-    // Nếu truyền rootId: lấy cây con của node đó
+  async getTreeData(query: LocationRegionQueryDto) {
+    const { filters } = query;
+    const parent = filters?.parent;
+
+    // Nếu truyền parent: lấy cây con của node đó
     // Nếu không truyền: lấy toàn bộ các cây từ các gốc (parent IS NULL)
-    const whereClause = rootId ? `id = '${rootId}'` : `parent IS NULL`;
+    const whereClause = parent ? `id = '${parent}'` : `parent IS NULL`;
 
     const sqlQuery = `
     WITH RECURSIVE region_tree AS (

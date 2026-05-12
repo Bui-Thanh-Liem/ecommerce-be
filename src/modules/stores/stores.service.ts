@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Repository } from 'typeorm';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
@@ -39,7 +39,7 @@ export class StoresService {
     //
     const existingStore = await this.storeRepo.exists({ where: [{ name }] });
     if (existingStore) {
-      throw new NotFoundException('Store with the same name');
+      throw new ConflictException('Store with the same name');
     }
 
     //
@@ -47,7 +47,7 @@ export class StoresService {
       where: { manager: { id: managerId } },
     });
     if (isManagerAssigned) {
-      throw new NotFoundException('Manager is already assigned to another store');
+      throw new ConflictException('Manager is already assigned to another store');
     }
 
     // Tìm kiếm các region
@@ -98,6 +98,7 @@ export class StoresService {
       .createQueryBuilder('store')
 
       // Join các quan hệ
+      .leftJoinAndSelect('store.country', 'country')
       .leftJoinAndSelect('store.provinceCity', 'provinceCity')
       .leftJoinAndSelect('store.districtTown', 'districtTown')
       .leftJoinAndSelect('store.wardCommune', 'wardCommune')
@@ -116,6 +117,8 @@ export class StoresService {
         'store.lng',
         'store.isActive',
         'store.createdAt',
+        'country.id',
+        'country.name',
         'provinceCity.id',
         'provinceCity.name',
         'districtTown.id',

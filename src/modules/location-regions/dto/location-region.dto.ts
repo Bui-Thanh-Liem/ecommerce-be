@@ -13,7 +13,7 @@ export class LocationRegionDto extends SerializerDto {
   type: LocationRegionType;
 
   @Expose()
-  parent: string | null;
+  parent: LocationRegionDto;
 
   @Expose()
   @Type(() => LocationRegionDto)

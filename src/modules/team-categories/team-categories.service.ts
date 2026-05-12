@@ -37,16 +37,12 @@ export class TeamCategoriesService implements OnModuleInit {
   }
 
   async findAll(query: TeamCategoryQueryDto) {
-    const { page, limit, filters } = query;
+    const { page, limit } = query;
 
     //
     const { take, skip } = calculatePagination(page, limit);
 
     const builder = this.teamCategoryRepository.createQueryBuilder('teamCategory');
-
-    if (filters?.store) {
-      // Thêm điều kiện lọc theo store
-    }
 
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
     return {

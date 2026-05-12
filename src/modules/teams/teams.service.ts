@@ -86,7 +86,7 @@ export class TeamsService {
 
     // Apply filters if provided
     if (filters?.store) {
-      queryBuilder.andWhere('team.store = :store', { store: filters.store as string });
+      queryBuilder.andWhere('team.store = :store', { store: filters.store });
     } else {
       queryBuilder.andWhere('team.store IS NULL');
     }

@@ -13,6 +13,9 @@ class PhoneStoreDto {
 
 export class StoreDto extends SerializerDto {
   @Expose()
+  country: LocationRegionDto;
+
+  @Expose()
   provinceCity: LocationRegionDto;
 
   @Expose()

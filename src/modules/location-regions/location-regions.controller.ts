@@ -1,12 +1,11 @@
 import { Permissions } from '@/decorators/permission.decorator';
 import { Serializer } from '@/interceptors/serializer.interceptor';
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { permissionsSeed } from '../permissions/seeding';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { LocationRegionDto } from './dto/location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionsService } from './location-regions.service';
-import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { LocationRegionMetadataDto } from './dto/metadata-location-region.dto';
 import { LocationRegionQueryDto } from './dto/query-location-region.dto';
 
@@ -28,25 +27,10 @@ export class LocationRegionsController {
     return await this.locationRegionsService.findAll(query);
   }
 
-  @Get('tree/:id')
-  @Permissions(permissionsSeed.locationRegions.read.code)
-  async getTreeDataByRootId(@Param('id') id?: string) {
-    return await this.locationRegionsService.getTreeData(id);
-  }
-
   @Get('tree')
   @Permissions(permissionsSeed.locationRegions.read.code)
-  async getTreeData() {
-    return await this.locationRegionsService.getTreeData();
-  }
-
-  @Get(`regions`)
-  @Permissions(permissionsSeed.locationRegions.read.code)
-  async getRegionsByType(
-    @Query('parentId', new ParseUUIDPipe({ version: '4', optional: true })) parentId: string,
-    @Query('type') type: LocationRegionType,
-  ) {
-    return await this.locationRegionsService.getRegions({ parentId, type });
+  async getTreeData(@Query() query: LocationRegionQueryDto) {
+    return await this.locationRegionsService.getTreeData(query);
   }
 
   @Get(':id')

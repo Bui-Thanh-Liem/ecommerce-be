@@ -246,7 +246,11 @@ export class StaffsService implements OnModuleInit {
    * @desc Đã kiểm tra tồn tại staff và store tại storeService rồi.
    */
   async updateAfterStoreCreate(staffId: string, storeId: string) {
-    await this.staffRepo.update(staffId, { managedStore: { id: storeId }, isStoreAdmin: true });
+    await this.staffRepo.save({
+      id: staffId,
+      isStoreAdmin: true,
+      managedStore: { id: storeId },
+    });
   }
 
   async remove(id: string, currentStaff: StaffEntity, targetStaff: StaffEntity) {
