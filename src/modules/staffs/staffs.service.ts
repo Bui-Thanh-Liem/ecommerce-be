@@ -249,6 +249,7 @@ export class StaffsService implements OnModuleInit {
     await this.staffRepo.save({
       id: staffId,
       isStoreAdmin: true,
+      store: { id: storeId },
       managedStore: { id: storeId },
     });
   }

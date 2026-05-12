@@ -1,5 +1,6 @@
 import { StaffDto } from '@/modules/staffs/dto/staff.dto';
 import { StoreDto } from '@/modules/stores/dto/store.dto';
+import { TeamCategoryDto } from '@/modules/team-categories/dto/team-category.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class TeamDto {
@@ -11,6 +12,9 @@ export class TeamDto {
 
   @Expose()
   desc: string;
+
+  @Expose()
+  category: TeamCategoryDto;
 
   @Expose()
   leader: StaffDto;

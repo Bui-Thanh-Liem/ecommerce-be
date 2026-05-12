@@ -1,16 +1,16 @@
+import { TeamType } from '@/shared/enums/team-type.enum';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TeamEntity } from './entities/team.entity';
 import { Repository } from 'typeorm';
 import { StaffsService } from '../staffs/staffs.service';
 import { StoresService } from '../stores/stores.service';
-import { TeamQueryDto } from './dto/query-team.dto';
-import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
-import { TeamType } from '@/shared/enums/team-type.enum';
 import { TeamCategoriesService } from '../team-categories/team-categories.service';
+import { CreateTeamDto } from './dto/create-team.dto';
+import { TeamQueryDto } from './dto/query-team.dto';
+import { UpdateTeamDto } from './dto/update-team.dto';
+import { TeamEntity } from './entities/team.entity';
 
 @Injectable()
 export class TeamsService {
@@ -73,6 +73,7 @@ export class TeamsService {
 
   async findAll(query: TeamQueryDto): Promise<IMetadata<TeamEntity>> {
     const { page, limit, filters } = query;
+    console.log('findAll :::', { page, limit, filters });
 
     //
     const { take, skip } = calculatePagination(page, limit);
@@ -80,9 +81,31 @@ export class TeamsService {
     //
     const queryBuilder = this.teamRepository
       .createQueryBuilder('team')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('team.category', 'category')
       .leftJoinAndSelect('team.leader', 'leader')
       .leftJoinAndSelect('team.members', 'members')
-      .leftJoinAndSelect('team.store', 'store');
+      .leftJoinAndSelect('team.store', 'store')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'team.id',
+        'team.name',
+        'team.desc',
+        'team.isActive',
+        'team.createdAt',
+        'leader.id',
+        'leader.avatarUrl',
+        'leader.fullName',
+        'members.id',
+        'members.avatarUrl',
+        'members.fullName',
+        'category.id',
+        'category.name',
+        'store.id',
+        'store.name',
+      ]);
 
     // Apply filters if provided
     if (filters?.store) {
@@ -91,8 +114,12 @@ export class TeamsService {
       queryBuilder.andWhere('team.store IS NULL');
     }
 
+    // Phân trang và sắp xếp
+    queryBuilder.skip(skip).take(take).orderBy('team.createdAt', 'DESC');
+
     //
-    const [data, total] = await queryBuilder.take(take).skip(skip).getManyAndCount();
+    const [data, total] = await queryBuilder.getManyAndCount();
+
     return {
       data,
       totalData: total,
