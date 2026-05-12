@@ -6,6 +6,9 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreEntity } from './entities/store.entity';
 import { StaffsService } from '../staffs/staffs.service';
+import { StoreQueryDto } from './dto/query-store.dto';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class StoresService {
@@ -84,25 +87,57 @@ export class StoresService {
     return savedStore;
   }
 
-  async findAll() {
-    return await this.storeRepo.find({
-      relations: ['provinceCity', 'districtTown', 'wardCommune', 'manager'],
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        address: true,
-        openingHours: true,
-        closingHours: true,
-        lat: true,
-        lng: true,
-        isActive: true,
-        provinceCity: { id: true, name: true },
-        districtTown: { id: true, name: true },
-        wardCommune: { id: true, name: true },
-        manager: { id: true, fullName: true },
-      },
-    });
+  async findAll(query: StoreQueryDto): Promise<IMetadata<StoreEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const builder = this.storeRepo
+      .createQueryBuilder('store')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('store.provinceCity', 'provinceCity')
+      .leftJoinAndSelect('store.districtTown', 'districtTown')
+      .leftJoinAndSelect('store.wardCommune', 'wardCommune')
+      .leftJoinAndSelect('store.manager', 'manager');
+
+    // Select các trường cụ thể (tương đương với select của bạn)
+    builder
+      .select([
+        'store.id',
+        'store.name',
+        'store.phone',
+        'store.address',
+        'store.openingHours',
+        'store.closingHours',
+        'store.lat',
+        'store.lng',
+        'store.isActive',
+        'store.createdAt',
+        'provinceCity.id',
+        'provinceCity.name',
+        'districtTown.id',
+        'districtTown.name',
+        'wardCommune.id',
+        'wardCommune.name',
+        'manager.id',
+        'manager.fullName',
+      ])
+
+      // Phân trang và sắp xếp
+      .skip(skip)
+      .take(take)
+      .orderBy('store.createdAt', 'DESC'); // Nên có orderBy khi phân trang
+
+    const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string) {

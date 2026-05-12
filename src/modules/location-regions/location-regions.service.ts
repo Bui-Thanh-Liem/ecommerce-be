@@ -14,6 +14,9 @@ import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionEntity } from './entities/location-region.entity';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
+import { LocationRegionQueryDto } from './dto/query-location-region.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class LocationRegionsService implements OnModuleInit {
@@ -57,8 +60,42 @@ export class LocationRegionsService implements OnModuleInit {
     return await this.locationRegionRepo.save(locationRegion);
   }
 
-  async findAll() {
-    return await this.locationRegionRepo.find({ relations: ['parent', 'children'] });
+  async findAll(query: LocationRegionQueryDto): Promise<IMetadata<LocationRegionEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { skip, take } = calculatePagination(page, limit);
+
+    //
+    const builder = this.locationRegionRepo
+      .createQueryBuilder('locationRegion')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('locationRegion.parent', 'parent')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'locationRegion.id',
+        'locationRegion.name',
+        'locationRegion.type',
+        'locationRegion.createdAt',
+        'parent.id',
+        'parent.name',
+      ])
+
+      // Phân trang và sắp xếp
+      .orderBy('locationRegion.createdAt', 'DESC')
+      .skip(skip)
+      .take(take);
+
+    const [data, totalData] = await builder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async getRegions(queryParams: { parentId?: string; type?: LocationRegionType }) {
@@ -210,7 +247,7 @@ export class LocationRegionsService implements OnModuleInit {
     return await this.locationRegionRepo.remove(locationRegion);
   }
 
-  async initializeData() {
+  private async initializeData() {
     const existingRoot = await this.locationRegionRepo.exists({ where: { type: LocationRegionType.ROOT } });
     if (existingRoot) {
       this.logger.debug('Root location region already exists. Skipping initialization.');

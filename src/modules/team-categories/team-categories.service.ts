@@ -58,7 +58,7 @@ export class TeamCategoriesService implements OnModuleInit {
   }
 
   async findOne(id: string) {
-    return await this.teamCategoryRepository.findOne({ where: { id } });
+    return await this.teamCategoryRepository.findOne({ where: { id }, relations: ['teams'] });
   }
 
   async update(id: string, payload: UpdateTeamCategoryDto) {
@@ -84,6 +84,8 @@ export class TeamCategoriesService implements OnModuleInit {
   }
 
   async remove(id: string) {
+    console.log('TeamCategoriesService - remove - id:', id);
+
     const teamCategory = await this.findOne(id);
     if (!teamCategory) {
       throw new Error('Team category not found');

@@ -13,7 +13,7 @@ export class PermissionsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.initPermissions();
+    await this.initializeData();
   }
 
   async findAll() {
@@ -41,7 +41,7 @@ export class PermissionsService implements OnModuleInit {
     return await this.permissionRepo.save(updated);
   }
 
-  async initPermissions() {
+  private async initializeData() {
     const existingPermissions = await this.permissionRepo.count();
     if (existingPermissions === 0) {
       const permissions = Object.values(permissionsSeed).flatMap((permission) => Object.values(permission));

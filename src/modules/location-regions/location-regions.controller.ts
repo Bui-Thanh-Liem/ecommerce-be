@@ -7,6 +7,8 @@ import { LocationRegionDto } from './dto/location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionsService } from './location-regions.service';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
+import { LocationRegionMetadataDto } from './dto/metadata-location-region.dto';
+import { LocationRegionQueryDto } from './dto/query-location-region.dto';
 
 @Controller('location-regions')
 @Serializer(LocationRegionDto)
@@ -20,9 +22,10 @@ export class LocationRegionsController {
   }
 
   @Get()
+  @Serializer(LocationRegionMetadataDto)
   @Permissions(permissionsSeed.locationRegions.read.code)
-  async findAll() {
-    return await this.locationRegionsService.findAll();
+  async findAll(@Query() query: LocationRegionQueryDto) {
+    return await this.locationRegionsService.findAll(query);
   }
 
   @Get('tree/:id')

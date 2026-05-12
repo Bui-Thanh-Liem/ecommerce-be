@@ -1,11 +1,13 @@
 import { Permissions } from '@/decorators/permission.decorator';
 import { Serializer } from '@/interceptors/serializer.interceptor';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { permissionsSeed } from '../permissions/seeding';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { StoreDto } from './dto/store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoresService } from './stores.service';
+import { StoreMetadataDto } from './dto/metadata-store.dto';
+import { StoreQueryDto } from './dto/query-store.dto';
 
 @Controller('stores')
 @Serializer(StoreDto)
@@ -19,9 +21,10 @@ export class StoresController {
   }
 
   @Get()
+  @Serializer(StoreMetadataDto)
   @Permissions(permissionsSeed.stores.read.code)
-  async findAll() {
-    return await this.storesService.findAll();
+  async findAll(@Query() query: StoreQueryDto) {
+    return await this.storesService.findAll(query);
   }
 
   @Get(':id')

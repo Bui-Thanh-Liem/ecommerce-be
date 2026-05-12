@@ -39,7 +39,7 @@ export class StaffsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.initializeAdminUser();
+    await this.initializeData();
   }
 
   async create(createStaffDto: CreateStaffDto) {
@@ -133,6 +133,7 @@ export class StaffsService implements OnModuleInit {
         'staff.workLocationID',
         'staff.isStoreAdmin',
         'staff.isSubAdmin',
+        'staff.createdAt',
         'store.id',
         'store.name',
         'directManager.id',
@@ -143,9 +144,11 @@ export class StaffsService implements OnModuleInit {
         'permissions.name',
         'permissions.code',
       ])
+
+      // Phân trang và sắp xếp
       .skip(skip)
       .take(take)
-      .orderBy('staff.id', 'DESC'); // Nên có orderBy khi phân trang
+      .orderBy('staff.createdAt', 'DESC'); // Nên có orderBy khi phân trang
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
@@ -256,7 +259,7 @@ export class StaffsService implements OnModuleInit {
     return await this.staffRepo.remove(targetStaff); // TypeOrm
   }
 
-  private async initializeAdminUser() {
+  private async initializeData() {
     // Admin user details
     const adminEmail = this.configService.get<string>('ADMIN_EMAIL') || '';
     const adminPassword = this.configService.get<string>('ADMIN_PASSWORD') || '';
