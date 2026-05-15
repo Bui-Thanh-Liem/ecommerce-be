@@ -1,5 +1,6 @@
 import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
+import { ProductImage } from '@/modules/product-images/entities/product-image.entity';
 import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
 import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
@@ -8,7 +9,7 @@ import { RatingEntity } from '@/modules/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IProductVariant, ISpecification } from '@/shared/interfaces/models/product-variant.interface';
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { BeforeInsert, Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -54,6 +55,21 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.productVariant)
   cartItems?: CartItemEntity[];
+
+  // eslint-disable-next-line max-len
+  @OneToMany(() => ProductImage, (image) => image.productVariant, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu biến thể sản phẩm
+  productImages?: ProductImage[];
+
+  //
+  @BeforeInsert()
+  assignProductToImages(): void {
+    if (this.productImages?.length && this.product) {
+      this.productImages.forEach((img, idx) => {
+        img.product = this.product;
+        img.sortOrder = idx; // Tự động gán sortOrder theo thứ tự trong mảng
+      });
+    }
+  }
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductVariant có sku: ${this.sku}`);

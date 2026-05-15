@@ -28,6 +28,7 @@ export class RoleEntity extends BaseEntity implements IRole {
   @Column({ default: true })
   isActive: boolean;
 
+  // Quan hệ với Store và Staff
   @ManyToMany(() => StoreEntity, (store) => store.roles, { nullable: true })
   @JoinTable({
     name: 'role_store',

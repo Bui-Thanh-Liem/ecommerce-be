@@ -5,7 +5,7 @@ export class CreateBrandDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(50)
   name: string;
 
   @IsString()
@@ -16,6 +16,6 @@ export class CreateBrandDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(50)
   country: string;
 }

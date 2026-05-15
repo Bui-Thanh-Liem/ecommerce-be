@@ -4,6 +4,7 @@ import { ICategory } from './category.interface';
 import { IBrand } from './brand.interface';
 import { IProductVariant } from './product-variant.interface';
 import { ICartItem } from './cart-item.interface';
+import { IProductImage } from './product-image.interface';
 
 export interface IProduct extends IBase {
   name: string;
@@ -18,4 +19,5 @@ export interface IProduct extends IBase {
   //
   productVariants?: IProductVariant[];
   cartItems?: ICartItem[];
+  productImages?: IProductImage[];
 }

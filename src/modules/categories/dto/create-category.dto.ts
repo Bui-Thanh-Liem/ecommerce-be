@@ -5,7 +5,7 @@ export class CreateCategoryDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(50)
   name: string;
 
   @IsString()
@@ -15,6 +15,7 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   desc?: string;
 
   @IsOptional()

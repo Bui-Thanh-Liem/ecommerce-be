@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -6,6 +6,8 @@ import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '../permissions/seeding';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { RoleDto } from './dto/role.dto';
+import { RoleQueryDto } from './dto/query-role.dto';
+import { RoleMetadataDto } from './dto/metadata-role.dto';
 
 @Controller('roles')
 @Serializer(RoleDto)
@@ -19,9 +21,10 @@ export class RolesController {
   }
 
   @Get()
+  @Serializer(RoleMetadataDto)
   @Permissions(permissionsSeed.roles.read.code)
-  async findAll() {
-    return await this.rolesService.findAll();
+  async findAll(@Query() query: RoleQueryDto) {
+    return await this.rolesService.findAll(query);
   }
 
   @Get(':id')

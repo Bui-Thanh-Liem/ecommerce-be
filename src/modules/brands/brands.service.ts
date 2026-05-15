@@ -5,6 +5,9 @@ import { In, Not, Repository } from 'typeorm';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandEntity } from './entities/brand.entity';
+import { BrandQueryDto } from './dto/query-brand.dto';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class BrandsService {
@@ -34,8 +37,31 @@ export class BrandsService {
     return await this.brandRepo.save(brand);
   }
 
-  async findAll() {
-    return await this.brandRepo.find();
+  async findAll(query: BrandQueryDto): Promise<IMetadata<BrandEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.brandRepo
+      .createQueryBuilder('brand')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select(['brand.id', 'brand.name', 'brand.logoUrl', 'brand.country', 'brand.code', 'brand.createdAt']);
+
+    // Phân trang và sắp xếp
+    queryBuilder.skip(skip).take(take).orderBy('brand.createdAt', 'DESC');
+
+    //
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
   }
 
   async exists(ids: string[]) {
@@ -96,7 +122,7 @@ export class BrandsService {
     return name
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .substring(0, 5) // Lấy 5 ký tự đầu tiên
+      .substring(0, 10) // Lấy 10 ký tự đầu tiên
       .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }
 }

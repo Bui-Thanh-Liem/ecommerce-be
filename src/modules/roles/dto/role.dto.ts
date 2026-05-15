@@ -18,7 +18,8 @@ export class RoleDto extends SerializerDto {
   permissions: PermissionDto[];
 
   @Expose()
-  store: StoreDto;
+  @Type(() => StoreDto)
+  stores: StoreDto[];
 
   @Expose()
   isActive: boolean;

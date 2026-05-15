@@ -12,6 +12,9 @@ import { In, Not, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
+import { CategoryQueryDto } from './dto/query-category.dto';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class CategoriesService {
@@ -48,14 +51,53 @@ export class CategoriesService {
     return this.categoryRepo.save(category);
   }
 
-  async findAll() {
-    return await this.categoryRepo.find({ relations: ['parent', 'children'] });
+  async findAll(query: CategoryQueryDto): Promise<IMetadata<CategoryEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.categoryRepo
+      .createQueryBuilder('category')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('category.parent', 'parent')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'category.id',
+        'category.name',
+        'category.slug',
+        'category.desc',
+        'category.imageUrl',
+        'category.code',
+        'category.createdAt',
+        'parent.id',
+        'parent.name',
+      ]);
+
+    // Phân trang và sắp xếp
+    queryBuilder.skip(skip).take(take).orderBy('category.createdAt', 'DESC');
+
+    //
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
   }
 
-  async getTreeData(rootId?: string) {
+  async getTreeData(query: CategoryQueryDto) {
+    const { filters } = query;
+    const parent = filters?.parent;
+
     // Nếu truyền rootId: lấy cây con của node đó
     // Nếu không truyền: lấy toàn bộ các cây từ các gốc (parent IS NULL)
-    const whereClause = rootId ? `id = '${rootId}'` : `parent IS NULL`;
+    const whereClause = parent ? `parent = '${parent}'` : `parent IS NULL`;
 
     const sqlQuery = `
       WITH RECURSIVE category_tree AS (
@@ -203,7 +245,7 @@ export class CategoriesService {
       .join('')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .substring(0, 5) // Lấy 5 ký tự đầu tiên
+      .substring(0, 10) // Lấy 10 ký tự đầu tiên
       .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }
 }

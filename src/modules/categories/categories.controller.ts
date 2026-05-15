@@ -1,11 +1,13 @@
 import { Permissions } from '@/decorators/permission.decorator';
 import { Serializer } from '@/interceptors/serializer.interceptor';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { permissionsSeed } from '../permissions/seeding';
 import { CategoriesService } from './categories.service';
 import { CategoryDto } from './dto/category.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryQueryDto } from './dto/query-category.dto';
+import { CategoryMetadataDto } from './dto/metadata-category.dto';
 
 @Controller('categories')
 @Serializer(CategoryDto)
@@ -19,21 +21,16 @@ export class CategoriesController {
   }
 
   @Get()
+  @Serializer(CategoryMetadataDto)
   @Permissions(permissionsSeed.category.read.code)
-  async findAll() {
-    return await this.categoriesService.findAll();
-  }
-
-  @Get('tree/:id')
-  @Permissions(permissionsSeed.category.read.code)
-  async getTreeDataByRootId(@Param('id') id?: string) {
-    return await this.categoriesService.getTreeData(id);
+  async findAll(@Query() query: CategoryQueryDto) {
+    return await this.categoriesService.findAll(query);
   }
 
   @Get('tree')
   @Permissions(permissionsSeed.category.read.code)
-  async getTreeData() {
-    return await this.categoriesService.getTreeData();
+  async getTreeData(@Query() query: CategoryQueryDto) {
+    return await this.categoriesService.getTreeData(query);
   }
 
   @Get(':id')

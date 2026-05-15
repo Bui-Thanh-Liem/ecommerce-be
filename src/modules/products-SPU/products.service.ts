@@ -8,6 +8,9 @@ import { ProductCodeService } from '../product-code/product-code.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
+import { ProductQueryDto } from './dto/query-product.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class ProductsService {
@@ -46,6 +49,8 @@ export class ProductsService {
     const spu = this.productCodeService.generateSPUCode(categoryCode, brandCode, slug, nextSeq);
 
     // 5. Tạo và lưu
+    // 6. Lúc này các Subscriber/Hooks như assignProductToImages sẽ chạy
+    // để gán các giá trị cần thiết để bảng ProductImage có thể lưu được (như product, sortOrder, isThumbnail,...)
     const product = this.productRepo.create({
       ...rest,
       name,
@@ -58,21 +63,58 @@ export class ProductsService {
     return await this.productRepo.save(product);
   }
 
-  async findAll() {
-    return await this.productRepo.find({
-      relations: ['category', 'brand'],
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        desc: true,
-        basePrice: true,
-        status: true,
-        spu: true,
-        category: { id: true, name: true, slug: true, code: true },
-        brand: { id: true, name: true, slug: true, code: true },
-      },
-    });
+  async findAll(query: ProductQueryDto): Promise<IMetadata<ProductEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.productRepo
+      .createQueryBuilder('product')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.productImages', 'productImages')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'product.id',
+        'product.name',
+        'product.slug',
+        'product.desc',
+        'product.basePrice',
+        'product.status',
+        'product.spu',
+        'product.createdAt',
+        'brand.id',
+        'brand.name',
+        'brand.slug',
+        'brand.code',
+        'category.id',
+        'category.name',
+        'category.slug',
+        'category.code',
+        'productImages.id',
+        'productImages.url',
+        'productImages.sortOrder',
+        'productImages.isThumbnail',
+      ])
+
+      // Phân trang và sắp xếp
+      .skip(skip)
+      .take(take)
+      .orderBy('product.createdAt', 'DESC'); // Nên có orderBy khi phân trang
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async exists(ids: string[]) {

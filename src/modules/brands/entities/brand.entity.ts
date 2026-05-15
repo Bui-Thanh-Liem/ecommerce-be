@@ -5,19 +5,19 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('brands')
 export class BrandEntity extends BaseEntity implements IBrand {
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 50 })
   name: string;
 
-  @Column({ unique: true, type: 'varchar', length: 150 })
+  @Column({ unique: true, type: 'varchar', length: 100 })
   slug: string;
 
-  @Column({ type: 'varchar', length: 150 })
+  @Column({ type: 'varchar', length: 20 })
   code: string;
 
   @Column({ type: 'text' })
   logoUrl: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 50 })
   country: string;
 
   @OneToMany(() => ProductEntity, (product) => product.brand)

@@ -1,9 +1,11 @@
 import { Serializer } from '@/interceptors/serializer.interceptor';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductSPUDto } from './dto/product-SPU.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
+import { ProductQueryDto } from './dto/query-product.dto';
+import { ProductMetadataDto } from './dto/metadata-product.dto';
 
 @Controller('products')
 @Serializer(ProductSPUDto)
@@ -16,8 +18,9 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  @Serializer(ProductMetadataDto)
+  findAll(@Query() query: ProductQueryDto) {
+    return this.productsService.findAll(query);
   }
 
   @Get(':id')

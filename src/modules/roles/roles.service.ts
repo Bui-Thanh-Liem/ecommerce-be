@@ -6,6 +6,8 @@ import { StoresService } from '../stores/stores.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleEntity } from './entities/role.entity';
+import { RoleQueryDto } from './dto/query-role.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class RolesService {
@@ -54,18 +56,48 @@ export class RolesService {
     return await this.rolesRepo.save(role);
   }
 
-  async findAll() {
-    return await this.rolesRepo.find({
-      relations: ['permissions', 'stores'],
-      select: {
-        id: true,
-        name: true,
-        desc: true,
-        isActive: true,
-        stores: { id: true, address: true },
-        permissions: { id: true, name: true, desc: true, code: true, isActive: true, keyGroup: true },
-      },
-    });
+  async findAll(query: RoleQueryDto) {
+    const { page, limit } = query;
+
+    //
+    const { skip, take } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.rolesRepo
+      .createQueryBuilder('role')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('role.permissions', 'permission')
+      .leftJoinAndSelect('role.stores', 'store')
+
+      // Select các trường cụ thể
+      .select([
+        'role.id',
+        'role.name',
+        'role.desc',
+        'role.isActive',
+        'role.createdAt',
+        'store.id',
+        'store.address',
+        'permission.id',
+        'permission.name',
+        'permission.desc',
+        'permission.code',
+        'permission.isActive',
+        'permission.keyGroup',
+      ]);
+
+    // Phân trang và sắp xếp
+    queryBuilder.orderBy('role.createdAt', 'DESC').skip(skip).take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async exists(ids: string[]) {

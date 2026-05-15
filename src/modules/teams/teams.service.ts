@@ -73,7 +73,6 @@ export class TeamsService {
 
   async findAll(query: TeamQueryDto): Promise<IMetadata<TeamEntity>> {
     const { page, limit, filters } = query;
-    console.log('findAll :::', { page, limit, filters });
 
     //
     const { take, skip } = calculatePagination(page, limit);

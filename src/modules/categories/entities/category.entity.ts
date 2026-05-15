@@ -7,19 +7,19 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'ty
 
 @Entity('categories')
 export class CategoryEntity extends BaseEntity implements ICategory {
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 50 })
   name: string;
 
   @Column({ type: 'text', nullable: true })
   desc?: string | null;
 
-  @Column({ unique: true, type: 'varchar', length: 150 })
+  @Column({ unique: true, type: 'varchar', length: 100 })
   slug: string;
 
   @Column({ type: 'text' })
   imageUrl: string;
 
-  @Column({ type: 'varchar', length: 150 })
+  @Column({ type: 'varchar', length: 20 })
   code: string;
 
   @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true, onDelete: 'SET NULL' })

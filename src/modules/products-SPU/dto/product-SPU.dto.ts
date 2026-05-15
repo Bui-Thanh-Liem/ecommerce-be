@@ -1,5 +1,6 @@
 import { BrandDto } from '@/modules/brands/dto/brand.dto';
 import { CategoryDto } from '@/modules/categories/dto/category.dto';
+import { ProductImageDto } from '@/modules/product-images/dto/product-image.dto';
 import { SerializerDto } from '@/shared/dtos/serializer.dto';
 import { Expose } from 'class-transformer';
 
@@ -21,6 +22,9 @@ export class ProductSPUDto extends SerializerDto {
 
   @Expose()
   brand: BrandDto;
+
+  @Expose()
+  productImages: ProductImageDto[];
 
   @Expose()
   spu: string;

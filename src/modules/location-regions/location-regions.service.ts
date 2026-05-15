@@ -64,7 +64,6 @@ export class LocationRegionsService implements OnModuleInit {
 
   async findAll(query: LocationRegionQueryDto): Promise<IMetadata<LocationRegionEntity>> {
     const { page, limit, filters } = query;
-    console.log('Finding all location regions with query:', filters);
 
     //
     const { skip, take } = calculatePagination(page, limit);
@@ -76,7 +75,7 @@ export class LocationRegionsService implements OnModuleInit {
       // Join các quan hệ
       .leftJoinAndSelect('locationRegion.parent', 'parent')
 
-      // Select các trường cụ thể (tương đương với select của bạn)
+      // Select các trường cụ thể
       .select([
         'locationRegion.id',
         'locationRegion.name',
