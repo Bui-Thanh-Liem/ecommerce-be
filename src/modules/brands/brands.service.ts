@@ -48,7 +48,7 @@ export class BrandsService {
       .createQueryBuilder('brand')
 
       // Select các trường cụ thể (tương đương với select của bạn)
-      .select(['brand.id', 'brand.name', 'brand.logoUrl', 'brand.country', 'brand.code', 'brand.createdAt']);
+      .select(['brand.id', 'brand.name', 'brand.image', 'brand.country', 'brand.code', 'brand.createdAt']);
 
     // Phân trang và sắp xếp
     queryBuilder.skip(skip).take(take).orderBy('brand.createdAt', 'DESC');

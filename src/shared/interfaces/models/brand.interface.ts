@@ -6,7 +6,7 @@ export interface IBrand extends IBase {
   name: string;
   slug: string;
   code: string;
-  logo: IImage;
+  image: IImage;
   country: string;
 
   //

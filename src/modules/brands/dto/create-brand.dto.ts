@@ -14,7 +14,7 @@ export class CreateBrandDto {
   @IsObject()
   @ValidateNested()
   @Type(() => ImageDto)
-  logo: ImageDto;
+  image: ImageDto;
 
   @IsString()
   @Trim()

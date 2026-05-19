@@ -97,7 +97,7 @@ export class ProductsService {
         'category.slug',
         'category.code',
         'productImages.id',
-        'productImages.url',
+        'productImages.image',
         'productImages.sortOrder',
         'productImages.isThumbnail',
       ])

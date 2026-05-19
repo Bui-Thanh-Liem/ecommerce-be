@@ -64,7 +64,7 @@ export class CreateStoreDto {
   @IsObject()
   @ValidateNested()
   @Type(() => ImageDto)
-  image?: string;
+  image?: ImageDto;
 
   @MaxLength(10) // Ví dụ: "08:00"
   @IsString()

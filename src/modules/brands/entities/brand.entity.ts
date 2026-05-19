@@ -16,7 +16,7 @@ export class BrandEntity extends BaseEntity implements IBrand {
   code: string;
 
   @Column({ type: 'json' })
-  logo: IImage;
+  image: IImage;
 
   @Column({ type: 'varchar', length: 50 })
   country: string;

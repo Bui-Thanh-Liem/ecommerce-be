@@ -110,6 +110,7 @@ export class StoresService {
         'store.id',
         'store.name',
         'store.phone',
+        'store.image',
         'store.address',
         'store.openingHours',
         'store.closingHours',

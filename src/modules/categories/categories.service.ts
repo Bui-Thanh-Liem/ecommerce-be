@@ -70,7 +70,7 @@ export class CategoriesService {
         'category.name',
         'category.slug',
         'category.desc',
-        'category.imageUrl',
+        'category.image',
         'category.code',
         'category.createdAt',
         'parent.id',
@@ -103,7 +103,7 @@ export class CategoriesService {
       WITH RECURSIVE category_tree AS (
         -- 1. Điểm bắt đầu: Node gốc được chỉ định
         SELECT 
-          id, name, "desc", slug, "imageUrl", code, "parent",
+          id, name, "desc", slug, "image", code, "parent",
           0 AS level,
           name::text AS path_name
         FROM categories
@@ -113,7 +113,7 @@ export class CategoriesService {
   
         -- 2. Đệ quy: Tìm các con của node hiện tại
         SELECT 
-          c.id, c.name, c."desc", c.slug, c."imageUrl", c.code, c."parent",
+          c.id, c.name, c."desc", c.slug, c."image", c.code, c."parent",
           p.level + 1,
           (p.path_name || ' -> ' || c.name)
         FROM categories c

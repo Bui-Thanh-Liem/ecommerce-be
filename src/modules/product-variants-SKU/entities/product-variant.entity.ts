@@ -1,6 +1,6 @@
 import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { InventoryEntity } from '@/modules/inventories/entities/inventory.entity';
-import { ProductImage } from '@/modules/product-images/entities/product-image.entity';
+import { ProductImageEntity } from '@/modules/product-images/entities/product-image.entity';
 import { ProductItemEntity } from '@/modules/product-items-SERIAL/entities/product-item.entity';
 import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
@@ -57,8 +57,8 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   cartItems?: CartItemEntity[];
 
   // eslint-disable-next-line max-len
-  @OneToMany(() => ProductImage, (image) => image.productVariant, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu biến thể sản phẩm
-  productImages?: ProductImage[];
+  @OneToMany(() => ProductImageEntity, (image) => image.productVariant, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu biến thể sản phẩm
+  productImages?: ProductImageEntity[];
 
   //
   @BeforeInsert()
