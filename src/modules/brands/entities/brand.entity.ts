@@ -1,5 +1,6 @@
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { type IImage } from '@/shared/interfaces/image.interface';
 import { IBrand } from '@/shared/interfaces/models/brand.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
 
@@ -14,8 +15,8 @@ export class BrandEntity extends BaseEntity implements IBrand {
   @Column({ type: 'varchar', length: 20 })
   code: string;
 
-  @Column({ type: 'text' })
-  logoUrl: string;
+  @Column({ type: 'json' })
+  logo: IImage;
 
   @Column({ type: 'varchar', length: 50 })
   country: string;

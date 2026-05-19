@@ -1,6 +1,6 @@
 import { PermissionDto } from '@/modules/permissions/dto/permission.dto';
 import { StoreDto } from '@/modules/stores/dto/store.dto';
-import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class RoleDto extends SerializerDto {

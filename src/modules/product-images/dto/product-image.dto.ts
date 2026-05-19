@@ -1,3 +1,4 @@
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 import { Expose } from 'class-transformer';
 
 export class ProductImageDto {
@@ -5,7 +6,10 @@ export class ProductImageDto {
   id: string;
 
   @Expose()
-  url: string;
+  image: ResponseImageDto;
+
+  @Expose()
+  sortOrder: number;
 
   @Expose()
   isThumbnail: boolean;

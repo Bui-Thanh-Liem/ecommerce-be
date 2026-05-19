@@ -1,13 +1,14 @@
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { type IImage } from '@/shared/interfaces/image.interface';
 import { IProductImage } from '@/shared/interfaces/models/product-image.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('product_images')
-export class ProductImage extends BaseEntity implements IProductImage {
-  @Column({ type: 'varchar' })
-  url: string;
+export class ProductImageEntity extends BaseEntity implements IProductImage {
+  @Column({ type: 'json' })
+  image: IImage;
 
   @Column({ type: 'int' })
   sortOrder: number;

@@ -1,6 +1,7 @@
 import { CategoryPromotionEntity } from '@/modules/category-promotion/entities/category-promotion.entity';
 import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { type IImage } from '@/shared/interfaces/image.interface';
 import { ICategory } from '@/shared/interfaces/models/category.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
@@ -16,8 +17,8 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ unique: true, type: 'varchar', length: 100 })
   slug: string;
 
-  @Column({ type: 'text' })
-  imageUrl: string;
+  @Column({ type: 'json' })
+  image: IImage;
 
   @Column({ type: 'varchar', length: 20 })
   code: string;

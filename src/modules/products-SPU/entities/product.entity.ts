@@ -1,7 +1,7 @@
 import { BrandEntity } from '@/modules/brands/entities/brand.entity';
 import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { CategoryEntity } from '@/modules/categories/entities/category.entity';
-import { ProductImage } from '@/modules/product-images/entities/product-image.entity';
+import { ProductImageEntity } from '@/modules/product-images/entities/product-image.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
@@ -42,8 +42,8 @@ export class ProductEntity extends BaseEntity implements IProduct {
   cartItems?: CartItemEntity[];
 
   // eslint-disable-next-line max-len
-  @OneToMany(() => ProductImage, (image) => image.product, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu sản phẩm
-  productImages?: ProductImage[];
+  @OneToMany(() => ProductImageEntity, (image) => image.product, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu sản phẩm
+  productImages?: ProductImageEntity[];
 
   // Ở Service chỉ cần product.productImages=[{url: string}] là đủ
   @BeforeInsert()

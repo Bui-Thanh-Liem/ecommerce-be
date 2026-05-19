@@ -1,4 +1,4 @@
-import { createQueryDto } from '@/shared/dtos/query.dto';
+import { createQueryDto } from '@/shared/dtos/req/query.dto';
 import { IsOptional, IsString } from 'class-validator';
 
 class TeamFilterDto {

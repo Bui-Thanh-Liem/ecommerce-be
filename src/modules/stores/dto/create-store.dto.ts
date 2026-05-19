@@ -1,4 +1,5 @@
 import { Trim } from '@/decorators/trim.decorator';
+import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 import { Type } from 'class-transformer';
 import {
@@ -7,6 +8,7 @@ import {
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -58,9 +60,11 @@ export class CreateStoreDto {
   name: string;
 
   @IsOptional()
-  @IsString()
-  @Trim()
-  imageUrl?: string;
+  @IsNotEmpty()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  image?: string;
 
   @MaxLength(10) // Ví dụ: "08:00"
   @IsString()

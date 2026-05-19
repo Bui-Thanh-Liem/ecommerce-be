@@ -1,5 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { ImageDto } from '@/shared/dtos/req/image.dto';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsObject, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -8,10 +10,11 @@ export class CreateCategoryDto {
   @MaxLength(50)
   name: string;
 
-  @IsString()
-  @Trim()
   @IsNotEmpty()
-  imageUrl: string;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  image: ImageDto;
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,4 @@
-import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { Expose, Type } from 'class-transformer';
 

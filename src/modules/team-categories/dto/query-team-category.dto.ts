@@ -1,4 +1,4 @@
-import { createQueryDto } from '@/shared/dtos/query.dto';
+import { createQueryDto } from '@/shared/dtos/req/query.dto';
 
 class TeamCategoryFilterDto {}
 

@@ -4,6 +4,7 @@ import { RoleEntity } from '@/modules/roles/entities/role.entity';
 import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
 import { VoucherEntity } from '@/modules/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
+import { type IImage } from '@/shared/interfaces/image.interface';
 import { IStore } from '@/shared/interfaces/models/store.interface';
 import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
@@ -40,8 +41,8 @@ export class StoreEntity extends BaseEntity implements IStore {
   @Column({ type: 'text' })
   address: string;
 
-  @Column({ type: 'text', nullable: true })
-  imageUrl?: string;
+  @Column({ type: 'json', nullable: true })
+  image?: IImage;
 
   @Column('jsonb')
   phone: IPhoneStore[];

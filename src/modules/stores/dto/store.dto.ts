@@ -1,6 +1,7 @@
 import { LocationRegionDto } from '@/modules/location-regions/dto/location-region.dto';
 import { StaffDto } from '@/modules/staffs/dto/staff.dto';
-import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 
 class PhoneStoreDto {
@@ -35,7 +36,7 @@ export class StoreDto extends SerializerDto {
   name: string;
 
   @Expose()
-  imageUrl: string;
+  image: ResponseImageDto;
 
   @Expose()
   address: string;

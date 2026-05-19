@@ -1,4 +1,5 @@
 import { IBase } from '../base.interface';
+import { IImage } from '../image.interface';
 import { IPhoneStore } from '../phone-store.interface';
 import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
@@ -18,7 +19,7 @@ export interface IStore extends IBase {
   lng: number; // Kinh độ
 
   //
-  imageUrl?: string; // URL hình ảnh đại diện của cửa hàng
+  image?: IImage; // URL hình ảnh đại diện của cửa hàng
   name: string;
   phone: IPhoneStore[];
   openingHours: string; // Ví dụ: "8:00 AM - 10:00 PM"

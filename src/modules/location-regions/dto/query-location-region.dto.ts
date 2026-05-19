@@ -1,4 +1,4 @@
-import { createQueryDto } from '@/shared/dtos/query.dto';
+import { createQueryDto } from '@/shared/dtos/req/query.dto';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 

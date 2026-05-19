@@ -1,4 +1,5 @@
-import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class CategoryDto extends SerializerDto {
@@ -13,6 +14,9 @@ export class CategoryDto extends SerializerDto {
 
   @Expose()
   slug: string;
+
+  @Expose()
+  image: ResponseImageDto;
 
   @Expose()
   desc?: string | null;

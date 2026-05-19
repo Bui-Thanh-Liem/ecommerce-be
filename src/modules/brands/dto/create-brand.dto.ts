@@ -1,5 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { ImageDto } from '@/shared/dtos/req/image.dto';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsObject, IsString, MaxLength, ValidateNested } from 'class-validator';
 
 export class CreateBrandDto {
   @IsString()
@@ -8,10 +10,11 @@ export class CreateBrandDto {
   @MaxLength(50)
   name: string;
 
-  @IsString()
-  @Trim()
   @IsNotEmpty()
-  logoUrl: string;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  logo: ImageDto;
 
   @IsString()
   @Trim()

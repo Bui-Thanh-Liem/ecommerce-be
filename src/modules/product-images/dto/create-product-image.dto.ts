@@ -1,9 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ImageDto } from '@/shared/dtos/req/image.dto';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsObject, ValidateNested } from 'class-validator';
 
 export class CreateProductImageDto {
-  @IsString()
   @IsNotEmpty()
-  url: string;
-
-  // ... có thể thêm các trường khác như sortOrder, isThumbnail nếu cần thiết
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  image: ImageDto;
 }

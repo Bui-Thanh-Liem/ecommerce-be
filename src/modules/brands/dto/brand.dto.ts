@@ -1,3 +1,4 @@
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 import { Expose } from 'class-transformer';
 
 export class BrandDto {
@@ -11,7 +12,7 @@ export class BrandDto {
   code: string;
 
   @Expose()
-  logoUrl: string;
+  logo: ResponseImageDto;
 
   @Expose()
   country: string;

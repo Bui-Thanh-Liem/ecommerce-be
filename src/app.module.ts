@@ -29,7 +29,7 @@ import { ProductImagesModule } from './modules/product-images/product-images.mod
 import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
-import { S3Module } from './modules/s3/s3.module';
+import { S3Module } from './cloud-storage/s3/s3.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { OrderItemsModule } from './modules/order-items/order-items.module';
 import { MoMoModule } from './payments/momo/momo.module';
@@ -45,6 +45,8 @@ import { CartsModule } from './modules/carts/carts.module';
 import { CartItemsModule } from './modules/cart-items/cart-items.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { TeamCategoriesModule } from './modules/team-categories/team-categories.module';
+import { CloudinaryModule } from './cloud-storage/cloudinary/cloudinary.module';
+import cloudinaryConfig from './configs/cloudinary.config';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -52,7 +54,7 @@ const isProd = process.env.NODE_ENV === 'production';
     //
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [pgConfig, s3ClientConfig],
+      load: [pgConfig, s3ClientConfig, cloudinaryConfig],
       envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
@@ -101,6 +103,7 @@ const isProd = process.env.NODE_ENV === 'production';
     CartItemsModule,
     TeamsModule,
     TeamCategoriesModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [

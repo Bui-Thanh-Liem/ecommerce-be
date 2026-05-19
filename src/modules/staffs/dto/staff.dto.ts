@@ -1,6 +1,6 @@
 import { RoleDto } from '@/modules/roles/dto/role.dto';
 import { StoreDto } from '@/modules/stores/dto/store.dto';
-import { SerializerDto } from '@/shared/dtos/serializer.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
 
