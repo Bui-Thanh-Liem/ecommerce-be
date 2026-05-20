@@ -5,6 +5,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,12 +16,17 @@ import { CategoryEntity } from './entities/category.entity';
 import { CategoryQueryDto } from './dto/query-category.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
+import { StoresService } from '../stores/stores.service';
 
 @Injectable()
 export class CategoriesService {
+  private readonly logger = new Logger(StoresService.name);
+
   constructor(
     @InjectRepository(CategoryEntity)
     private categoryRepo: Repository<CategoryEntity>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -82,6 +88,13 @@ export class CategoriesService {
 
     //
     const [data, total] = await queryBuilder.getManyAndCount();
+
+    // Chuyển đổi URL ảnh nếu có
+    data.forEach((category) => {
+      if (category.image && category.image.key) {
+        category.image.url = this.cloudinaryService.generateUrl(category.image.key);
+      }
+    });
 
     return {
       data,
@@ -181,9 +194,15 @@ export class CategoriesService {
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const { name, parent: parentId, ...rest } = updateCategoryDto;
+    const { name, parent: parentId, image, ...rest } = updateCategoryDto;
 
-    // 0. Kiểm tra nếu có name thì phải unique
+    // 1. Kiểm tra xem category có tồn tại không
+    const oldCategory = await this.categoryRepo.findOneBy({ id });
+    if (!oldCategory) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    // 2. Kiểm tra nếu có name thì phải unique
     if (name) {
       const slug = stringToSlug(name);
       const existingCategory = await this.categoryRepo.exists({
@@ -194,12 +213,12 @@ export class CategoriesService {
       }
     }
 
-    // 1. Chặn lỗi logic: Không được phép chọn chính mình làm cha (circular reference)
+    // Chặn lỗi logic: Không được phép chọn chính mình làm cha (circular reference)
     if (parentId && parentId === id) {
       throw new BadRequestException('A category cannot be its own parent');
     }
 
-    // 2. Kiểm tra Parent có tồn tại không (nếu có update parent)
+    // Kiểm tra Parent có tồn tại không (nếu có update parent)
     if (parentId) {
       const parentExists = await this.categoryRepo.exists({ where: { id: parentId } });
       if (!parentExists) {
@@ -207,23 +226,25 @@ export class CategoriesService {
       }
     }
 
-    // 3. Gán thủ công để đảm bảo TypeORM hiểu đây là quan hệ Entity, không phải String
-    const category = await this.categoryRepo.preload({
-      id,
-      name,
-      slug: name ? stringToSlug(name) : undefined,
-      code: name ? this.generateCategoryCode(name) : undefined,
-      ...rest,
-      parent: parentId ? { id: parentId } : undefined,
-    });
+    // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
+    const oldImageKey = oldCategory.image?.key;
 
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
-    }
-
-    // 4. Lưu và trả về dữ liệu đã update
     try {
-      return await this.categoryRepo.save(category);
+      // 3. Cập nhật category
+      const category = this.categoryRepo.merge(oldCategory, {
+        ...rest,
+        name,
+        image: image || oldCategory.image,
+        slug: name ? stringToSlug(name) : undefined,
+        parent: parentId ? { id: parentId } : undefined,
+        code: name ? this.generateCategoryCode(name) : undefined,
+      });
+      await this.categoryRepo.save(category);
+
+      // 4. Nếu có cập nhật ảnh, xóa ảnh cũ trên Cloudinary
+      if (image?.key && oldImageKey && image.key !== oldImageKey) {
+        await this.cloudinaryService.deleteImage(oldImageKey);
+      }
     } catch (error) {
       // Xử lý lỗi khác nếu cần
       throw new InternalServerErrorException('Error updating category', (error as Error).message);
@@ -231,11 +252,28 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const category = await this.categoryRepo.findOne({ where: { id } });
+    const category = await this.categoryRepo.findOneBy({ id });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    return await this.categoryRepo.remove(category);
+
+    // 1. Xóa trong DB trước - Chạy mất vài mili-giây, giải phóng DB ngay lập tức
+    await this.categoryRepo.remove(category);
+
+    // 2. DB đã sạch sẽ rồi, xóa ảnh
+    if (category.image && category.image.key) {
+      try {
+        await this.cloudinaryService.deleteImage(category.image.key);
+      } catch (error) {
+        // Nếu lỗi cloud ở đây, DB đã xóa xong nên hệ thống KHÔNG bị lỗi hiển thị ảnh chết.
+        // Chúng ta chỉ bị thừa 1 cái ảnh rác trên Cloudinary.
+        // Log lỗi lại để dùng Cron Job quét rác sau,
+        // hoặc ném vào Queue để nó tự động xóa lại (Retry).
+        console.error(`Failed to delete image from Cloudinary: ${category.image.key}`, error);
+      }
+    }
+
+    return true;
   }
 
   private generateCategoryCode(name: string): string {

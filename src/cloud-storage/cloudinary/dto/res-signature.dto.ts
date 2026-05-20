@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class ResSignature {
+export class ResSignatureDto {
   @Expose()
   folder: string;
 

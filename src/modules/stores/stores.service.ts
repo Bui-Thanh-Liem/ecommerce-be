@@ -9,6 +9,7 @@ import { StaffsService } from '../staffs/staffs.service';
 import { StoreQueryDto } from './dto/query-store.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
 
 @Injectable()
 export class StoresService {
@@ -22,6 +23,8 @@ export class StoresService {
 
     @Inject(forwardRef(() => StaffsService))
     private readonly staffService: StaffsService,
+
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createStoreDto: CreateStoreDto) {
@@ -136,6 +139,14 @@ export class StoresService {
       .orderBy('store.createdAt', 'DESC'); // Nên có orderBy khi phân trang
 
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+
+    // Chuyển đổi URL ảnh nếu có
+    data.forEach((store) => {
+      if (store.image && store.image.key) {
+        store.image.url = this.cloudinaryService.generateUrl(store.image.key);
+      }
+    });
+
     return {
       data,
       totalData: total,
@@ -147,7 +158,7 @@ export class StoresService {
   async findOne(id: string) {
     return await this.storeRepo.findOne({
       where: { id },
-      relations: ['provinceCity', 'districtTown', 'wardCommune', 'manager'],
+      relations: ['country', 'provinceCity', 'districtTown', 'wardCommune', 'manager'],
       select: {
         id: true,
         name: true,
@@ -158,6 +169,7 @@ export class StoresService {
         lat: true,
         lng: true,
         isActive: true,
+        country: { id: true, name: true },
         provinceCity: { id: true, name: true },
         districtTown: { id: true, name: true },
         wardCommune: { id: true, name: true },
@@ -177,59 +189,74 @@ export class StoresService {
   }
 
   async update(id: string, updateStoreDto: UpdateStoreDto) {
-    const { country, provinceCity, districtTown, wardCommune, manager: managerId, ...rest } = updateStoreDto;
+    const { country, provinceCity, districtTown, wardCommune, manager: managerId, image, ...rest } = updateStoreDto;
 
-    // Tìm kiếm locationRegion
-    if (country) {
-      const countryExists = await this.locationService.exists(country);
-      if (!countryExists) {
-        throw new NotFoundException('Country not found');
-      }
-    }
-
-    if (provinceCity) {
-      const provinceExists = await this.locationService.exists(provinceCity);
-      if (!provinceExists) {
-        throw new NotFoundException('Province not found');
-      }
-    }
-
-    if (districtTown) {
-      const districtExists = await this.locationService.exists(districtTown);
-      if (!districtExists) {
-        throw new NotFoundException('District not found');
-      }
-    }
-
-    if (wardCommune) {
-      const wardExists = await this.locationService.exists(wardCommune);
-      if (!wardExists) {
-        throw new NotFoundException('Ward not found');
-      }
-    }
-
-    if (managerId) {
-      const managerExists = await this.staffService.exists([managerId]);
-      if (!managerExists) {
-        throw new NotFoundException('Manager not found');
-      }
-    }
-
-    const store = await this.storeRepo.preload({
-      id,
-      ...rest,
-      country: country ? { id: country } : undefined,
-      provinceCity: provinceCity ? { id: provinceCity } : undefined,
-      districtTown: districtTown ? { id: districtTown } : undefined,
-      wardCommune: wardCommune ? { id: wardCommune } : undefined,
-      manager: managerId ? { id: managerId } : undefined,
-    });
-    if (!store) {
+    // 1. Kiểm tra xem store có tồn tại không
+    const oldStore = await this.storeRepo.findOneBy({ id });
+    if (!oldStore) {
       throw new NotFoundException(`Store with ID ${id} not found`);
     }
 
+    // 2. Nếu có cập nhật manager, kiểm tra xem manager đó có tồn tại không và chưa được gán cho store nào khác
+    const validationPromises: Promise<void>[] = [];
+    if (country) {
+      validationPromises.push(
+        this.locationService.exists(country).then((ext) => {
+          if (!ext) throw new NotFoundException('Country not found');
+        }),
+      );
+    }
+    if (provinceCity) {
+      validationPromises.push(
+        this.locationService.exists(provinceCity).then((ext) => {
+          if (!ext) throw new NotFoundException('Province not found');
+        }),
+      );
+    }
+    if (districtTown) {
+      validationPromises.push(
+        this.locationService.exists(districtTown).then((ext) => {
+          if (!ext) throw new NotFoundException('District not found');
+        }),
+      );
+    }
+    if (wardCommune) {
+      validationPromises.push(
+        this.locationService.exists(wardCommune).then((ext) => {
+          if (!ext) throw new NotFoundException('Ward not found');
+        }),
+      );
+    }
+    if (managerId) {
+      validationPromises.push(
+        this.staffService.exists([managerId]).then((exists) => {
+          if (!exists) {
+            throw new NotFoundException('Manager not found');
+          }
+        }),
+      );
+    }
+    await Promise.all(validationPromises);
+
+    // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
+    const oldImageKey = oldStore.image?.key;
+
     try {
-      return await this.storeRepo.save(store);
+      // 3. Cập nhật store với các trường mới nếu có
+      const updatedStore = this.storeRepo.merge(oldStore, {
+        ...rest,
+        image: image ? image : undefined,
+        manager: managerId ? { id: managerId } : undefined,
+        wardCommune: wardCommune ? { id: wardCommune } : undefined,
+        districtTown: districtTown ? { id: districtTown } : undefined,
+        provinceCity: provinceCity ? { id: provinceCity } : undefined,
+      });
+      await this.storeRepo.save(updatedStore);
+
+      // 4. Nếu có cập nhật ảnh, xóa ảnh cũ trên Cloudinary
+      if (image?.key && oldImageKey && image.key !== oldImageKey) {
+        await this.cloudinaryService.deleteImage(oldImageKey);
+      }
     } catch (error) {
       this.logger.debug(`Failed to update store with ID ${id}`, error);
       throw new NotFoundException(`Failed to update store with ID ${id}`);
@@ -241,6 +268,23 @@ export class StoresService {
     if (!store) {
       throw new NotFoundException(`Store with ID ${id} not found`);
     }
-    return await this.storeRepo.remove(store);
+
+    // 1. Xóa trong DB trước - Chạy mất vài mili-giây, giải phóng DB ngay lập tức
+    await this.storeRepo.remove(store);
+
+    // 2. DB đã sạch sẽ rồi, xóa ảnh
+    if (store.image && store.image.key) {
+      try {
+        await this.cloudinaryService.deleteImage(store.image.key);
+      } catch (error) {
+        // Nếu lỗi cloud ở đây, DB đã xóa xong nên hệ thống KHÔNG bị lỗi hiển thị ảnh chết.
+        // Chúng ta chỉ bị thừa 1 cái ảnh rác trên Cloudinary.
+        // Log lỗi lại để dùng Cron Job quét rác sau,
+        // hoặc ném vào Queue để nó tự động xóa lại (Retry).
+        console.error(`Failed to delete image from Cloudinary: ${store.image.key}`, error);
+      }
+    }
+
+    return true;
   }
 }

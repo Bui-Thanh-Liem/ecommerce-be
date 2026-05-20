@@ -7,7 +7,7 @@ export class CloudinaryService {
    * 1. GENERATE SIGNATURE (Bảo mật cho Client-side Upload)
    * Giúp Client tự upload lên Cloudinary mà không lộ API Secret, giảm tải cho Server.
    */
-  generateSignature(folder: string, ttlInSeconds = 3600) {
+  generateSignature(folder: string) {
     try {
       const timestamp = Math.round(new Date().getTime() / 1000);
 
@@ -71,11 +71,11 @@ export class CloudinaryService {
       throw new BadRequestException('Public ID không hợp lệ');
     }
 
-    // Các option mặc định chuẩn Prod để tối ưu hóa performance và dung lượng ảnh
     const defaultOptions: TransformationOptions = {
-      quality: 'auto', // Tự động nén ảnh tối ưu nhất mà không giảm chất lượng mắt thường thấy
-      fetch_format: 'auto', // Tự động chuyển đổi sang WebP/AVIF tùy trình duyệt khách
       secure: true,
+      quality: 'auto',
+      fetch_format: 'auto',
+      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
     };
 
     return cloudinary.url(publicId, {
@@ -88,46 +88,56 @@ export class CloudinaryService {
    * 4. XÓA MỘT FILE ĐƠN LẺ (Delete Single Asset)
    * @param publicId ID định danh của file trên Cloudinary (ví dụ: 'products/chair_123')
    */
-  async deleteImage(publicId: string): Promise<{ result: string }> {
+  async deleteImage(publicId: string): Promise<CloudinaryDestroyResponse> {
     if (!publicId) {
       throw new BadRequestException('Public ID không được để trống');
     }
 
-    return new Promise((resolve, reject) => {
-      // Mặc định resource_type là 'image'. Nếu bạn xóa video, cần truyền thêm { resource_type: 'video' }
-      cloudinary.uploader.destroy(publicId, (error, result) => {
-        if (error) {
-          return reject(new InternalServerErrorException(`Xóa file thất bại: ${error.message}`));
-        }
+    try {
+      // 2. Gọi thẳng await mà không cần bọc new Promise()
+      const result = (await cloudinary.uploader.destroy(publicId)) as CloudinaryDestroyResponse;
 
-        // Cloudinary trả về { result: 'ok' } nếu xóa thành công, hoặc { result: 'not_found' } nếu sai ID
-        if (result.result !== 'ok' && result.result !== 'not_found') {
-          return reject(new InternalServerErrorException(`Cloudinary trả về lỗi: ${result.result}`));
-        }
+      // Cloudinary trả về { result: 'ok' } nếu xóa thành công, hoặc { result: 'not_found' } nếu không tìm thấy file
+      if (result.result !== 'ok' && result.result !== 'not_found') {
+        throw new InternalServerErrorException(`Cloudinary trả về trạng thái lạ: ${result.result}`);
+      }
 
-        resolve(result);
-      });
-    });
+      return result;
+    } catch (error) {
+      // Tránh lỗi gán 'any' khi bắt catch error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new InternalServerErrorException(`Xóa file thất bại: ${errorMessage}`);
+    }
   }
 
   /**
    * 5. XÓA HÀNG LOẠT FILE (Bulk Delete Assets)
    * @param publicIds Mảng chứa các ID cần xóa (tối đa 100 IDs trong 1 request)
    */
-  async deleteMultipleImages(publicIds: string[]): Promise<any> {
+  async deleteMultipleImages(publicIds: string[]): Promise<CloudinaryDeleteResourcesResponse> {
     if (!publicIds || publicIds.length === 0) {
       throw new BadRequestException('Danh sách Public IDs không được rỗng');
     }
 
     try {
       // Dùng hàm Admin API để xóa nhiều file cùng lúc nhằm tối ưu hiệu năng mạng (Network I/O)
-      const response = await cloudinary.api.delete_resources(publicIds, {
+      const response = (await cloudinary.api.delete_resources(publicIds, {
         resource_type: 'image',
-      });
+      })) as CloudinaryDeleteResourcesResponse;
 
       return response;
     } catch (error) {
-      throw new InternalServerErrorException(`Xóa hàng loạt thất bại: ${error.message}`);
+      throw new InternalServerErrorException(`Xóa hàng loạt thất bại: ${(error as Error).message}`);
     }
   }
+}
+
+interface CloudinaryDeleteResourcesResponse {
+  deleted: Record<string, 'deleted' | 'not_found'>;
+  partial: boolean;
+}
+
+interface CloudinaryDestroyResponse {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  result: 'ok' | 'not_found' | string;
 }

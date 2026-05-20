@@ -1,11 +1,10 @@
-import { Controller, Post, Get, Query, UseInterceptors, UploadedFile, Body, Delete } from '@nestjs/common';
+import { Controller, Post, Query, UseInterceptors, UploadedFile, Body, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from './cloudinary.service';
 import { SignatureDto } from './dto/signature-upload-url.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
-import { ResSignature } from './dto/res-signature.dto';
+import { ResSignatureDto } from './dto/res-signature.dto';
 
-@Serializer(ResSignature)
 @Controller('cloudinary')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
@@ -13,6 +12,7 @@ export class CloudinaryController {
   /**
    * API lấy Signature để Client tự upload trực tiếp lên Cloudinary
    */
+  @Serializer(ResSignatureDto)
   @Post('signature')
   getUploadSignature(@Body() body: SignatureDto) {
     const targetFolder = body?.folder || 'signatures';
@@ -34,20 +34,6 @@ export class CloudinaryController {
       original_url: result.secure_url,
       optimized_url: this.cloudinaryService.generateUrl(result.public_id),
     };
-  }
-
-  /**
-   * API lấy URL ảnh đã qua tối ưu hoặc resize động dựa trên public_id
-   */
-  @Get('transform')
-  getOptimizedUrl(
-    @Query('public_id') publicId: string,
-    @Query('width') width?: number,
-    @Query('height') height?: number,
-  ) {
-    const options = width && height ? { width, height, crop: 'fill' } : {};
-    const url = this.cloudinaryService.generateUrl(publicId, options);
-    return { url };
   }
 
   /**
