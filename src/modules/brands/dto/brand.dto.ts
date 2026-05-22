@@ -9,6 +9,9 @@ export class BrandDto {
   name: string;
 
   @Expose()
+  code: string;
+
+  @Expose()
   @Type(() => ResponseImageDto)
   image: ResponseImageDto;
 

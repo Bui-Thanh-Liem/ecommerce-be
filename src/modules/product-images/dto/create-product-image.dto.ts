@@ -1,4 +1,10 @@
 import { ImageDto } from '@/shared/dtos/req/image.dto';
-import { PartialType } from '@nestjs/mapped-types';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
 
-export class CreateProductImageDto extends PartialType(ImageDto) {}
+export class CreateProductImageDto {
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  image: ImageDto;
+}

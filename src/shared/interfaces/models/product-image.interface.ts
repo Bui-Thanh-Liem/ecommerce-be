@@ -8,5 +8,5 @@ export interface IProductImage extends IBase {
   product: IProduct;
   sortOrder: number;
   isThumbnail: boolean;
-  productVariant?: IProductVariant | null;
+  productVariant: IProductVariant;
 }

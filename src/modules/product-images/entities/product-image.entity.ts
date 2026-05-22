@@ -20,7 +20,7 @@ export class ProductImageEntity extends BaseEntity implements IProductImage {
   product: ProductEntity;
 
   @ManyToOne(() => ProductVariantEntity, (variant) => variant.productImages, { onDelete: 'CASCADE' })
-  productVariant?: ProductVariantEntity | null;
+  productVariant: ProductVariantEntity;
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Product Image có product: ${this.product.name}`);

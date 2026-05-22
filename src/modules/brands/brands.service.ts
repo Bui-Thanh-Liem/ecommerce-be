@@ -1,5 +1,5 @@
 import { stringToSlug } from '@/utils/string-to-slug.util';
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { CreateBrandDto } from './dto/create-brand.dto';
@@ -157,10 +157,7 @@ export class BrandsService {
   }
 
   private generateBrandCode(name: string): string {
-    return name
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .substring(0, 10) // Lấy 10 ký tự đầu tiên
-      .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
+    if (!name) throw new BadRequestException('Name is required !');
+    return name.slice(0, 3).toUpperCase();
   }
 }

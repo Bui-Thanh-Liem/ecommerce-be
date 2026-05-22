@@ -8,7 +8,7 @@ import { PromotionEntity } from '@/modules/promotions/entities/promotion.entity'
 import { RatingEntity } from '@/modules/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
-import { IProductVariant, ISpecification } from '@/shared/interfaces/models/product-variant.interface';
+import { IProductVariant, IVariantAttribute } from '@/shared/interfaces/models/product-variant.interface';
 import { BeforeInsert, Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('product_variants')
@@ -29,13 +29,13 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   vat?: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  discountPrice: number;
+  discountPercent: number;
 
   @Column({ type: 'enum', enum: ProductVariantCondition })
   conditions: ProductVariantCondition;
 
   @Column({ type: 'jsonb', nullable: true })
-  specifications: ISpecification[];
+  salesAttributes: IVariantAttribute[];
 
   // Quan hệ với các entity khác
   @OneToMany(() => InventoryEntity, (inventory) => inventory.productVariant, { nullable: true, onDelete: 'SET NULL' })
@@ -45,7 +45,7 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   productItems?: ProductItemEntity[];
 
   @OneToMany(() => RatingEntity, (rating) => rating.productVariant, { nullable: true })
-  ratings?: RatingEntity[];
+  rating?: RatingEntity[];
 
   @OneToMany(() => ProductPromotionEntity, (productPromotion) => productPromotion.productVariant, { nullable: true })
   productPromotions?: ProductPromotionEntity[];
@@ -56,9 +56,11 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.productVariant)
   cartItems?: CartItemEntity[];
 
-  // eslint-disable-next-line max-len
-  @OneToMany(() => ProductImageEntity, (image) => image.productVariant, { cascade: true }) // Thêm cascade để tự động lưu các hình ảnh khi lưu biến thể sản phẩm
-  productImages?: ProductImageEntity[];
+  @OneToMany(() => ProductImageEntity, (image) => image.productVariant, {
+    cascade: true, // Thêm cascade để tự động lưu các hình ảnh khi lưu biến thể sản phẩm
+    orphanedRowAction: 'delete',
+  })
+  productImages: ProductImageEntity[];
 
   //
   @BeforeInsert()
@@ -66,7 +68,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
     if (this.productImages?.length && this.product) {
       this.productImages.forEach((img, idx) => {
         img.product = this.product;
+        img.productVariant = this; // Gán productVariant cho mỗi hình ảnh
         img.sortOrder = idx; // Tự động gán sortOrder theo thứ tự trong mảng
+        img.isThumbnail = idx === 0; // Tự động đánh dấu hình ảnh đầu tiên là thumbnail
       });
     }
   }

@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductVariantsService } from './product-variants.service';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { ProductVariantSKUDto } from './dto/product-variant-SKU.dto';
+import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
+import { ProductVariantMetadataDto } from './dto/metadata-product-variant.dto';
 
 @Controller('product-variants')
 @Serializer(ProductVariantSKUDto)
@@ -16,8 +18,9 @@ export class ProductVariantsController {
   }
 
   @Get()
-  findAll() {
-    return this.productVariantsService.findAll();
+  @Serializer(ProductVariantMetadataDto)
+  findAll(@Query() query: ProductVariantQueryDto) {
+    return this.productVariantsService.findAll(query);
   }
 
   @Get(':id')

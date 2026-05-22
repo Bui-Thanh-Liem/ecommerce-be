@@ -1,22 +1,20 @@
 import { Trim } from '@/decorators/trim.decorator';
+import { CreateProductImageDto } from '@/modules/product-images/dto/create-product-image.dto';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
-import { ISpecification } from '@/shared/interfaces/models/product-variant.interface';
-import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
-  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
-import { Entity } from 'typeorm';
 
-class SpecificationItemDto {
+class VariantAttributeDto {
   @IsNotEmpty()
   @IsString()
   @Trim()
@@ -25,44 +23,14 @@ class SpecificationItemDto {
   @IsNotEmpty()
   @IsString()
   @Trim()
+  label: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Trim()
   value: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  priority: number;
-
-  @IsOptional()
-  @IsBoolean()
-  isHighlight?: boolean;
-
-  @IsOptional()
-  @IsString()
-  @Trim()
-  link?: string;
-
-  @IsNotEmpty()
-  @IsBoolean()
-  isSKU: boolean;
-
-  @IsNotEmpty()
-  @IsNumber()
-  order: number;
 }
 
-class SpecificationDto implements ISpecification {
-  @IsNotEmpty()
-  @IsString()
-  @Trim()
-  title: string;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  @ApiProperty({ type: [SpecificationItemDto] })
-  @Type(() => SpecificationItemDto)
-  items: [SpecificationItemDto];
-}
-
-@Entity('product_variants')
 export class CreateProductVariantDto {
   @IsUUID()
   @IsNotEmpty()
@@ -74,10 +42,6 @@ export class CreateProductVariantDto {
 
   @IsNumber()
   @IsNotEmpty()
-  discountPrice: number;
-
-  @IsNumber()
-  @IsNotEmpty()
   discountPercent: number;
 
   @IsEnum(ProductVariantCondition)
@@ -85,6 +49,12 @@ export class CreateProductVariantDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  @Type(() => SpecificationDto)
-  specifications: SpecificationDto[];
+  @Type(() => VariantAttributeDto)
+  salesAttributes: VariantAttributeDto[];
+
+  @IsArray()
+  @ArrayMaxSize(6)
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductImageDto)
+  productImages: CreateProductImageDto[];
 }

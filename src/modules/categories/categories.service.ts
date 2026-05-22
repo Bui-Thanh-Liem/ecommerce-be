@@ -277,6 +277,7 @@ export class CategoriesService {
   }
 
   private generateCategoryCode(name: string): string {
+    if (!name) throw new BadRequestException('Name is required !');
     return name
       .split(' ')
       .map((word) => word.charAt(0))

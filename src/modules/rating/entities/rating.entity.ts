@@ -1,7 +1,7 @@
 import { CustomerEntity } from '@/modules/customers/entities/customer.entity';
 import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { IRating } from '@/shared/interfaces/models/rating.inetrface';
+import { IRating } from '@/shared/interfaces/models/rating.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('ratings')
@@ -9,7 +9,7 @@ export class RatingEntity extends BaseEntity implements IRating {
   @ManyToOne(() => CustomerEntity, (customer) => customer.ratings)
   customer: CustomerEntity;
 
-  @ManyToOne(() => ProductVariantEntity, (productVariant) => productVariant.ratings)
+  @ManyToOne(() => ProductVariantEntity, (productVariant) => productVariant.rating)
   productVariant: ProductVariantEntity;
 
   @Column({ type: 'int' })
