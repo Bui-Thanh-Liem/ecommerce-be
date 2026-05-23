@@ -25,20 +25,26 @@ export class BrandsService {
     const code = this.generateBrandCode(name);
     const slug = stringToSlug(name);
 
-    // Kiểm tra tên brand đã tồn tại chưa
-    const existingBrand = await this.brandRepo.exists({ where: { slug } });
-    if (existingBrand) {
-      throw new ConflictException('Brand with this name already exists');
-    }
+    try {
+      // Kiểm tra tên brand đã tồn tại chưa
+      const existingBrand = await this.brandRepo.exists({ where: { slug } });
+      if (existingBrand) {
+        throw new ConflictException('Brand with this name already exists');
+      }
 
-    // Tạo brand mới
-    const brand = this.brandRepo.create({
-      ...rest,
-      slug,
-      name,
-      code,
-    });
-    return await this.brandRepo.save(brand);
+      // Tạo brand mới
+      const brand = this.brandRepo.create({
+        ...rest,
+        slug,
+        name,
+        code,
+      });
+      return await this.brandRepo.save(brand);
+    } catch (error) {
+      await this.removeImageForError(createBrandDto.image?.key);
+      this.logger.debug(`Failed to create brand`, error);
+      throw error;
+    }
   }
 
   async findAll(query: BrandQueryDto): Promise<IMetadata<BrandEntity>> {
@@ -92,25 +98,25 @@ export class BrandsService {
   async update(id: string, updateBrandDto: UpdateBrandDto) {
     const { name, image, ...rest } = updateBrandDto;
 
-    // 1. Kiểm tra brand tồn tại chưa
-    const oldBrand = await this.brandRepo.findOneBy({ id });
-    if (!oldBrand) {
-      throw new NotFoundException(`Brand with ID ${id} not found`);
-    }
-
-    // 2. Nếu có cập nhật tên, cần kiểm tra trùng tên
-    if (name) {
-      const slug = stringToSlug(name);
-      const existingBrand = await this.brandRepo.findOne({ where: { slug, id: Not(id) } });
-      if (existingBrand) {
-        throw new ConflictException('Brand with this name already exists');
-      }
-    }
-
-    // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
-    const oldImageKey = oldBrand.image?.key;
-
     try {
+      // 1. Kiểm tra brand tồn tại chưa
+      const oldBrand = await this.brandRepo.findOneBy({ id });
+      if (!oldBrand) {
+        throw new NotFoundException(`Brand with ID ${id} not found`);
+      }
+
+      // 2. Nếu có cập nhật tên, cần kiểm tra trùng tên
+      if (name) {
+        const slug = stringToSlug(name);
+        const existingBrand = await this.brandRepo.findOne({ where: { slug, id: Not(id) } });
+        if (existingBrand) {
+          throw new ConflictException('Brand with this name already exists');
+        }
+      }
+
+      // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
+      const oldImageKey = oldBrand.image?.key;
+
       // 3. Cập nhật brand
       const updatedBrand = this.brandRepo.merge(oldBrand, {
         ...rest,
@@ -126,8 +132,9 @@ export class BrandsService {
         await this.cloudinaryService.deleteImage(oldImageKey);
       }
     } catch (error) {
+      await this.removeImageForError(updateBrandDto?.image?.key);
       this.logger.debug(`Failed to update brand with ID ${id}`, error);
-      throw new NotFoundException(`Failed to update brand with ID ${id}`);
+      throw error;
     }
   }
 
@@ -159,5 +166,10 @@ export class BrandsService {
   private generateBrandCode(name: string): string {
     if (!name) throw new BadRequestException('Name is required !');
     return name.slice(0, 3).toUpperCase();
+  }
+
+  private removeImageForError(key?: string) {
+    if (!key) return;
+    return this.cloudinaryService.deleteImage(key);
   }
 }

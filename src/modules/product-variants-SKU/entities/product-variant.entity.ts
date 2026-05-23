@@ -19,17 +19,23 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ unique: true })
   sku: string;
 
+  @Column({ unique: true })
+  barcode: string;
+
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'int', default: 0 })
-  soldCount: number;
+  @Column('decimal', { precision: 10, scale: 2 })
+  costPrice: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  discountPercent: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: true })
   vat?: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  discountPercent: number;
+  @Column({ type: 'int', default: 0 })
+  soldCount: number;
 
   @Column({ type: 'enum', enum: ProductVariantCondition })
   conditions: ProductVariantCondition;

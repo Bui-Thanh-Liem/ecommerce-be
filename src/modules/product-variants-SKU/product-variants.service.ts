@@ -58,18 +58,19 @@ export class ProductVariantsService {
       .createQueryBuilder('productVariant')
 
       // Join các quan hệ
-      .leftJoinAndSelect('product.product', 'product')
-      .leftJoinAndSelect('product.productImages', 'productImages')
+      .leftJoinAndSelect('productVariant.product', 'product')
+      .leftJoinAndSelect('productVariant.productImages', 'productImages')
 
       // Select các trường cụ thể (tương đương với select của bạn)
       .select([
         'productVariant.id',
         'productVariant.sku',
+        'productVariant.vat',
         'productVariant.price',
-        'productVariant.discountPercent',
+        'productVariant.createdAt',
         'productVariant.conditions',
         'productVariant.salesAttributes',
-        'productVariant.createdAt',
+        'productVariant.discountPercent',
         'product.id',
         'product.name',
         'product.slug',

@@ -24,15 +24,19 @@ export interface IVariantAttribute {
 export interface IProductVariant extends IBase {
   product: IProduct;
   sku: string;
-  price: number;
+  barcode?: string; // Mã vạch quốc tế của hãng (EAN/UPC) trên vỏ hộp
+
+  price: number; // Giá bán niêm yết
+  costPrice: number; // Giá vốn (Giá nhập trung bình/gốc để tính lợi nhuận)
   discountPercent: number;
-  vat?: number; // Thuế VAT (nếu có) được tính trên giá gốc (price), không tính trên giá đã giảm (discountPrice) %
+  vat?: number;
   soldCount: number;
-  conditions: ProductVariantCondition;
-  salesAttributes: IVariantAttribute[];
+
+  conditions: ProductVariantCondition; // Hàng mới, Hàng trưng bày (xả kho), Hàng đổi trả
+  salesAttributes: IVariantAttribute[]; // JSONB lưu color, dung tích, công suất...
   productImages: IProductImage[];
 
-  //
+  // ======================================
   inventories?: IInventory[];
   productItems?: IProductItem[];
   rating?: IRating[];

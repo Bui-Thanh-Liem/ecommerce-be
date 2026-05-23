@@ -21,17 +21,43 @@ export interface ISpecification {
 export interface IProduct extends IBase {
   name: string;
   slug: string;
-  desc: string; // Mô tả sản phẩm
+  desc: string;
   spu: string;
+  model: string;
   basePrice: number;
-  discountPercent: number;
   status: ProductStatus;
+  discountPercent: number;
   category: ICategory;
   brand: IBrand;
-  specifications: ISpecification[]; // Các thông số kỹ thuật chung của sản phẩm
+  specifications: ISpecification[];
 
-  //
-  productVariants?: IProductVariant[];
+  // Media tối ưu
+  thumbnail?: string; // Khi có productImages lấy tấm đầu tiên làm thumbnail
+  videoUrl?: string;
+
+  // Logistics mặc định cho SPU
+  weight?: number; // gram
+  length?: number; // cm
+  width?: number; // cm
+  height?: number; // cm
+
+  // SEO
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+
+  // Thống kê (Dùng để hiển thị nhanh không cần count/aggregate)
+  ratingAvg: number;
+  reviewCount: number;
+  viewCount: number;
+  soldCount: number;
+
+  // Flags
+  isFeatured: boolean; // Sản phẩm nổi bật (Banner, trang chủ, ...)
+  allowReview: boolean;
+
+  // ======================================
   cartItems?: ICartItem[];
+  productVariants?: IProductVariant[];
   productImages?: IProductImage[];
 }

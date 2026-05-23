@@ -19,6 +19,12 @@ export class ProductEntity extends BaseEntity implements IProduct {
   @Column({ type: 'text', nullable: true })
   desc: string;
 
+  @Column({ unique: true })
+  spu: string;
+
+  @Column({ unique: true })
+  model: string;
+
   @Column('decimal', { precision: 10, scale: 2 })
   basePrice: number;
 
@@ -34,8 +40,50 @@ export class ProductEntity extends BaseEntity implements IProduct {
   @ManyToOne(() => BrandEntity, (brand) => brand.products, { onDelete: 'SET NULL' })
   brand: BrandEntity;
 
-  @Column({ unique: true })
-  spu: string;
+  @Column({ type: 'varchar', nullable: true })
+  thumbnail?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  videoUrl?: string;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  weight?: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  height?: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  length?: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  width?: number;
+
+  @Column()
+  metaTitle?: string;
+
+  @Column()
+  metaDescription?: string;
+
+  @Column()
+  metaKeywords?: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  ratingAvg: number;
+
+  @Column({ type: 'int', default: 0 })
+  reviewCount: number;
+
+  @Column({ type: 'int', default: 0 })
+  viewCount: number;
+
+  @Column({ type: 'int', default: 0 })
+  soldCount: number;
+
+  @Column({ type: 'boolean', default: false })
+  isFeatured: boolean;
+
+  @Column({ type: 'boolean', default: true })
+  allowReview: boolean;
 
   @Column({ type: 'jsonb', nullable: true })
   specifications: ISpecification[];

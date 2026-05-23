@@ -1,13 +1,6 @@
 import { CategoryNode, TreeDataCategoryQuery } from '@/shared/interfaces/treedata-category-query.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -33,28 +26,34 @@ export class CategoriesService {
     const { name, parent: parentId, ...rest } = createCategoryDto;
     const slug = stringToSlug(name);
 
-    // Kiểm tra tên category đã tồn tại chưa
-    const existingCategory = await this.categoryRepo.exists({ where: { slug } });
-    if (existingCategory) {
-      throw new ConflictException('Category with this name already exists');
-    }
-
-    // Nếu có parentId, kiểm tra xem category cha có tồn tại không
-    if (parentId) {
-      const parentCategory = await this.categoryRepo.findOne({ where: { id: parentId } });
-      if (!parentCategory) {
-        throw new ConflictException('Parent category not found');
+    try {
+      // Kiểm tra tên category đã tồn tại chưa
+      const existingCategory = await this.categoryRepo.exists({ where: { slug } });
+      if (existingCategory) {
+        throw new ConflictException('Category with this name already exists');
       }
-    }
 
-    const category = this.categoryRepo.create({
-      ...rest,
-      slug,
-      name,
-      code: this.generateCategoryCode(name),
-      parent: parentId ? { id: parentId } : null,
-    });
-    return this.categoryRepo.save(category);
+      // Nếu có parentId, kiểm tra xem category cha có tồn tại không
+      if (parentId) {
+        const parentCategory = await this.categoryRepo.findOne({ where: { id: parentId } });
+        if (!parentCategory) {
+          throw new ConflictException('Parent category not found');
+        }
+      }
+
+      const category = this.categoryRepo.create({
+        ...rest,
+        slug,
+        name,
+        code: this.generateCategoryCode(name),
+        parent: parentId ? { id: parentId } : null,
+      });
+      return this.categoryRepo.save(category);
+    } catch (error) {
+      await this.removeImageForError(createCategoryDto.image?.key);
+      this.logger.debug(`Failed to create category`, error);
+      throw error;
+    }
   }
 
   async findAll(query: CategoryQueryDto): Promise<IMetadata<CategoryEntity>> {
@@ -196,40 +195,40 @@ export class CategoriesService {
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const { name, parent: parentId, image, ...rest } = updateCategoryDto;
 
-    // 1. Kiểm tra xem category có tồn tại không
-    const oldCategory = await this.categoryRepo.findOneBy({ id });
-    if (!oldCategory) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
-    }
-
-    // 2. Kiểm tra nếu có name thì phải unique
-    if (name) {
-      const slug = stringToSlug(name);
-      const existingCategory = await this.categoryRepo.exists({
-        where: { slug, id: Not(id) },
-      });
-      if (existingCategory) {
-        throw new ConflictException('Category with this name already exists');
-      }
-    }
-
-    // Chặn lỗi logic: Không được phép chọn chính mình làm cha (circular reference)
-    if (parentId && parentId === id) {
-      throw new BadRequestException('A category cannot be its own parent');
-    }
-
-    // Kiểm tra Parent có tồn tại không (nếu có update parent)
-    if (parentId) {
-      const parentExists = await this.categoryRepo.exists({ where: { id: parentId } });
-      if (!parentExists) {
-        throw new NotFoundException(`Parent category with ID ${parentId} not found`);
-      }
-    }
-
-    // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
-    const oldImageKey = oldCategory.image?.key;
-
     try {
+      // 1. Kiểm tra xem category có tồn tại không
+      const oldCategory = await this.categoryRepo.findOneBy({ id });
+      if (!oldCategory) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
+      }
+
+      // 2. Kiểm tra nếu có name thì phải unique
+      if (name) {
+        const slug = stringToSlug(name);
+        const existingCategory = await this.categoryRepo.exists({
+          where: { slug, id: Not(id) },
+        });
+        if (existingCategory) {
+          throw new ConflictException('Category with this name already exists');
+        }
+      }
+
+      // Chặn lỗi logic: Không được phép chọn chính mình làm cha (circular reference)
+      if (parentId && parentId === id) {
+        throw new BadRequestException('A category cannot be its own parent');
+      }
+
+      // Kiểm tra Parent có tồn tại không (nếu có update parent)
+      if (parentId) {
+        const parentExists = await this.categoryRepo.exists({ where: { id: parentId } });
+        if (!parentExists) {
+          throw new NotFoundException(`Parent category with ID ${parentId} not found`);
+        }
+      }
+
+      // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
+      const oldImageKey = oldCategory.image?.key;
+
       // 3. Cập nhật category
       const category = this.categoryRepo.merge(oldCategory, {
         ...rest,
@@ -246,8 +245,9 @@ export class CategoriesService {
         await this.cloudinaryService.deleteImage(oldImageKey);
       }
     } catch (error) {
-      // Xử lý lỗi khác nếu cần
-      throw new InternalServerErrorException('Error updating category', (error as Error).message);
+      await this.removeImageForError(updateCategoryDto.image?.key);
+      this.logger.debug(`Failed to update category with ID ${id}`, error);
+      throw error;
     }
   }
 
@@ -286,5 +286,10 @@ export class CategoriesService {
       .replace(/[\u0300-\u036f]/g, '')
       .substring(0, 10) // Lấy 10 ký tự đầu tiên
       .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
+  }
+
+  private removeImageForError(key?: string) {
+    if (!key) return;
+    return this.cloudinaryService.deleteImage(key);
   }
 }

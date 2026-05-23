@@ -38,6 +38,10 @@ export class CreateProductVariantDto {
 
   @IsNumber()
   @IsNotEmpty()
+  vat: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   price: number;
 
   @IsNumber()
@@ -53,7 +57,7 @@ export class CreateProductVariantDto {
   salesAttributes: VariantAttributeDto[];
 
   @IsArray()
-  @ArrayMaxSize(6)
+  @ArrayMaxSize(10)
   @ValidateNested({ each: true })
   @Type(() => CreateProductImageDto)
   productImages: CreateProductImageDto[];

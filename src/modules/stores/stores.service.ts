@@ -39,55 +39,61 @@ export class StoresService {
       ...rest
     } = createStoreDto;
 
-    //
-    const existingStore = await this.storeRepo.exists({ where: [{ name }] });
-    if (existingStore) {
-      throw new ConflictException('Store with the same name');
+    try {
+      //
+      const existingStore = await this.storeRepo.exists({ where: [{ name }] });
+      if (existingStore) {
+        throw new ConflictException('Store with the same name');
+      }
+
+      //
+      const isManagerAssigned = await this.storeRepo.exists({
+        where: { manager: { id: managerId } },
+      });
+      if (isManagerAssigned) {
+        throw new ConflictException('Manager is already assigned to another store');
+      }
+
+      // Tìm kiếm các region
+      const [countryExists, provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
+        this.locationService.exists(country),
+        this.locationService.exists(provinceCity),
+        this.locationService.exists(districtTown),
+        this.locationService.exists(wardCommune),
+        this.staffService.exists([managerId]),
+      ]);
+
+      if (!countryExists || !provinceExists || !districtExists || !wardExists) {
+        throw new NotFoundException('One or more location regions not found');
+      }
+
+      if (!managerExists) {
+        throw new NotFoundException('Manager not found');
+      }
+
+      // Tạo mới store với các region nếu có
+      const store = this.storeRepo.create({
+        ...rest,
+        name,
+        address,
+        country: { id: country },
+        provinceCity: { id: provinceCity },
+        districtTown: { id: districtTown },
+        wardCommune: { id: wardCommune },
+        manager: { id: managerId },
+      });
+
+      const savedStore = await this.storeRepo.save(store);
+
+      // Cập nhật lại thông tin store cho manager
+      await this.staffService.updateAfterStoreCreate(managerId, savedStore.id);
+
+      return savedStore;
+    } catch (error) {
+      await this.removeImageForError(createStoreDto.image?.key);
+      this.logger.debug(`Failed to create store`, error);
+      throw error;
     }
-
-    //
-    const isManagerAssigned = await this.storeRepo.exists({
-      where: { manager: { id: managerId } },
-    });
-    if (isManagerAssigned) {
-      throw new ConflictException('Manager is already assigned to another store');
-    }
-
-    // Tìm kiếm các region
-    const [countryExists, provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
-      this.locationService.exists(country),
-      this.locationService.exists(provinceCity),
-      this.locationService.exists(districtTown),
-      this.locationService.exists(wardCommune),
-      this.staffService.exists([managerId]),
-    ]);
-
-    if (!countryExists || !provinceExists || !districtExists || !wardExists) {
-      throw new NotFoundException('One or more location regions not found');
-    }
-
-    if (!managerExists) {
-      throw new NotFoundException('Manager not found');
-    }
-
-    // Tạo mới store với các region nếu có
-    const store = this.storeRepo.create({
-      ...rest,
-      name,
-      address,
-      country: { id: country },
-      provinceCity: { id: provinceCity },
-      districtTown: { id: districtTown },
-      wardCommune: { id: wardCommune },
-      manager: { id: managerId },
-    });
-
-    const savedStore = await this.storeRepo.save(store);
-
-    // Cập nhật lại thông tin store cho manager
-    await this.staffService.updateAfterStoreCreate(managerId, savedStore.id);
-
-    return savedStore;
   }
 
   async findAll(query: StoreQueryDto): Promise<IMetadata<StoreEntity>> {
@@ -191,57 +197,57 @@ export class StoresService {
   async update(id: string, updateStoreDto: UpdateStoreDto) {
     const { country, provinceCity, districtTown, wardCommune, manager: managerId, image, ...rest } = updateStoreDto;
 
-    // 1. Kiểm tra xem store có tồn tại không
-    const oldStore = await this.storeRepo.findOneBy({ id });
-    if (!oldStore) {
-      throw new NotFoundException(`Store with ID ${id} not found`);
-    }
-
-    // 2. Nếu có cập nhật manager, kiểm tra xem manager đó có tồn tại không và chưa được gán cho store nào khác
-    const validationPromises: Promise<void>[] = [];
-    if (country) {
-      validationPromises.push(
-        this.locationService.exists(country).then((ext) => {
-          if (!ext) throw new NotFoundException('Country not found');
-        }),
-      );
-    }
-    if (provinceCity) {
-      validationPromises.push(
-        this.locationService.exists(provinceCity).then((ext) => {
-          if (!ext) throw new NotFoundException('Province not found');
-        }),
-      );
-    }
-    if (districtTown) {
-      validationPromises.push(
-        this.locationService.exists(districtTown).then((ext) => {
-          if (!ext) throw new NotFoundException('District not found');
-        }),
-      );
-    }
-    if (wardCommune) {
-      validationPromises.push(
-        this.locationService.exists(wardCommune).then((ext) => {
-          if (!ext) throw new NotFoundException('Ward not found');
-        }),
-      );
-    }
-    if (managerId) {
-      validationPromises.push(
-        this.staffService.exists([managerId]).then((exists) => {
-          if (!exists) {
-            throw new NotFoundException('Manager not found');
-          }
-        }),
-      );
-    }
-    await Promise.all(validationPromises);
-
-    // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
-    const oldImageKey = oldStore.image?.key;
-
     try {
+      // 1. Kiểm tra xem store có tồn tại không
+      const oldStore = await this.storeRepo.findOneBy({ id });
+      if (!oldStore) {
+        throw new NotFoundException(`Store with ID ${id} not found`);
+      }
+
+      // 2. Nếu có cập nhật manager, kiểm tra xem manager đó có tồn tại không và chưa được gán cho store nào khác
+      const validationPromises: Promise<void>[] = [];
+      if (country) {
+        validationPromises.push(
+          this.locationService.exists(country).then((ext) => {
+            if (!ext) throw new NotFoundException('Country not found');
+          }),
+        );
+      }
+      if (provinceCity) {
+        validationPromises.push(
+          this.locationService.exists(provinceCity).then((ext) => {
+            if (!ext) throw new NotFoundException('Province not found');
+          }),
+        );
+      }
+      if (districtTown) {
+        validationPromises.push(
+          this.locationService.exists(districtTown).then((ext) => {
+            if (!ext) throw new NotFoundException('District not found');
+          }),
+        );
+      }
+      if (wardCommune) {
+        validationPromises.push(
+          this.locationService.exists(wardCommune).then((ext) => {
+            if (!ext) throw new NotFoundException('Ward not found');
+          }),
+        );
+      }
+      if (managerId) {
+        validationPromises.push(
+          this.staffService.exists([managerId]).then((exists) => {
+            if (!exists) {
+              throw new NotFoundException('Manager not found');
+            }
+          }),
+        );
+      }
+      await Promise.all(validationPromises);
+
+      // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
+      const oldImageKey = oldStore.image?.key;
+
       // 3. Cập nhật store với các trường mới nếu có
       const updatedStore = this.storeRepo.merge(oldStore, {
         ...rest,
@@ -258,8 +264,9 @@ export class StoresService {
         await this.cloudinaryService.deleteImage(oldImageKey);
       }
     } catch (error) {
+      await this.removeImageForError(updateStoreDto?.image?.key);
       this.logger.debug(`Failed to update store with ID ${id}`, error);
-      throw new NotFoundException(`Failed to update store with ID ${id}`);
+      throw error;
     }
   }
 
@@ -286,5 +293,10 @@ export class StoresService {
     }
 
     return true;
+  }
+
+  private removeImageForError(key?: string) {
+    if (!key) return;
+    return this.cloudinaryService.deleteImage(key);
   }
 }

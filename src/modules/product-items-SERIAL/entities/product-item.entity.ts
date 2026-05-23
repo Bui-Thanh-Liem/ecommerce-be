@@ -19,8 +19,20 @@ export class ProductItemEntity extends BaseEntity implements IProductItem {
   @Column({ unique: true })
   serialNumber: string;
 
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  purchasePrice?: number;
+
+  @Column({ type: 'timestamp' })
+  importDate: Date;
+
   @Column({ type: 'enum', enum: ProductItemStatus })
   status: ProductItemStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  warrantyActivatedAt?: Date;
+
+  // ============================
+  // order:
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductVariant có sku: ${this.serialNumber}`);

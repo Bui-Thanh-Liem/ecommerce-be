@@ -1,31 +1,56 @@
 import { IVariantAttribute } from '@/shared/interfaces/models/product-variant.interface';
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class ProductCodeService {
   /**
-   * Format: [CATEGORY]-[BRAND]-[SLUG]-[YYYY]-[SEQUENCE]
-   * Ví dụ: DT-APL-SLUG-2026-0001
+   * Sinh mã SPU
+   * Format: [CATEGORY]-[BRAND]-[MODEL]
+   * Xử lý xóa khoảng trắng, ký tự đặc biệt của Model
    */
-  generateSPUCode(categoryCode: string, brandCode: string, slug: string, sequence: number): string {
-    const year = new Date().getFullYear();
-    const formattedSeq = sequence.toString().padStart(4, '0'); // Đảm bảo đủ 4 chữ số
-    const formattedSlug = slug
-      .split('-')
-      .map((word) => word.substring(0, 2).toUpperCase())
-      .join('-');
-    return `${categoryCode}-${brandCode}-${formattedSlug}-${year}-${formattedSeq}`;
+  generateSPUCode(categoryCode: string, brandCode: string, model: string): string {
+    const cleanCategory = categoryCode
+      .toUpperCase()
+      .trim()
+      .replace(/[^A-Z0-9]/g, '');
+    const cleanBrand = brandCode
+      .toUpperCase()
+      .trim()
+      .replace(/[^A-Z0-9]/g, '');
+    const cleanModel = model
+      .toUpperCase()
+      .trim()
+      .replace(/[^A-Z0-9]/g, '');
+
+    return `${cleanCategory}-${cleanBrand}-${cleanModel}`;
   }
 
   /**
-   * Format: [SPU]-[SKU-SPEC1]-[SKU-SPEC2]-...
-   * Ví dụ: DT-APL-SLUG-2026-0001-BLU128
+   * Sinh mã SKU thực tế
+   * Format: [SPU]-[ATTRIBUTES_CODE]
+   * Ví dụ: DT-APL-IPHONE-BLK128
    */
   generateSKUCode(spuCode: string, salesAttributes: IVariantAttribute[]): string {
-    //
-    const variantItems = salesAttributes.flatMap((attr) => attr.value);
-    // eslint-disable-next-line max-len
-    const skuParts = variantItems.map((item) => `${item}`.toUpperCase().replace(/\s+/g, '')); // Loại bỏ khoảng trắng và chuyển thành chữ hoa
-    return `${spuCode}-${skuParts.join('-')}`;
+    if (!salesAttributes || salesAttributes.length === 0) {
+      throw new BadRequestException('Sales attributes không được để trống khi tạo SKU');
+    }
+
+    // 1. Lấy mã 'key' viết tắt của các thuộc tính, viết hoa và làm sạch
+    const attrParts = salesAttributes.map((attr) => {
+      if (!attr.key) {
+        // Fallback nếu không có trường code thì tự convert slug từ value, nhưng khuyên dùng trường code riêng
+        return attr.value.toUpperCase().replace(/\s+/g, '');
+      }
+      return attr.key
+        .toUpperCase()
+        .trim()
+        .replace(/[^A-Z0-9]/g, '');
+    });
+
+    // 2. Ghép lại thành một chuỗi mã thuộc tính duy nhất (Ví dụ: BLK128)
+    const attributesString = attrParts.join('');
+
+    // 3. Trả về mã SKU hoàn chỉnh (Không cần SEQUENCE đuôi)
+    return `${spuCode}-${attributesString}`;
   }
 }

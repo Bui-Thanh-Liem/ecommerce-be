@@ -75,6 +75,11 @@ export class CreateProductDto {
   @IsString()
   desc: string;
 
+  @IsString()
+  @Trim()
+  @IsNotEmpty()
+  model: string;
+
   @IsNumber()
   @IsNotEmpty()
   @Min(0)
@@ -88,6 +93,12 @@ export class CreateProductDto {
 
   @IsEnum(ProductStatus)
   status: ProductStatus;
+
+  @IsBoolean()
+  isFeatured: boolean;
+
+  @IsBoolean()
+  allowReview: boolean;
 
   @IsArray()
   @ArrayNotEmpty()

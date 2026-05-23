@@ -10,5 +10,9 @@ WHERE datname = 'shop_dev'
   AND pid <> pg_backend_pid();
 
 
--- Tạo sequence cho product_spu_id
-CREATE SEQUENCE IF NOT EXISTS product_spu_seq;
+-- Tạo sequence cho SKU
+CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1;
+
+-- Lấy giá trị tiếp theo từ sequence
+-- const queryResult = await query<{ val: string }[]>("SELECT nextval('order_number_seq') as val");
+-- const nextSeq = Number(queryResult[0].val);

@@ -33,7 +33,7 @@ export class ProductVariantSKUDto {
   soldCount: number;
 
   @Expose()
-  discountPrice: number;
+  discountPercent: number;
 
   @Expose()
   conditions: ProductVariantCondition;
