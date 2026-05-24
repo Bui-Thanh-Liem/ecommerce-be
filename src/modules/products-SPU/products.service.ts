@@ -60,6 +60,7 @@ export class ProductsService {
         spu,
         slug,
         name,
+        model,
         productImages, // Thêm productImages vào đây để cascade lưu
         brand: { id: brandId },
         category: { id: categoryId },
@@ -92,9 +93,16 @@ export class ProductsService {
       .select([
         'product.id',
         'product.spu',
+        'product.model',
         'product.name',
         'product.slug',
         'product.desc',
+        'product.weight',
+        'product.length',
+        'product.width',
+        'product.isFeatured',
+        'product.allowReview',
+        'product.height',
         'product.status',
         'product.createdAt',
         'product.basePrice',
@@ -203,6 +211,7 @@ export class ProductsService {
       const updatedProduct = this.productRepo.merge(oldProduct, {
         ...rest,
         name: name ? name : undefined,
+        model: model ? model : undefined,
         slug: name ? stringToSlug(name) : undefined,
         brand: brandId ? { id: brandId } : undefined,
         category: categoryId ? { id: categoryId } : undefined,

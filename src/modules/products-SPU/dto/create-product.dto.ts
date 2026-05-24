@@ -78,6 +78,7 @@ export class CreateProductDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
+  @MaxLength(20)
   model: string;
 
   @IsNumber()
@@ -99,6 +100,22 @@ export class CreateProductDto {
 
   @IsBoolean()
   allowReview: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
+
+  @IsOptional()
+  @IsNumber()
+  height?: number;
+
+  @IsOptional()
+  @IsNumber()
+  length?: number;
+
+  @IsOptional()
+  @IsNumber()
+  width?: number;
 
   @IsArray()
   @ArrayNotEmpty()

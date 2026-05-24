@@ -284,6 +284,8 @@ export class CategoriesService {
       .join('')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd') // xử lý riêng đ
+      .replace(/Đ/g, 'D')
       .substring(0, 10) // Lấy 10 ký tự đầu tiên
       .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }

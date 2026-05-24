@@ -45,7 +45,28 @@ export class ProductSPUDto extends SerializerDto {
   slug: string;
 
   @Expose()
+  model: string;
+
+  @Expose()
   desc: string;
+
+  @Expose()
+  weight: number;
+
+  @Expose()
+  length: number;
+
+  @Expose()
+  width: number;
+
+  @Expose()
+  height: number;
+
+  @Expose()
+  isFeatured: boolean;
+
+  @Expose()
+  allowReview: boolean;
 
   @Expose()
   category: CategoryDto;

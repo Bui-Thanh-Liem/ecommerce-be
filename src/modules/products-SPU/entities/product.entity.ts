@@ -22,7 +22,7 @@ export class ProductEntity extends BaseEntity implements IProduct {
   @Column({ unique: true })
   spu: string;
 
-  @Column({ unique: true })
+  @Column({ length: 20, unique: true })
   model: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -46,25 +46,25 @@ export class ProductEntity extends BaseEntity implements IProduct {
   @Column({ type: 'varchar', nullable: true })
   videoUrl?: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   weight?: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   height?: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   length?: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   width?: number;
 
-  @Column()
+  @Column({ nullable: true })
   metaTitle?: string;
 
-  @Column()
+  @Column({ nullable: true })
   metaDescription?: string;
 
-  @Column()
+  @Column({ nullable: true })
   metaKeywords?: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
