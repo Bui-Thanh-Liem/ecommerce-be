@@ -1,7 +1,7 @@
 import { CartEntity } from '@/modules/carts/entities/cart.entity';
 import { CustomerEntity } from '@/modules/customers/entities/customer.entity';
-import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
-import { StoreEntity } from '@/modules/stores/entities/store.entity';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
+import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
 import { VoucherStatus } from '@/shared/enums/voucher-status.enum';

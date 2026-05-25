@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { Permissions } from '@/decorators/permission.decorator';
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator';
-import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
 
 @Injectable()
 export class RoleGuard implements CanActivate {

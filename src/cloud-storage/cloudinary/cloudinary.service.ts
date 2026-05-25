@@ -78,10 +78,13 @@ export class CloudinaryService {
       sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
     };
 
-    return cloudinary.url(publicId, {
+    const url = cloudinary.url(publicId, {
       ...defaultOptions,
       ...(customOptions && typeof customOptions === 'object' && { ...customOptions }), // Cho phép ghi đè size (width, height), crop,... nếu cần
     });
+
+    // TODO: cache (redis)
+    return url;
   }
 
   /**

@@ -1,6 +1,6 @@
 import { CartEntity } from '@/modules/carts/entities/cart.entity';
-import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
-import { ProductEntity } from '@/modules/products-SPU/entities/product.entity';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
+import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICartItem } from '@/shared/interfaces/models/cart-item.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';

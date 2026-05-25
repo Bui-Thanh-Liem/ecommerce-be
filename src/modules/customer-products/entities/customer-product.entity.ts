@@ -1,5 +1,5 @@
 import { CustomerEntity } from '@/modules/customers/entities/customer.entity';
-import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
 import { ICustomerProduct } from '@/shared/interfaces/models/customer-product.interface';

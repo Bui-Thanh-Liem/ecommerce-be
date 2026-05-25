@@ -19,6 +19,7 @@ export interface IVariantAttribute {
   key: string; // vd: "color", "storage"
   label: string; // vd: "Màu sắc", "Dung lượng"
   value: string; // vd: "Đen lục bảo", "128GB"
+  isSKU?: boolean; // Thuộc tính nào sẽ hiển thị ở SKU
 }
 
 export interface IProductVariant extends IBase {

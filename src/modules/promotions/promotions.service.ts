@@ -4,7 +4,7 @@ import { UpdatePromotionDto } from './dto/update-promotion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromotionEntity } from './entities/promotion.entity';
 import { In, Repository } from 'typeorm';
-import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
+import { ProductVariantsService } from '../catalog/product-variants-SKU/product-variants.service';
 import { CampaignsService } from '../campaigns/campaigns.service';
 
 @Injectable()

@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryPromotionEntity } from './entities/category-promotion.entity';
 import { Repository } from 'typeorm';
 import { PromotionsService } from '../promotions/promotions.service';
-import { CategoriesService } from '../categories/categories.service';
+import { CategoriesService } from '../catalog/categories/categories.service';
 
 @Injectable()
 export class CategoryPromotionService {

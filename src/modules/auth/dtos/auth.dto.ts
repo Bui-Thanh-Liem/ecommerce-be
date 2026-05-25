@@ -1,4 +1,4 @@
-import { StaffDto } from '@/modules/staffs/dto/staff.dto';
+import { StaffDto } from '@/modules/management/staffs/dto/staff.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class AuthDto {

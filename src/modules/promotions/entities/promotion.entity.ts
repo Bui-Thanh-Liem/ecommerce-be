@@ -1,7 +1,7 @@
 import { CampaignEntity } from '@/modules/campaigns/entities/campaign.entity';
 import { CategoryPromotionEntity } from '@/modules/category-promotion/entities/category-promotion.entity';
 import { ProductPromotionEntity } from '@/modules/product-promotions/entities/product-promotion.entity';
-import { ProductVariantEntity } from '@/modules/product-variants-SKU/entities/product-variant.entity';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { PromotionApplyType } from '@/shared/enums/promotion-apply-type.enum';
 import { IPromotion } from '@/shared/interfaces/models/promotion.interface';

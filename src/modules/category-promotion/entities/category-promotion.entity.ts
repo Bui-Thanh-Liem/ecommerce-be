@@ -1,4 +1,4 @@
-import { CategoryEntity } from '@/modules/categories/entities/category.entity';
+import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
 import { PromotionEntity } from '@/modules/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategoryPromotion } from '@/shared/interfaces/models/category-promotion.interface';

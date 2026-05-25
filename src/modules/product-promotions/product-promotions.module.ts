@@ -3,7 +3,7 @@ import { ProductPromotionsService } from './product-promotions.service';
 import { ProductPromotionsController } from './product-promotions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductPromotionEntity } from './entities/product-promotion.entity';
-import { ProductVariantsModule } from '../product-variants-SKU/product-variants.module';
+import { ProductVariantsModule } from '../catalog/product-variants-SKU/product-variants.module';
 import { PromotionsModule } from '../promotions/promotions.module';
 
 @Module({

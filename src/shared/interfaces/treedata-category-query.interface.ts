@@ -1,4 +1,4 @@
-import { CategoryEntity } from '@/modules/categories/entities/category.entity';
+import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
 
 // Định nghĩa kiểu dữ liệu trả về từ SQL (Entity gốc + các cột tính toán)
 export type TreeDataCategoryQuery = Pick<CategoryEntity, 'id' | 'name' | 'code' | 'image' | 'parent'> & {

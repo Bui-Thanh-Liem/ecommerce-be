@@ -4,8 +4,8 @@ import { CartItemsController } from './cart-items.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { CartsModule } from '../carts/carts.module';
-import { ProductsModule } from '../products-SPU/products.module';
-import { ProductVariantsModule } from '../product-variants-SKU/product-variants.module';
+import { ProductsModule } from '../catalog/products-SPU/products.module';
+import { ProductVariantsModule } from '../catalog/product-variants-SKU/product-variants.module';
 
 @Module({
   imports: [

@@ -1,4 +1,4 @@
-import { LocationRegionEntity } from '@/modules/location-regions/entities/location-region.entity';
+import { LocationRegionEntity } from '@/modules/inventory/location-regions/entities/location-region.entity';
 
 // Định nghĩa kiểu dữ liệu trả về từ SQL (Entity gốc + các cột tính toán)
 export type TreeDataLocationRegionQuery = Pick<LocationRegionEntity, 'id' | 'name' | 'type' | 'parent'> & {

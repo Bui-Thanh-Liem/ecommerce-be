@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductPromotionEntity } from './entities/product-promotion.entity';
 import { Repository } from 'typeorm';
 import { PromotionsService } from '../promotions/promotions.service';
-import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
+import { ProductVariantsService } from '../catalog/product-variants-SKU/product-variants.service';
 
 @Injectable()
 export class ProductPromotionsService {

@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { StaffsService } from '@/modules/staffs/staffs.service';
 import { IJwtPayload } from '@/shared/interfaces/jwt-payload.interface';
-import { StaffEntity } from '@/modules/staffs/entities/staff.entity';
+import { StaffsService } from '@/modules/management/staffs/staffs.service';
+import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
 
 // JWT Strategy để xác thực người dùng dựa trên token JWT
 @Injectable()

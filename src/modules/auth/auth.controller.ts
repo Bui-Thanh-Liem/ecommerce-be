@@ -2,12 +2,12 @@ import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { CurrentStaff } from '../../decorators/current-staff.decorator';
-import { StaffEntity } from '../staffs/entities/staff.entity';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dtos/auth.dto';
 import { SigninStaffDto } from './dtos/signin-staff.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from '@/decorators/public.decorator';
+import { StaffEntity } from '../management/staffs/entities/staff.entity';
 
 @Controller('auth')
 @Serializer(AuthDto)

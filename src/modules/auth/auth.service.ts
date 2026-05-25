@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
-import { StaffTokensService } from '../staff-tokens/staff-tokens.service';
-import { StaffEntity } from '../staffs/entities/staff.entity';
-import { StaffsService } from '../staffs/staffs.service';
+import { StaffTokensService } from '../management/staff-tokens/staff-tokens.service';
 import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { StaffsService } from '../management/staffs/staffs.service';
+import { StaffEntity } from '../management/staffs/entities/staff.entity';
 
 @Injectable()
 export class AuthService {

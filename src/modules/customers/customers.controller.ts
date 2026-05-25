@@ -1,12 +1,12 @@
 import { CurrentStaff } from '@/decorators/current-staff.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { StaffEntity } from '../staffs/entities/staff.entity';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GoogleAuthGuard } from './guards/google.guard';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { CustomerDto } from './dto/customer.dto';
+import { StaffEntity } from '../management/staffs/entities/staff.entity';
 
 @Controller('customers')
 @Serializer(CustomerDto)

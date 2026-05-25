@@ -4,7 +4,7 @@ import { UpdateRatingDto } from './dto/update-rating.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RatingEntity } from './entities/rating.entity';
 import { CustomersService } from '../customers/customers.service';
-import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
+import { ProductVariantsService } from '../catalog/product-variants-SKU/product-variants.service';
 import { Repository } from 'typeorm';
 
 @Injectable()

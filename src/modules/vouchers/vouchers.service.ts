@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { VoucherEntity } from './entities/voucher.entity';
 import { Not, Repository } from 'typeorm';
 import { CustomersService } from '../customers/customers.service';
-import { StoresService } from '../stores/stores.service';
-import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
+import { StoresService } from '../inventory/stores/stores.service';
+import { ProductVariantsService } from '../catalog/product-variants-SKU/product-variants.service';
 
 @Injectable()
 export class VouchersService {

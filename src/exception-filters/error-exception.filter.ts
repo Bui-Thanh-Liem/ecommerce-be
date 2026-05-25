@@ -1,4 +1,4 @@
-import { StaffDto } from '@/modules/staffs/dto/staff.dto';
+import { StaffDto } from '@/modules/management/staffs/dto/staff.dto';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Request, Response } from 'express';
