@@ -10,8 +10,8 @@ export class CreateBrandDto {
   @MaxLength(50)
   name: string;
 
-  @IsNotEmpty()
   @IsObject()
+  @IsNotEmpty()
   @ValidateNested()
   @Type(() => ImageDto)
   image: ImageDto;

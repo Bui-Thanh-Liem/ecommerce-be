@@ -1,8 +1,8 @@
 import { BrandEntity } from '@/modules/catalog/brands/entities/brand.entity';
-import { CartItemEntity } from '@/modules/cart-items/entities/cart-item.entity';
 import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
 import { ProductImageEntity } from '@/modules/catalog/product-images/entities/product-image.entity';
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
+import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
 import { IProduct, ISpecification } from '@/shared/interfaces/models/product.interface';

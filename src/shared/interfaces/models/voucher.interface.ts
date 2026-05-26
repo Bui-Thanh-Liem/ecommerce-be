@@ -16,6 +16,7 @@ export interface IVoucher extends IBase {
   endDate: Date;
   maxUses: number; // số lần tối đa được sử dụng cho voucher này, nếu là 0 thì không giới hạn
   usedCount: number; // số lần đã được sử dụng, sẽ tăng lên mỗi khi có đơn hàng áp dụng voucher này
+  maxUsagePerUser: number; // Số lần sử dụng tối đa per người dùng
   minOrderValue: number; // giá trị đơn tối thiểu
   store?: IStore; // Voucher chỉ áp dụng cho 1 cửa hàng (optional)
   applicableVariants?: IProductVariant[]; // Áp dụng cho sản phẩm cụ thể

@@ -11,7 +11,6 @@ import { JwtAuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { OvInterceptor } from './interceptors/ov.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
-import { CustomersModule } from './modules/customers/customers.module';
 import { PermissionsModule } from './modules/management/permissions/permissions.module';
 import { StaffTokensModule } from './modules/management/staff-tokens/staff-tokens.module';
 import { StoresModule } from './modules/inventory/stores/stores.module';
@@ -23,23 +22,19 @@ import { BrandsModule } from './modules/catalog/brands/brands.module';
 import { ProductVariantsModule } from './modules/catalog/product-variants-SKU/product-variants.module';
 import { ProductItemsModule } from './modules/catalog/product-items-SERIAL/product-items.module';
 import { ProductImagesModule } from './modules/catalog/product-images/product-images.module';
-import { ProductPromotionsModule } from './modules/product-promotions/product-promotions.module';
-import { VouchersModule } from './modules/vouchers/vouchers.module';
+import { VouchersModule } from './modules/payments/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
 import { S3Module } from './cloud-storage/s3/s3.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { OrderItemsModule } from './modules/order-items/order-items.module';
-import { MoMoModule } from './payments/momo/momo.module';
-import { VnpayModule } from './payments/vnpay/vnpay.module';
-import { ZalopayModule } from './payments/zalopay/zalopay.module';
-import { RatingModule } from './modules/rating/rating.module';
-import { NavbarModule } from './modules/navbar/navbar.module';
-import { CustomerProductsModule } from './modules/customer-products/customer-products.module';
-import { PromotionsModule } from './modules/promotions/promotions.module';
-import { CampaignModule } from './modules/campaigns/campaigns.module';
-import { CategoryPromotionModule } from './modules/category-promotion/category-promotion.module';
-import { CartsModule } from './modules/carts/carts.module';
-import { CartItemsModule } from './modules/cart-items/cart-items.module';
+import { OrdersModule } from './modules/customer/orders/orders.module';
+import { OrderItemsModule } from './modules/customer/order-items/order-items.module';
+import { MoMoModule } from './modules/payments/momo/momo.module';
+import { VnPayModule } from './modules/payments/vnpay/vnpay.module';
+import { ZaloPayModule } from './modules/payments/zalopay/zalopay.module';
+import { RatingModule } from './modules/customer/rating/rating.module';
+import { ProductNavbarModule } from './modules/catalog/product-navbar/navbar.module';
+import { CustomerProductsModule } from './modules/customer/customer-products/customer-products.module';
+import { PromotionsModule } from './modules/campaign/promotions/promotions.module';
+import { CartsModule } from './modules/customer/carts/carts.module';
 import { TeamCategoriesModule } from './modules/management/team-categories/team-categories.module';
 import { CloudinaryModule } from './cloud-storage/cloudinary/cloudinary.module';
 import cloudinaryConfig from './configs/cloudinary.config';
@@ -47,6 +42,11 @@ import { StaffsModule } from './modules/management/staffs/staffs.module';
 import { RolesModule } from './modules/management/roles/roles.module';
 import { LocationRegionsModule } from './modules/inventory/location-regions/location-regions.module';
 import { TeamsModule } from './modules/management/teams/teams.module';
+import { CustomersModule } from './modules/customer/customers/customers.module';
+import { CartItemsModule } from './modules/customer/cart-items/cart-items.module';
+import { ProductPromotionsModule } from './modules/campaign/product-promotions/product-promotions.module';
+import { CampaignModule } from './modules/campaign/campaigns/campaigns.module';
+import { CategoryPromotionModule } from './modules/campaign/category-promotion/category-promotion.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -91,10 +91,10 @@ const isProd = process.env.NODE_ENV === 'production';
     OrdersModule,
     OrderItemsModule,
     MoMoModule,
-    VnpayModule,
-    ZalopayModule,
+    VnPayModule,
+    ZaloPayModule,
     RatingModule,
-    NavbarModule,
+    ProductNavbarModule,
     CustomerProductsModule,
     PromotionsModule,
     CampaignModule,

@@ -18,7 +18,7 @@ export const pgConfig: DataSourceOptions = {
   database: process.env.POSTGRES_DB || 'ecommerce',
   synchronize: !isProd,
   // logging: true,
-  entities: [join(__dirname, '../**/**/*.entity{.ts,.js}')],
+  entities: [join(__dirname, '../**/**/**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '../**/*.migration{.ts,.js}')],
   migrationsTableName: 'migrations-storage',
   poolSize: 10,

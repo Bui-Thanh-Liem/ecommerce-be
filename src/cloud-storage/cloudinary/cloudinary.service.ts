@@ -1,3 +1,4 @@
+import { IImage } from '@/shared/interfaces/image.interface';
 import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { v2 as cloudinary, SignApiOptions, UploadApiResponse, TransformationOptions } from 'cloudinary';
 
@@ -85,6 +86,36 @@ export class CloudinaryService {
 
     // TODO: cache (redis)
     return url;
+  }
+
+  /**
+   * 3.3. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
+   * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
+   */
+  generateUrls(images: IImage[], customOptions?: TransformationOptions): IImage[] {
+    if (!images || images.length === 0) {
+      throw new BadRequestException('Images không hợp lệ');
+    }
+
+    const defaultOptions: TransformationOptions = {
+      secure: true,
+      quality: 'auto',
+      fetch_format: 'auto',
+      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
+    };
+
+    const imageSigned = images.map((image) => {
+      return {
+        ...image,
+        url: cloudinary.url(image.key, {
+          ...defaultOptions,
+          ...(customOptions && typeof customOptions === 'object' && { ...customOptions }), // Cho phép ghi đè size (width, height), crop,... nếu cần
+        }),
+      };
+    });
+
+    // TODO: cache (redis)
+    return imageSigned;
   }
 
   /**

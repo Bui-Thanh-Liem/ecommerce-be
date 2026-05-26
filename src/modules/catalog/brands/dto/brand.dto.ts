@@ -16,8 +16,5 @@ export class BrandDto {
   image: ResponseImageDto;
 
   @Expose()
-  logo: ResponseImageDto;
-
-  @Expose()
   country: string;
 }
