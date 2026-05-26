@@ -1,18 +1,20 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCampaignDto } from './dto/create-campaign.dto';
-import { UpdateCampaignDto } from './dto/update-campaign.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CampaignEntity } from './entities/campaign.entity';
-import { In, Not, Repository } from 'typeorm';
-import { PromotionsService } from '../promotions/promotions.service';
-import { stringToSlug } from '@/utils/string-to-slug.util';
-import { CampaignQueryDto } from './dto/query-campaign.dto';
+import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
+import { stringToSlug } from '@/utils/string-to-slug.util';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Not, Repository } from 'typeorm';
+import { PromotionsService } from '../promotions/promotions.service';
+import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { CampaignQueryDto } from './dto/query-campaign.dto';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { CampaignEntity } from './entities/campaign.entity';
 
 @Injectable()
 export class CampaignsService {
+  private readonly logger = new Logger(CampaignsService.name);
+
   constructor(
     @InjectRepository(CampaignEntity)
     private campaignRepository: Repository<CampaignEntity>,
@@ -24,37 +26,44 @@ export class CampaignsService {
   ) {}
 
   async create(createCampaignDto: CreateCampaignDto) {
-    const { promotions: promotionIds, name, startDate, endDate, ...rest } = createCampaignDto;
+    try {
+      const { promotions: promotionIds, name, startDate, endDate, ...rest } = createCampaignDto;
 
-    //
-    if (startDate >= endDate) {
-      throw new NotFoundException('Start date must be before end date');
-    }
-
-    //
-    const slug = stringToSlug(name);
-    const existingCampaign = await this.campaignRepository.exists({ where: { slug } });
-    if (existingCampaign) {
-      throw new NotFoundException('A campaign with the same name already exists');
-    }
-
-    //
-    if (promotionIds && promotionIds?.length > 0) {
-      const promotionsExist = await this.promotionService.exists(promotionIds);
-      if (!promotionsExist) {
-        throw new NotFoundException(`One or more Promotion IDs not found: ${promotionIds.join(', ')}`);
+      //
+      if (startDate >= endDate) {
+        throw new NotFoundException('Start date must be before end date');
       }
-    }
 
-    const campaign = this.campaignRepository.create({
-      ...rest,
-      name,
-      slug,
-      startDate,
-      endDate,
-      promotions: promotionIds?.map((id) => ({ id })) || [],
-    });
-    return await this.campaignRepository.save(campaign);
+      //
+      const slug = stringToSlug(name);
+      const existingCampaign = await this.campaignRepository.exists({ where: { slug } });
+      if (existingCampaign) {
+        throw new NotFoundException('A campaign with the same name already exists');
+      }
+
+      //
+      if (promotionIds && promotionIds?.length > 0) {
+        const promotionsExist = await this.promotionService.exists(promotionIds);
+        if (!promotionsExist) {
+          throw new NotFoundException(`One or more Promotion IDs not found: ${promotionIds.join(', ')}`);
+        }
+      }
+
+      const campaign = this.campaignRepository.create({
+        ...rest,
+        name,
+        slug,
+        startDate,
+        endDate,
+        promotions: promotionIds?.map((id) => ({ id })) || [],
+      });
+      return await this.campaignRepository.save(campaign);
+    } catch (error) {
+      const keys = [...(createCampaignDto?.images?.map((img) => img.key) || []), createCampaignDto?.mainImage.key];
+      await this.removeImagesForError(keys);
+      this.logger.debug(`Failed to create brand`, error);
+      throw error;
+    }
   }
 
   async findAll(query: CampaignQueryDto): Promise<IMetadata<CampaignEntity>> {
@@ -131,44 +140,51 @@ export class CampaignsService {
   }
 
   async update(id: string, updateCampaignDto: UpdateCampaignDto) {
-    const { promotions: promotionIds, name, startDate, endDate, ...rest } = updateCampaignDto;
+    try {
+      const { promotions: promotionIds, name, startDate, endDate, ...rest } = updateCampaignDto;
 
-    //
-    if (startDate && endDate && startDate >= endDate) {
-      throw new NotFoundException('Start date must be before end date');
-    }
-
-    //
-    let slug: string | undefined = undefined;
-    if (name) {
-      slug = stringToSlug(name);
-      const existingCampaign = await this.campaignRepository.exists({ where: { slug, id: Not(id) } });
-      if (existingCampaign) {
-        throw new NotFoundException('A campaign with the same name already exists');
+      //
+      if (startDate && endDate && startDate >= endDate) {
+        throw new NotFoundException('Start date must be before end date');
       }
-    }
 
-    //
-    if (promotionIds && promotionIds.length > 0) {
-      const promotionsExist = await this.promotionService.exists(promotionIds);
-      if (!promotionsExist) {
-        throw new NotFoundException(`One or more Promotion IDs not found: ${promotionIds.join(', ')}`);
+      //
+      let slug: string | undefined = undefined;
+      if (name) {
+        slug = stringToSlug(name);
+        const existingCampaign = await this.campaignRepository.exists({ where: { slug, id: Not(id) } });
+        if (existingCampaign) {
+          throw new NotFoundException('A campaign with the same name already exists');
+        }
       }
-    }
 
-    const campaign = await this.campaignRepository.preload({
-      id,
-      ...rest,
-      slug,
-      endDate,
-      startDate,
-      name: name ? name : undefined,
-      promotions: promotionIds ? promotionIds.map((id) => ({ id })) : undefined,
-    });
-    if (!campaign) {
-      throw new NotFoundException(`Campaign with ID ${id} not found`);
+      //
+      if (promotionIds && promotionIds.length > 0) {
+        const promotionsExist = await this.promotionService.exists(promotionIds);
+        if (!promotionsExist) {
+          throw new NotFoundException(`One or more Promotion IDs not found: ${promotionIds.join(', ')}`);
+        }
+      }
+
+      const campaign = await this.campaignRepository.preload({
+        id,
+        ...rest,
+        slug,
+        endDate,
+        startDate,
+        name: name ? name : undefined,
+        promotions: promotionIds ? promotionIds.map((id) => ({ id })) : undefined,
+      });
+      if (!campaign) {
+        throw new NotFoundException(`Campaign with ID ${id} not found`);
+      }
+      return await this.campaignRepository.save(campaign);
+    } catch (error) {
+      const keys = [...(updateCampaignDto?.images?.map((img) => img.key) || []), updateCampaignDto?.mainImage?.key];
+      await this.removeImagesForError(keys.filter((key): key is string => !!key));
+      this.logger.debug(`Failed to update campaign`, error);
+      throw error;
     }
-    return await this.campaignRepository.save(campaign);
   }
 
   async remove(id: string) {
@@ -178,5 +194,10 @@ export class CampaignsService {
     }
 
     return await this.campaignRepository.remove(campaign);
+  }
+
+  private removeImagesForError(keys?: string[]) {
+    if (!keys || keys.length === 0) return;
+    return this.cloudinaryService.deleteMultipleImages(keys);
   }
 }

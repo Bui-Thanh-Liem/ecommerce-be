@@ -1,19 +1,21 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductVariantDto } from './dto/create-product-variant.dto';
-import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ProductVariantEntity } from './entities/product-variant.entity';
-import { In, Not, Repository } from 'typeorm';
-import { ProductsService } from '../products-SPU/products.service';
-import { ProductCodeService } from '../product-code/product-code.service';
-import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
-import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
-import { ProductImageEntity } from '../product-images/entities/product-image.entity';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Not, Repository } from 'typeorm';
+import { ProductCodeService } from '../product-code/product-code.service';
+import { ProductImageEntity } from '../product-images/entities/product-image.entity';
+import { ProductsService } from '../products-SPU/products.service';
+import { CreateProductVariantDto } from './dto/create-product-variant.dto';
+import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { ProductVariantEntity } from './entities/product-variant.entity';
 
 @Injectable()
 export class ProductVariantsService {
+  private readonly logger = new Logger(ProductVariantsService.name);
+
   constructor(
     @InjectRepository(ProductVariantEntity)
     private productVariantRepo: Repository<ProductVariantEntity>,
@@ -24,28 +26,34 @@ export class ProductVariantsService {
   ) {}
 
   async create(createProductVariantDto: CreateProductVariantDto) {
-    const { product: productId, productImages, ...rest } = createProductVariantDto;
+    try {
+      const { product: productId, productImages, ...rest } = createProductVariantDto;
 
-    // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant
-    const spu = await this.productsService.findSPUById(productId);
-    if (!spu) throw new NotFoundException(`Product with id ${productId} not found`);
+      // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant
+      const spu = await this.productsService.findSPUById(productId);
+      if (!spu) throw new NotFoundException(`Product with id ${productId} not found`);
 
-    // 2.  Tạo SKU dựa trên SPU và specifications
-    const salesAttributeSKU = rest.salesAttributes.filter((attr) => attr.isSKU);
-    const sku = this.productCodeService.generateSKUCode(spu, salesAttributeSKU);
+      // 2.  Tạo SKU dựa trên SPU và specifications
+      const salesAttributeSKU = rest.salesAttributes.filter((attr) => attr.isSKU);
+      const sku = this.productCodeService.generateSKUCode(spu, salesAttributeSKU);
 
-    // 3. Kiểm tra SKU có bị trùng không
-    const exitsSKU = await this.productVariantRepo.findOne({ where: { sku } });
-    if (exitsSKU) throw new NotFoundException(`Product variant with SKU ${sku} already exists`);
+      // 3. Kiểm tra SKU có bị trùng không
+      const exitsSKU = await this.productVariantRepo.findOne({ where: { sku } });
+      if (exitsSKU) throw new NotFoundException(`Product variant with SKU ${sku} already exists`);
 
-    // 4. Tạo ProductVariant mới
-    const productVariant = this.productVariantRepo.create({
-      ...rest,
-      sku,
-      product: { id: productId },
-      productImages: productImages, // Thêm productImages vào đây để cascade lưu
-    });
-    return this.productVariantRepo.save(productVariant);
+      // 4. Tạo ProductVariant mới
+      const productVariant = this.productVariantRepo.create({
+        ...rest,
+        sku,
+        product: { id: productId },
+        productImages: productImages, // Thêm productImages vào đây để cascade lưu
+      });
+      return this.productVariantRepo.save(productVariant);
+    } catch (error) {
+      await this.removeImagesForError(createProductVariantDto.productImages?.map((img) => img.image.url));
+      this.logger.debug(`Failed to create brand`, error);
+      throw error;
+    }
   }
 
   async findAll(query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
@@ -130,51 +138,57 @@ export class ProductVariantsService {
   }
 
   async update(id: string, updateProductVariantDto: UpdateProductVariantDto) {
-    const { product: productId, ...rest } = updateProductVariantDto;
+    try {
+      const { product: productId, ...rest } = updateProductVariantDto;
 
-    // Preload entity hiện tại + merge dữ liệu mới
-    const existingVariant = await this.productVariantRepo.preload({
-      id,
-      ...rest,
-      ...(productId && { product: { id: productId } }),
-    });
-
-    if (!existingVariant) {
-      throw new NotFoundException(`Product variant with id ${id} not found`);
-    }
-
-    // Nếu có cập nhật Product (SPU), kiểm tra tồn tại
-    let spu: string | undefined = existingVariant.product.spu;
-    if (productId) {
-      spu = await this.productsService.findSPUById(productId);
-      if (!spu) {
-        throw new NotFoundException(`Product with id ${productId} not found`);
-      }
-    }
-
-    // Tạo SKU mới nếu salesAttributes hoặc product thay đổi
-    let sku = existingVariant.sku;
-    const shouldRegenerateSKU = productId || rest.salesAttributes !== undefined;
-    const salesAttributeSKU = rest.salesAttributes?.filter((attr) => attr.isSKU);
-    if (shouldRegenerateSKU) {
-      sku = this.productCodeService.generateSKUCode(spu, salesAttributeSKU ?? existingVariant.salesAttributes);
-
-      // Kiểm tra SKU có bị trùng không (trừ variant hiện tại)
-      const existsSKU = await this.productVariantRepo.findOne({
-        where: {
-          sku,
-          id: Not(id),
-        },
+      // Preload entity hiện tại + merge dữ liệu mới
+      const existingVariant = await this.productVariantRepo.preload({
+        id,
+        ...rest,
+        ...(productId && { product: { id: productId } }),
       });
 
-      if (existsSKU) {
-        throw new ConflictException(`Product variant with SKU ${sku} already exists`);
+      if (!existingVariant) {
+        throw new NotFoundException(`Product variant with id ${id} not found`);
       }
 
-      existingVariant.sku = sku;
-    }
+      // Nếu có cập nhật Product (SPU), kiểm tra tồn tại
+      let spu: string | undefined = existingVariant.product.spu;
+      if (productId) {
+        spu = await this.productsService.findSPUById(productId);
+        if (!spu) {
+          throw new NotFoundException(`Product with id ${productId} not found`);
+        }
+      }
 
-    return this.productVariantRepo.save(existingVariant);
+      // Tạo SKU mới nếu salesAttributes hoặc product thay đổi
+      let sku = existingVariant.sku;
+      const shouldRegenerateSKU = productId || rest.salesAttributes !== undefined;
+      const salesAttributeSKU = rest.salesAttributes?.filter((attr) => attr.isSKU);
+      if (shouldRegenerateSKU) {
+        sku = this.productCodeService.generateSKUCode(spu, salesAttributeSKU ?? existingVariant.salesAttributes);
+
+        // Kiểm tra SKU có bị trùng không (trừ variant hiện tại)
+        const existsSKU = await this.productVariantRepo.findOne({
+          where: {
+            sku,
+            id: Not(id),
+          },
+        });
+
+        if (existsSKU) {
+          throw new ConflictException(`Product variant with SKU ${sku} already exists`);
+        }
+
+        existingVariant.sku = sku;
+      }
+
+      return this.productVariantRepo.save(existingVariant);
+    } catch (error) {
+      await this.removeImagesForError(updateProductVariantDto.productImages?.map((img) => img?.image?.url));
+      this.logger.debug(`Failed to create brand`, error);
+      throw error;
+    }
   }
 
   async remove(id: string) {
@@ -182,5 +196,10 @@ export class ProductVariantsService {
     if (productVariant) {
       await this.productVariantRepo.remove(productVariant);
     }
+  }
+
+  private removeImagesForError(keys?: string[]) {
+    if (!keys || keys.length === 0) return;
+    return this.cloudinaryService.deleteMultipleImages(keys);
   }
 }

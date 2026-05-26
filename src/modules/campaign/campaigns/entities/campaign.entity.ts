@@ -22,7 +22,7 @@ export class CampaignEntity extends BaseEntity implements ICampaign {
   @Column({ type: 'json' })
   mainImage: IImage;
 
-  @Column({ type: 'json', array: true })
+  @Column({ type: 'json' })
   images: IImage[];
 
   @Column({ type: 'timestamp' })

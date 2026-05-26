@@ -2,6 +2,7 @@ import { Trim } from '@/decorators/trim.decorator';
 import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
@@ -42,7 +43,7 @@ export class CreateCampaignDto {
   @ArrayNotEmpty()
   @ValidateNested()
   @Type(() => ImageDto)
-  @MaxLength(5)
+  @ArrayMaxSize(5)
   images: ImageDto[];
 
   @IsDate()
@@ -53,6 +54,7 @@ export class CreateCampaignDto {
   @IsNotEmpty()
   endDate: Date;
 
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   promotions: string[];
