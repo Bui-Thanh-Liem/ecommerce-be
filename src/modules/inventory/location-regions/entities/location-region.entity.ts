@@ -1,7 +1,9 @@
+import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { ILocationRegion } from '@/shared/interfaces/models/location-region.interface';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
+import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
 @Entity('location_regions')
 export class LocationRegionEntity extends BaseEntity implements ILocationRegion {
@@ -19,6 +21,10 @@ export class LocationRegionEntity extends BaseEntity implements ILocationRegion 
   @JoinColumn({ name: 'parent' })
   @TreeParent()
   parent: LocationRegionEntity | null;
+
+  //
+  @ManyToMany(() => PromotionEntity, (promotion) => promotion.locations, { nullable: true })
+  promotions?: IPromotion[] | undefined;
 
   @OneToMany(() => LocationRegionEntity, (region) => region.parent)
   children?: LocationRegionEntity[];

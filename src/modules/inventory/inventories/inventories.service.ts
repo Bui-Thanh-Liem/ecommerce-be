@@ -10,7 +10,7 @@ import { Logger } from '@nestjs/common';
 import { InventoryQueryDto } from './dto/query-inventory.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
-import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { ProductImageEntity } from '../../catalog/product-images/entities/product-image.entity';
 
 @Injectable()

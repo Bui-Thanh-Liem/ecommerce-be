@@ -1,15 +1,16 @@
 import { ConflictException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Repository } from 'typeorm';
+import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { StoreEntity } from './entities/store.entity';
 import { StoreQueryDto } from './dto/query-store.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
 import { StaffsService } from '@/modules/management/staffs/staffs.service';
+import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class StoresService {
@@ -23,38 +24,35 @@ export class StoresService {
 
     @Inject(forwardRef(() => StaffsService))
     private readonly staffService: StaffsService,
+    private dataSource: DataSource,
 
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createStoreDto: CreateStoreDto) {
-    const {
-      country,
-      provinceCity,
-      districtTown,
-      wardCommune,
-      manager: managerId,
-      name,
-      address,
-      ...rest
-    } = createStoreDto;
-
     try {
-      //
-      const existingStore = await this.storeRepo.exists({ where: [{ name }] });
-      if (existingStore) {
-        throw new ConflictException('Store with the same name');
-      }
+      const {
+        country,
+        provinceCity,
+        districtTown,
+        wardCommune,
+        manager: managerId,
+        name,
+        address,
+        ...rest
+      } = createStoreDto;
 
-      //
-      const isManagerAssigned = await this.storeRepo.exists({
-        where: { manager: { id: managerId } },
-      });
-      if (isManagerAssigned) {
-        throw new ConflictException('Manager is already assigned to another store');
-      }
+      // 1. Kiểm tra trùng tên store và trùng manager
+      const [eS, eM] = await Promise.all([
+        this.storeRepo.exists({ where: [{ name }] }),
+        this.storeRepo.exists({
+          where: { manager: { id: managerId } },
+        }),
+      ]);
+      if (eS) throw new ConflictException('Store with the same name');
+      if (eM) throw new ConflictException('Manager is already assigned to another store');
 
-      // Tìm kiếm các region
+      // 2. Tìm kiếm các region
       const [countryExists, provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
         this.locationService.exists(country),
         this.locationService.exists(provinceCity),
@@ -67,11 +65,9 @@ export class StoresService {
         throw new NotFoundException('One or more location regions not found');
       }
 
-      if (!managerExists) {
-        throw new NotFoundException('Manager not found');
-      }
+      if (!managerExists) throw new NotFoundException('Manager not found');
 
-      // Tạo mới store với các region nếu có
+      // 3. Tạo mới store với các region nếu có
       const store = this.storeRepo.create({
         ...rest,
         name,
@@ -85,7 +81,7 @@ export class StoresService {
 
       const savedStore = await this.storeRepo.save(store);
 
-      // Cập nhật lại thông tin store cho manager
+      // 4. Cập nhật lại thông tin store cho manager
       await this.staffService.updateAfterStoreCreate(managerId, savedStore.id);
 
       return savedStore;
@@ -147,14 +143,17 @@ export class StoresService {
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
 
     // Chuyển đổi URL ảnh nếu có
-    data.forEach((store) => {
-      if (store.image && store.image.key) {
-        store.image.url = this.cloudinaryService.generateUrl(store.image.key);
-      }
-    });
+    const dataWithUrls = await Promise.all(
+      data.map(async (store) => {
+        if (store.image && store.image.key) {
+          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+        }
+        return store;
+      }),
+    );
 
     return {
-      data,
+      data: dataWithUrls,
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
@@ -195,78 +194,107 @@ export class StoresService {
   }
 
   async update(id: string, updateStoreDto: UpdateStoreDto) {
-    const { country, provinceCity, districtTown, wardCommune, manager: managerId, image, ...rest } = updateStoreDto;
+    const {
+      country,
+      provinceCity,
+      districtTown,
+      wardCommune,
+      manager: managerId,
+      image,
+      name,
+      ...rest
+    } = updateStoreDto;
+
+    // ==========================================
+    // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
+    // ==========================================
+
+    // Lấy dữ liệu cũ để check tồn tại và giữ lại thông tin ảnh cũ
+    const oldStore = await this.storeRepo.findOne({
+      where: { id },
+      select: { id: true, name: true, image: true },
+    });
+    if (!oldStore) {
+      throw new NotFoundException(`Store with ID ${id} not found`);
+    }
+
+    // Chạy song song các câu lệnh check độc lập ngoài transaction
+    const [eN, eC, ePC, eDT, eWC, eM] = await Promise.all([
+      name ? this.storeRepo.exists({ where: { name, id: Not(id) } }) : null,
+      country ? this.locationService.exists(country) : null,
+      provinceCity ? this.locationService.exists(provinceCity) : null,
+      districtTown ? this.locationService.exists(districtTown) : null,
+      wardCommune ? this.locationService.exists(wardCommune) : null,
+      managerId ? this.staffService.exists([managerId]) : null,
+    ]);
+
+    // Check trùng tên (Sửa lỗi logic !eN thành eN và đổi sang đúng ConflictException)
+    if (eN) throw new ConflictException('Store with this name already exists');
+
+    // Check tồn tại các khóa ngoại
+    if (country && !eC) throw new NotFoundException('Country not found');
+    if (provinceCity && !ePC) throw new NotFoundException('Province not found');
+    if (districtTown && !eDT) throw new NotFoundException('District not found');
+    if (wardCommune && !eWC) throw new NotFoundException('Ward not found');
+    if (managerId && !eM) throw new NotFoundException('Manager not found');
+
+    // Ghi nhận key ảnh cũ trước khi bị ghi đè
+    const oldImageKey = oldStore.image?.key;
+
+    // ==========================================
+    // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)
+    // ==========================================
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      // 1. Kiểm tra xem store có tồn tại không
-      const oldStore = await this.storeRepo.findOneBy({ id });
-      if (!oldStore) {
-        throw new NotFoundException(`Store with ID ${id} not found`);
-      }
-
-      // 2. Nếu có cập nhật manager, kiểm tra xem manager đó có tồn tại không và chưa được gán cho store nào khác
-      const validationPromises: Promise<void>[] = [];
-      if (country) {
-        validationPromises.push(
-          this.locationService.exists(country).then((ext) => {
-            if (!ext) throw new NotFoundException('Country not found');
-          }),
-        );
-      }
-      if (provinceCity) {
-        validationPromises.push(
-          this.locationService.exists(provinceCity).then((ext) => {
-            if (!ext) throw new NotFoundException('Province not found');
-          }),
-        );
-      }
-      if (districtTown) {
-        validationPromises.push(
-          this.locationService.exists(districtTown).then((ext) => {
-            if (!ext) throw new NotFoundException('District not found');
-          }),
-        );
-      }
-      if (wardCommune) {
-        validationPromises.push(
-          this.locationService.exists(wardCommune).then((ext) => {
-            if (!ext) throw new NotFoundException('Ward not found');
-          }),
-        );
-      }
-      if (managerId) {
-        validationPromises.push(
-          this.staffService.exists([managerId]).then((exists) => {
-            if (!exists) {
-              throw new NotFoundException('Manager not found');
-            }
-          }),
-        );
-      }
-      await Promise.all(validationPromises);
-
-      // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
-      const oldImageKey = oldStore.image?.key;
-
-      // 3. Cập nhật store với các trường mới nếu có
+      // Merge dữ liệu mới vào thực thể cũ
       const updatedStore = this.storeRepo.merge(oldStore, {
         ...rest,
-        image: image ? image : undefined,
+        ...(name && { name }),
         manager: managerId ? { id: managerId } : undefined,
         wardCommune: wardCommune ? { id: wardCommune } : undefined,
         districtTown: districtTown ? { id: districtTown } : undefined,
         provinceCity: provinceCity ? { id: provinceCity } : undefined,
+        // (Nếu Dto có truyền country thì mapping vào entity tương ứng của bạn, ở đây mình giữ nguyên theo rest nếu có)
       });
-      await this.storeRepo.save(updatedStore);
 
-      // 4. Nếu có cập nhật ảnh, xóa ảnh cũ trên Cloudinary
-      if (image?.key && oldImageKey && image.key !== oldImageKey) {
+      if (image !== undefined) {
+        updatedStore.image = image as IImage; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+      }
+
+      // Lưu vào DB qua transaction manager
+      await queryRunner.manager.save(StoreEntity, updatedStore);
+
+      // Chỉ commit khi DB hoàn tất
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      // Nếu DB lỗi, dọn dẹp ảnh MỚI vừa được truyền lên từ Dto để tránh rác Cloudinary
+      if (image?.key) {
+        await this.removeImageForError(image.key).catch((err) =>
+          this.logger.error(`Failed to cleanup new store image on error`, err),
+        );
+      }
+
+      this.logger.error(`Failed to update store with ID ${id}`, error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+
+    // ==========================================
+    // 3. CLEANUP CLOUDINARY (Sau khi DB thành công 100%)
+    // ==========================================
+    try {
+      // Chỉ tiến hành xóa ảnh cũ nếu có truyền ảnh mới, ảnh cũ thực sự tồn tại và khác ảnh mới
+      if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
         await this.cloudinaryService.deleteImage(oldImageKey);
       }
-    } catch (error) {
-      await this.removeImageForError(updateStoreDto?.image?.key);
-      this.logger.debug(`Failed to update store with ID ${id}`, error);
-      throw error;
+    } catch (cloudError) {
+      this.logger.warn(`Database updated but failed to delete old store image from Cloudinary`, cloudError);
     }
   }
 
@@ -276,27 +304,19 @@ export class StoresService {
       throw new NotFoundException(`Store with ID ${id} not found`);
     }
 
-    // 1. Xóa trong DB trước - Chạy mất vài mili-giây, giải phóng DB ngay lập tức
+    // 1. Xóa trong DB trước
     await this.storeRepo.remove(store);
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (store.image && store.image.key) {
-      try {
-        await this.cloudinaryService.deleteImage(store.image.key);
-      } catch (error) {
-        // Nếu lỗi cloud ở đây, DB đã xóa xong nên hệ thống KHÔNG bị lỗi hiển thị ảnh chết.
-        // Chúng ta chỉ bị thừa 1 cái ảnh rác trên Cloudinary.
-        // Log lỗi lại để dùng Cron Job quét rác sau,
-        // hoặc ném vào Queue để nó tự động xóa lại (Retry).
-        console.error(`Failed to delete image from Cloudinary: ${store.image.key}`, error);
-      }
+      await this.cloudinaryService.deleteImage(store.image.key);
     }
 
     return true;
   }
 
-  private removeImageForError(key?: string) {
+  private async removeImageForError(key?: string) {
     if (!key) return;
-    return this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryService.deleteImage(key);
   }
 }

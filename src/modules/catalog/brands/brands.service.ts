@@ -1,14 +1,15 @@
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { DataSource, In, Not, Repository } from 'typeorm';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandEntity } from './entities/brand.entity';
 import { BrandQueryDto } from './dto/query-brand.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { CloudinaryService } from '@/cloud-storage/cloudinary/cloudinary.service';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class BrandsService {
@@ -18,6 +19,7 @@ export class BrandsService {
     @InjectRepository(BrandEntity)
     private brandRepo: Repository<BrandEntity>,
     private readonly cloudinaryService: CloudinaryService,
+    private dataSource: DataSource,
   ) {}
 
   async create(createBrandDto: CreateBrandDto) {
@@ -67,14 +69,17 @@ export class BrandsService {
     const [data, total] = await queryBuilder.getManyAndCount();
 
     // Chuyển đổi URL ảnh nếu có
-    data.forEach((brand) => {
-      if (brand.image && brand.image.key) {
-        brand.image.url = this.cloudinaryService.generateUrl(brand.image.key);
-      }
-    });
+    const dataWithUrls = await Promise.all(
+      data.map(async (brand) => {
+        if (brand.image && brand.image.key) {
+          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+        }
+        return brand;
+      }),
+    );
 
     return {
-      data,
+      data: dataWithUrls,
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
@@ -98,43 +103,82 @@ export class BrandsService {
   async update(id: string, updateBrandDto: UpdateBrandDto) {
     const { name, image, ...rest } = updateBrandDto;
 
+    // ==========================================
+    // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
+    // ==========================================
+
+    // Lấy dữ liệu cũ để check tồn tại và giữ lại key ảnh cũ phục vụ dọn dẹp bộ nhớ
+    const oldBrand = await this.brandRepo.findOne({
+      where: { id },
+      select: { id: true, name: true, slug: true, image: true },
+    });
+    if (!oldBrand) {
+      throw new NotFoundException(`Brand with ID ${id} not found`);
+    }
+
+    const slug = name ? stringToSlug(name) : undefined;
+
+    // Chạy song song các câu lệnh check độc lập ngoài transaction
+    const [isSlugDup] = await Promise.all([
+      name ? this.brandRepo.exists({ where: { slug, id: Not(id) } }) : Promise.resolve(false),
+    ]);
+
+    if (isSlugDup) {
+      throw new ConflictException('Brand with this name already exists');
+    }
+
+    // Ghi nhận key ảnh cũ trước khi ghi đè
+    const oldImageKey = oldBrand.image?.key;
+
+    // ==========================================
+    // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)
+    // ==========================================
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      // 1. Kiểm tra brand tồn tại chưa
-      const oldBrand = await this.brandRepo.findOneBy({ id });
-      if (!oldBrand) {
-        throw new NotFoundException(`Brand with ID ${id} not found`);
-      }
-
-      // 2. Nếu có cập nhật tên, cần kiểm tra trùng tên
-      if (name) {
-        const slug = stringToSlug(name);
-        const existingBrand = await this.brandRepo.findOne({ where: { slug, id: Not(id) } });
-        if (existingBrand) {
-          throw new ConflictException('Brand with this name already exists');
-        }
-      }
-
-      // Lưu lại key của ảnh cũ để nếu có cập nhật ảnh mới thì sẽ xóa ảnh cũ sau
-      const oldImageKey = oldBrand.image?.key;
-
-      // 3. Cập nhật brand
+      // Merge dữ liệu mới vào thực thể cũ
       const updatedBrand = this.brandRepo.merge(oldBrand, {
         ...rest,
-        name: name ? name : undefined,
-        image: image ? image : undefined,
-        slug: name ? stringToSlug(name) : undefined,
-        code: name ? this.generateBrandCode(name) : undefined,
+        ...(name && { name, slug, code: this.generateBrandCode(name) }),
       });
-      await this.brandRepo.save(updatedBrand);
 
-      // 4. Nếu có cập nhật ảnh, xóa ảnh cũ trên Cloudinary
-      if (image?.key && oldImageKey && image.key !== oldImageKey) {
+      if (image !== undefined) {
+        updatedBrand.image = image as IImage; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+      }
+
+      // Lưu vào DB qua transaction manager
+      await queryRunner.manager.save(BrandEntity, updatedBrand);
+
+      // Chỉ commit khi DB hoàn tất
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      // Nếu DB lỗi, dọn dẹp ảnh MỚI vừa được truyền lên từ Dto để tránh rác Cloudinary
+      if (image?.key) {
+        await this.removeImageForError(image.key).catch((err) =>
+          this.logger.error(`Failed to cleanup new brand image on error`, err),
+        );
+      }
+
+      this.logger.error(`Failed to update brand with ID ${id}`, error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+
+    // ==========================================
+    // 3. CLEANUP CLOUDINARY (Sau khi DB thành công 100%)
+    // ==========================================
+    try {
+      // Chỉ tiến hành xóa ảnh cũ nếu có truyền ảnh mới lên và ảnh cũ thực sự tồn tại và khác ảnh mới
+      if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
         await this.cloudinaryService.deleteImage(oldImageKey);
       }
-    } catch (error) {
-      await this.removeImageForError(updateBrandDto?.image?.key);
-      this.logger.debug(`Failed to update brand with ID ${id}`, error);
-      throw error;
+    } catch (cloudError) {
+      this.logger.warn(`Database updated but failed to delete old brand image from Cloudinary`, cloudError);
     }
   }
 
@@ -144,20 +188,12 @@ export class BrandsService {
       throw new NotFoundException(`Brand with ID ${id} not found`);
     }
 
-    // 1. Xóa trong DB trước - Chạy mất vài mili-giây, giải phóng DB ngay lập tức
+    // 1. Xóa trong DB trước
     await this.brandRepo.remove(brand);
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (brand.image && brand.image.key) {
-      try {
-        await this.cloudinaryService.deleteImage(brand.image.key);
-      } catch (error) {
-        // Nếu lỗi cloud ở đây, DB đã xóa xong nên hệ thống KHÔNG bị lỗi hiển thị ảnh chết.
-        // Chúng ta chỉ bị thừa 1 cái ảnh rác trên Cloudinary.
-        // Log lỗi lại để dùng Cron Job quét rác sau,
-        // hoặc ném vào Queue để nó tự động xóa lại (Retry).
-        console.error(`Failed to delete image from Cloudinary: ${brand.image.key}`, error);
-      }
+      await this.cloudinaryService.deleteImage(brand.image.key);
     }
 
     return true;
@@ -168,8 +204,8 @@ export class BrandsService {
     return name.slice(0, 3).toUpperCase();
   }
 
-  private removeImageForError(key?: string) {
+  private async removeImageForError(key?: string) {
     if (!key) return;
-    return this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryService.deleteImage(key);
   }
 }

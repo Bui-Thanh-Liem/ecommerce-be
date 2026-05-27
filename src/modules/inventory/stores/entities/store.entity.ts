@@ -8,6 +8,7 @@ import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne 
 import { LocationRegionEntity } from '../../location-regions/entities/location-region.entity';
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
 import { RoleEntity } from '@/modules/management/roles/entities/role.entity';
+import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity implements IStore {
@@ -78,6 +79,9 @@ export class StoreEntity extends BaseEntity implements IStore {
 
   @ManyToMany(() => RoleEntity, (role) => role.stores, { nullable: true })
   roles?: RoleEntity[] | undefined;
+
+  @ManyToMany(() => PromotionEntity, (promotion) => promotion.stores, { nullable: true })
+  promotions?: PromotionEntity[] | undefined;
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Store có name: ${this.name}`);

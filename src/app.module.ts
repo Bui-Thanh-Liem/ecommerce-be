@@ -24,7 +24,7 @@ import { ProductItemsModule } from './modules/catalog/product-items-SERIAL/produ
 import { ProductImagesModule } from './modules/catalog/product-images/product-images.module';
 import { VouchersModule } from './modules/payments/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
-import { S3Module } from './cloud-storage/s3/s3.module';
+import { S3Module } from './common/s3/s3.module';
 import { OrdersModule } from './modules/customer/orders/orders.module';
 import { OrderItemsModule } from './modules/customer/order-items/order-items.module';
 import { MoMoModule } from './modules/payments/momo/momo.module';
@@ -36,7 +36,7 @@ import { CustomerProductsModule } from './modules/customer/customer-products/cus
 import { PromotionsModule } from './modules/campaign/promotions/promotions.module';
 import { CartsModule } from './modules/customer/carts/carts.module';
 import { TeamCategoriesModule } from './modules/management/team-categories/team-categories.module';
-import { CloudinaryModule } from './cloud-storage/cloudinary/cloudinary.module';
+import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import cloudinaryConfig from './configs/cloudinary.config';
 import { StaffsModule } from './modules/management/staffs/staffs.module';
 import { RolesModule } from './modules/management/roles/roles.module';
@@ -47,18 +47,23 @@ import { CartItemsModule } from './modules/customer/cart-items/cart-items.module
 import { ProductPromotionsModule } from './modules/campaign/product-promotions/product-promotions.module';
 import { CampaignModule } from './modules/campaign/campaigns/campaigns.module';
 import { CategoryPromotionModule } from './modules/campaign/category-promotion/category-promotion.module';
+import { BullModule, BullRootModuleOptions } from '@nestjs/bullmq';
+import redisConfig, { RedisOptions } from './configs/redis.config';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
+import { CacheModule } from './common/cache/cache.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
-    //
+    // Cấu hình biến môi trường
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [pgConfig, s3ClientConfig, cloudinaryConfig],
+      load: [pgConfig, s3ClientConfig, cloudinaryConfig, redisConfig],
       envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
-    //
+    // Cấu hình kết nối database với TypeORM
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -70,6 +75,36 @@ const isProd = process.env.NODE_ENV === 'production';
         return pgConfig;
       },
     }),
+
+    // Cấu hình kết nối Redis cho BullMQ
+    BullModule.forRootAsync('ecommerce-configuration', {
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): BullRootModuleOptions => {
+        const configRedis = config.get<RedisOptions>('redis') || null;
+
+        if (!configRedis) throw new NotFoundException('Redis configuration not found in environment variables');
+
+        return {
+          connection: {
+            host: configRedis.host,
+            port: configRedis.port,
+          },
+        };
+      },
+    }),
+
+    // Cấu hình Bull Board để quản lý các queue của BullMQ
+    BullBoardModule.forRoot({
+      route: '/admin/queues',
+      adapter: ExpressAdapter,
+    }),
+
+    // Module chung
+    CloudinaryModule,
+    CacheModule,
+
+    // Các module chức năng của ứng dụng
     AuthModule,
     StaffsModule,
     RolesModule,
@@ -103,7 +138,6 @@ const isProd = process.env.NODE_ENV === 'production';
     CartItemsModule,
     TeamsModule,
     TeamCategoriesModule,
-    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [

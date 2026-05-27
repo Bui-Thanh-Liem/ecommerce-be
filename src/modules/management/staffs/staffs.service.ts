@@ -21,6 +21,7 @@ import { StaffQueryDto } from './dto/query-staff.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { StoresService } from '@/modules/inventory/stores/stores.service';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class StaffsService implements OnModuleInit {
@@ -36,6 +37,8 @@ export class StaffsService implements OnModuleInit {
     private readonly configService: ConfigService,
 
     private readonly rolesService: RolesService,
+
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async onModuleInit() {
@@ -125,7 +128,7 @@ export class StaffsService implements OnModuleInit {
       .select([
         'staff.id',
         'staff.fullName',
-        'staff.avatarUrl',
+        'staff.avatar',
         'staff.phone',
         'staff.email',
         'staff.isActive',
@@ -152,8 +155,18 @@ export class StaffsService implements OnModuleInit {
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    // Chuyển đổi URL ảnh nếu có
+    const dataWithUrls = await Promise.all(
+      data.map(async (staff) => {
+        if (staff.avatar && staff.avatar.key) {
+          staff.avatar.url = await this.cloudinaryService.generateUrl(staff.avatar.key);
+        }
+        return staff;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

@@ -7,13 +7,14 @@ import { ICategoryPromotion } from './category-promotion.interface';
 import { IStore } from './store.interface';
 import { ILocationRegion } from './location-region.interface';
 import { PromotionApplyScope } from '@/shared/enums/promotion-apply-scope.enum';
+import { IImage } from '../image.interface';
 
 export interface IPromotion extends IBase {
   campaign: ICampaign; // ID của chiến dịch mà khuyến mãi này thuộc về
 
   name: string; // Tủ lạnh, TIVI giảm sốc, ...
   slug: string;
-  imageUrl: string;
+  image: IImage;
   isActive: boolean;
   applyType: PromotionApplyType;
   applyScope: PromotionApplyScope; // Phạm vi áp dụng của khuyến mãi

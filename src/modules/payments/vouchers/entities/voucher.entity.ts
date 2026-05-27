@@ -7,9 +7,13 @@ import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
 import { VoucherStatus } from '@/shared/enums/voucher-status.enum';
 import { IVoucher } from '@/shared/interfaces/models/voucher.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { IStaff } from '@/shared/interfaces/models/staff.interface';
 
 @Entity('vouchers')
 export class VoucherEntity extends BaseEntity implements IVoucher {
+  maxUsagePerUser: number;
+  createdBy?: IStaff | undefined;
+  updatedBy?: IStaff | undefined;
   @Column({ unique: true })
   code: string; // VD: SALE2026, FREESHIPHN
 

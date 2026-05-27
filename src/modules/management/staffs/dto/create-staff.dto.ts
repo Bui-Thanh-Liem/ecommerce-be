@@ -1,11 +1,13 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { MAX_ROLES_IN_STAFF } from '@/shared/constants/staff.constant';
+import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -15,9 +17,8 @@ import {
 
 export class CreateStaffDto {
   @IsOptional()
-  @IsString()
-  @Trim()
-  avatarUrl: string;
+  @IsObject()
+  avatar?: ImageDto;
 
   @IsString()
   @Trim()

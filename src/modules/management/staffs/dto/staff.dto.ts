@@ -3,6 +3,7 @@ import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { RoleDto } from '../../roles/dto/role.dto';
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 
 export class StaffDto extends SerializerDto {
   @Expose()
@@ -12,7 +13,7 @@ export class StaffDto extends SerializerDto {
   email: string;
 
   @Expose()
-  avatarUrl: string;
+  avatar: ResponseImageDto;
 
   @Expose()
   phone: string;

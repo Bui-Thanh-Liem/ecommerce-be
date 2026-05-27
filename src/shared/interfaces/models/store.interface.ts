@@ -3,6 +3,7 @@ import { IImage } from '../image.interface';
 import { IPhoneStore } from '../phone-store.interface';
 import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
+import { IPromotion } from './promotion.interface';
 import { IRole } from './role.interface';
 import { IStaff } from './staff.interface';
 import { IVoucher } from './voucher.interface';
@@ -32,4 +33,5 @@ export interface IStore extends IBase {
   roles?: IRole[]; // Các vai trò liên quan đến cửa hàng (nếu cần)
   inventories?: IInventory[]; // Danh sách tồn kho của cửa hàng (nếu cần)
   vouchers?: IVoucher[]; // Danh sách voucher áp dụng cho cửa hàng (nếu cần)
+  promotions?: IPromotion[]; // Danh sách khuyến mãi áp dụng cho cửa hàng (nếu cần)
 }
