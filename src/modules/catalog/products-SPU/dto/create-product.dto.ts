@@ -2,7 +2,7 @@ import { Trim } from '@/decorators/trim.decorator';
 import { CreateProductImageDto } from '@/modules/catalog/product-images/dto/create-product-image.dto';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
 import { ISpecification } from '@/shared/interfaces/models/product.interface';
-import { ApiProperty } from '@nestjs/swagger/dist/decorators/api-property.decorator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,

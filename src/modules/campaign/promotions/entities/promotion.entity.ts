@@ -20,14 +20,8 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
   @Column({ length: 50 })
   name: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, unique: true })
   slug: string;
-
-  @Column({ type: 'int', default: 0 })
-  totalUsed: number;
-
-  @Column({ type: 'int', default: 0 })
-  maxUsagePerUser: number;
 
   @Column({ type: 'json' })
   image: IImage;
@@ -54,7 +48,6 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
   totalSoldQuantity: number;
 
   // Relations
-
   @ManyToMany(() => StoreEntity, (store) => store.promotions, { nullable: true })
   stores?: StoreEntity[];
 

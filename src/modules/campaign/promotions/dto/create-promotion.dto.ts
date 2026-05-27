@@ -1,11 +1,12 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { PromotionApplyType } from '@/shared/enums/promotion-apply-type.enum';
-import { IsEnum, IsNotEmpty, IsNumber, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 export class CreatePromotionDto {
   @IsString()
   @Trim()
   @IsNotEmpty()
+  @MaxLength(50)
   name: string;
 
   @IsString()

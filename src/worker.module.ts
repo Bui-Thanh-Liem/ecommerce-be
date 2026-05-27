@@ -10,6 +10,7 @@ import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
 import { CloudinaryConsumer } from './common/cloudinary/cloudinary.consumer';
+import { CacheModule } from './common/cache/cache.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -52,12 +53,14 @@ const isProd = process.env.NODE_ENV === 'production';
       },
     }),
 
+    // Cấu hình Bull Board để quản lý các queue của BullMQ
     BullBoardModule.forRoot({
       route: '/admin/queues',
       adapter: ExpressAdapter,
     }),
 
     //
+    CacheModule,
     CloudinaryModule, // Cần cho cấu hình queue và provider của Cloudinary
   ],
   controllers: [],

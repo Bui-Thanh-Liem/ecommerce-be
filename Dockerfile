@@ -23,4 +23,4 @@ RUN npm install --only=production
 
 EXPOSE 9000
 
-CMD ["node", "./src/main.js"] 
+CMD ["node", "main.js"] 

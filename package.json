@@ -1,8 +1,8 @@
 {
-  "name": "nestjs",
+  "name": "ecommerce-be",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "E-commerce backend application built with NestJS, TypeORM, and PostgreSQL. This application provides RESTful APIs for managing products, categories, brands, users, orders, and more. It also includes features such as authentication, authorization, caching with Redis, and background job processing with BullMQ.",
+  "author": "Liemdev",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

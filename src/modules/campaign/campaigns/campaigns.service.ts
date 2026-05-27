@@ -139,10 +139,22 @@ export class CampaignsService {
   }
 
   async findOne(id: string) {
-    return await this.campaignRepository.findOne({
+    const campaign = await this.campaignRepository.findOne({
       where: { id },
       relations: ['promotions'],
     });
+
+    const mainImageKey = campaign?.mainImage?.key;
+    if (mainImageKey) {
+      campaign.mainImage = {
+        ...campaign.mainImage,
+        url: await this.cloudinaryService.generateUrl(mainImageKey),
+      };
+    }
+    if (campaign?.images) {
+      campaign.images = await this.cloudinaryService.generateUrls(campaign?.images || []);
+    }
+    return campaign;
   }
 
   async exists(ids: string[]): Promise<boolean> {

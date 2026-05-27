@@ -39,7 +39,7 @@ export class CacheModule {}
  *
  * 2. cache-manager => Cung cấp API cache đơn giản: get, set, del, reset,... hỗ trợ TTL
  *
- * 3. keyv + @keyv/redis => Là adapter để kết nối cache-manager với Redis, giúp cache-manager có thể sử dụng Redis làm backend lưu trữ cache
+ * 3. keyv + @keyv/redis => adapter để kết nối cache-manager với Redis, giúp cache-manager có thể sử dụng Redis làm backend lưu trữ cache
  *
  *
  * Lý do sử dụng keyv + @keyv/redis thay vì ioredis trực tiếp:
