@@ -22,7 +22,7 @@ Hệ thống backend cho nền tảng thương mại điện tử được xây 
 - **Quản Lý Quyền Chi Tiết**: Role-based access control (RBAC)
 - **Tích Hợp Thanh Toán**: MoMo, VNPAY, ZaloPay
 - **Xử Lý Hình Ảnh**: AWS S3 và Cloudinary
-- **Lưu Trữ Dữ Liệu**: PostgreSQL và SQLite
+- **Lưu Trữ Dữ Liệu**: PostgreSQL
 - **Cache và Queue**: Redis với BullMQ
 
 ---
@@ -832,7 +832,6 @@ src/
 ### Database & ORM
 
 - **PostgreSQL** - Database chính (production)
-- **SQLite** - Database phục vụ testing
 - **TypeORM** v0.3.28 - Object-Relational Mapping
 
 ### Authentication & Authorization
@@ -932,7 +931,7 @@ src/
 ```typescript
 app.enableCors({
   credentials: true,
-  allowedHeaders: ["Content-Type", "x-api-key"],
+  allowedHeaders: ['Content-Type', 'x-api-key'],
 });
 ```
 
@@ -966,7 +965,7 @@ return this.dataSource.transaction(async (manager) => {
 ```typescript
 // Khóa bản ghi để tránh race condition
 lock: {
-  mode: "pessimistic_write";
+  mode: 'pessimistic_write';
 }
 ```
 
