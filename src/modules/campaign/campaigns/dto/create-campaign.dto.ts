@@ -34,7 +34,6 @@ export class CreateCampaignDto {
   isActive: boolean;
 
   @IsObject()
-  @IsNotEmpty()
   @ValidateNested()
   @Type(() => ImageDto)
   mainImage: ImageDto;

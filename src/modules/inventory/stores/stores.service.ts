@@ -10,7 +10,6 @@ import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
 import { StaffsService } from '@/modules/management/staffs/staffs.service';
-import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class StoresService {
@@ -54,10 +53,10 @@ export class StoresService {
 
       // 2. Tìm kiếm các region
       const [countryExists, provinceExists, districtExists, wardExists, managerExists] = await Promise.all([
-        this.locationService.exists(country),
-        this.locationService.exists(provinceCity),
-        this.locationService.exists(districtTown),
-        this.locationService.exists(wardCommune),
+        this.locationService.exists([country]),
+        this.locationService.exists([provinceCity]),
+        this.locationService.exists([districtTown]),
+        this.locationService.exists([wardCommune]),
         this.staffService.exists([managerId]),
       ]);
 
@@ -221,10 +220,10 @@ export class StoresService {
     // Chạy song song các câu lệnh check độc lập ngoài transaction
     const [eN, eC, ePC, eDT, eWC, eM] = await Promise.all([
       name ? this.storeRepo.exists({ where: { name, id: Not(id) } }) : null,
-      country ? this.locationService.exists(country) : null,
-      provinceCity ? this.locationService.exists(provinceCity) : null,
-      districtTown ? this.locationService.exists(districtTown) : null,
-      wardCommune ? this.locationService.exists(wardCommune) : null,
+      country ? this.locationService.exists([country]) : null,
+      provinceCity ? this.locationService.exists([provinceCity]) : null,
+      districtTown ? this.locationService.exists([districtTown]) : null,
+      wardCommune ? this.locationService.exists([wardCommune]) : null,
       managerId ? this.staffService.exists([managerId]) : null,
     ]);
 
@@ -261,7 +260,7 @@ export class StoresService {
       });
 
       if (image !== undefined) {
-        updatedStore.image = image as IImage; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+        updatedStore.image = image; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
       }
 
       // Lưu vào DB qua transaction manager

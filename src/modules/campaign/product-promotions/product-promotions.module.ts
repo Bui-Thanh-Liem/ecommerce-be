@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProductPromotionsService } from './product-promotions.service';
 import { ProductPromotionsController } from './product-promotions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,8 +7,13 @@ import { PromotionsModule } from '../promotions/promotions.module';
 import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/product-variants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductPromotionEntity]), PromotionsModule, ProductVariantsModule],
+  imports: [
+    TypeOrmModule.forFeature([ProductPromotionEntity]),
+    forwardRef(() => PromotionsModule),
+    ProductVariantsModule,
+  ],
   controllers: [ProductPromotionsController],
   providers: [ProductPromotionsService],
+  exports: [ProductPromotionsService],
 })
 export class ProductPromotionsModule {}

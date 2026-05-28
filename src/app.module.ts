@@ -47,11 +47,9 @@ import { CartItemsModule } from './modules/customer/cart-items/cart-items.module
 import { ProductPromotionsModule } from './modules/campaign/product-promotions/product-promotions.module';
 import { CampaignModule } from './modules/campaign/campaigns/campaigns.module';
 import { CategoryPromotionModule } from './modules/campaign/category-promotion/category-promotion.module';
-import { BullModule, BullRootModuleOptions } from '@nestjs/bullmq';
-import redisConfig, { RedisOptions } from './configs/redis.config';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { ExpressAdapter } from '@bull-board/express';
+import redisConfig from './configs/redis.config';
 import { CacheModule } from './common/cache/cache.module';
+import { BullMqModule } from './common/bull/bull.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -76,33 +74,10 @@ const isProd = process.env.NODE_ENV === 'production';
       },
     }),
 
-    // Cấu hình kết nối Redis cho BullMQ
-    BullModule.forRootAsync('ecommerce-configuration', {
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): BullRootModuleOptions => {
-        const configRedis = config.get<RedisOptions>('redis') || null;
-
-        if (!configRedis) throw new NotFoundException('Redis configuration not found in environment variables');
-
-        return {
-          connection: {
-            host: configRedis.host,
-            port: configRedis.port,
-          },
-        };
-      },
-    }),
-
-    // Cấu hình Bull Board để quản lý các queue của BullMQ
-    BullBoardModule.forRoot({
-      route: '/admin/queues',
-      adapter: ExpressAdapter,
-    }),
-
     // Module chung
-    CloudinaryModule,
     CacheModule,
+    BullMqModule,
+    CloudinaryModule,
 
     // Các module chức năng của ứng dụng
     AuthModule,

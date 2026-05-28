@@ -10,7 +10,7 @@ export class CategoryPromotionEntity extends BaseEntity implements ICategoryProm
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity;
 
-  @ManyToOne(() => PromotionEntity, (p) => p.productPromotions)
+  @ManyToOne(() => PromotionEntity, (p) => p.categoryPromotions)
   @JoinColumn({ name: 'promotion_id' })
   promotion: PromotionEntity;
 

@@ -7,6 +7,8 @@ import { AppLogger } from './logger/app.logger';
 async function bootstrap() {
   //
   const isProd = process.env.NODE_ENV === 'production';
+  const port = process.env.PORT ?? 3001;
+  const type = process.env.TYPE || 'api';
 
   //
   const app = await NestFactory.create(AppModule, {
@@ -88,8 +90,31 @@ async function bootstrap() {
     },
   });
 
-  //
-  await app.listen(process.env.PORT ?? 3001);
+  // Chỉ khởi tạo ứng dụng, không cần listen HTTP
+  if (type === 'worker') {
+    await app.init();
+    return;
+  }
+
+  // Khởi động ứng dụng HTTP
+  await app.listen(port);
 }
 
-bootstrap();
+bootstrap()
+  //
+  .then(() => {
+    const port = process.env.PORT ?? 3001;
+    const type = process.env.TYPE || 'api';
+    console.log(`Application is running on: ${port} (mode: ${type})`);
+  })
+
+  //
+  .catch((error) => {
+    console.error('Failed to start application:', error);
+    process.exit(1);
+  })
+
+  //
+  .finally(() => {
+    console.log('Bootstrap process completed.');
+  });

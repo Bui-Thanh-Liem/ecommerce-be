@@ -9,7 +9,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateLocationRegionDto } from './dto/create-location-region.dto';
 import { UpdateLocationRegionDto } from './dto/update-location-region.dto';
 import { LocationRegionEntity } from './entities/location-region.entity';
@@ -106,8 +106,9 @@ export class LocationRegionsService implements OnModuleInit {
     };
   }
 
-  async exists(id: string): Promise<boolean> {
-    return await this.locationRegionRepo.exists({ where: { id } });
+  async exists(ids: string[]): Promise<boolean> {
+    const count = await this.locationRegionRepo.count({ where: { id: In(ids) } });
+    return count === ids.length;
   }
 
   async findOne(id: string) {

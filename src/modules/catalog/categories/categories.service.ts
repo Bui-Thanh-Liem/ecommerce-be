@@ -11,7 +11,6 @@ import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { StoresService } from '../../inventory/stores/stores.service';
-import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class CategoriesService {
@@ -53,7 +52,7 @@ export class CategoriesService {
       return this.categoryRepo.save(category);
     } catch (error) {
       await this.removeImageForError(createCategoryDto.image?.key);
-      this.logger.debug(`Failed to create category`, error);
+      this.logger.error(`Failed to create category`, error);
       throw error;
     }
   }
@@ -191,9 +190,11 @@ export class CategoriesService {
       where: { id },
       relations: ['parent', 'children'],
     });
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+
+    if (category?.image && category.image.key) {
+      category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
     }
+
     return category;
   }
 
@@ -252,7 +253,7 @@ export class CategoriesService {
       });
 
       if (image !== undefined) {
-        updatedCategory.image = image as IImage; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+        updatedCategory.image = image; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
       }
 
       // Lưu vào DB qua transaction manager

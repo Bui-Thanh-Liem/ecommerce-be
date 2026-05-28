@@ -4,8 +4,8 @@ import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Logger } from '@nestjs/common';
 
 @Processor('cloudinary')
-export class CloudinaryConsumer extends WorkerHost {
-  private readonly logger = new Logger(CloudinaryConsumer.name);
+export class CloudinaryProcessor extends WorkerHost {
+  private readonly logger = new Logger(CloudinaryProcessor.name);
 
   async process(
     job: Job<

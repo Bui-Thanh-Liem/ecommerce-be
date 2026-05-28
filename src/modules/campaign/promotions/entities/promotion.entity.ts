@@ -2,7 +2,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { PromotionApplyType } from '@/shared/enums/promotion-apply-type.enum';
 import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { ProductPromotionEntity } from '../../product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '../../campaigns/entities/campaign.entity';
 import { CategoryPromotionEntity } from '../../category-promotion/entities/category-promotion.entity';
@@ -39,6 +39,11 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
   discountPercentage: number;
 
   @ManyToMany(() => ProductVariantEntity, (pv) => pv.promotions, { nullable: true })
+  @JoinTable({
+    name: 'promotion_product_highlighted',
+    joinColumn: { name: 'promotion_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'product_variant_id', referencedColumnName: 'id' },
+  })
   productHighlighted?: ProductVariantEntity[] | undefined;
 
   @Column({ type: 'int', default: 0 })
@@ -49,9 +54,19 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
 
   // Relations
   @ManyToMany(() => StoreEntity, (store) => store.promotions, { nullable: true })
+  @JoinTable({
+    name: 'promotion_stores',
+    joinColumn: { name: 'promotion_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'store_id', referencedColumnName: 'id' },
+  })
   stores?: StoreEntity[];
 
   @ManyToMany(() => LocationRegionEntity, (location) => location.promotions, { nullable: true })
+  @JoinTable({
+    name: 'promotion_locations',
+    joinColumn: { name: 'promotion_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'location_id', referencedColumnName: 'id' },
+  })
   locations?: LocationRegionEntity[]; // Các địa điểm áp dụng (nếu cần)
 
   @OneToMany(() => ProductPromotionEntity, (productPromotion) => productPromotion.promotion, { nullable: true })

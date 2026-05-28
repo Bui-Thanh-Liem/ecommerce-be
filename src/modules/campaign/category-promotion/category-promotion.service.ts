@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryPromotionDto } from './dto/create-category-promotion.dto';
 import { UpdateCategoryPromotionDto } from './dto/update-category-promotion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryPromotionEntity } from './entities/category-promotion.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { PromotionsService } from '../promotions/promotions.service';
 import { CategoriesService } from '@/modules/catalog/categories/categories.service';
 
@@ -13,7 +13,9 @@ export class CategoryPromotionService {
     @InjectRepository(CategoryPromotionEntity)
     private categoryPromotionRepository: Repository<CategoryPromotionEntity>,
 
+    @Inject(forwardRef(() => PromotionsService))
     private readonly promotionsService: PromotionsService,
+
     private readonly categoriesService: CategoriesService,
   ) {}
 
@@ -42,6 +44,11 @@ export class CategoryPromotionService {
 
   async findAll() {
     return await this.categoryPromotionRepository.find({ relations: ['category', 'promotion'] });
+  }
+
+  async exists(ids: string[]): Promise<boolean> {
+    const count = await this.categoryPromotionRepository.count({ where: { id: In(ids) } });
+    return count === ids.length;
   }
 
   async findOne(id: string) {

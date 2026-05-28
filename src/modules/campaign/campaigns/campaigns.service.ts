@@ -18,7 +18,6 @@ import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignQueryDto } from './dto/query-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignEntity } from './entities/campaign.entity';
-import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class CampaignsService {
@@ -212,8 +211,8 @@ export class CampaignsService {
         ...(promotionIds && { promotions: promotionIds.map((pId) => ({ id: pId })) }),
       });
 
-      if (images !== undefined) updatedCampaign.images = images as IImage[];
-      if (mainImage !== undefined) updatedCampaign.mainImage = mainImage as IImage;
+      if (images !== undefined) updatedCampaign.images = images;
+      if (mainImage !== undefined) updatedCampaign.mainImage = mainImage;
 
       // Lưu vào DB qua transaction manager
       await queryRunner.manager.save(CampaignEntity, updatedCampaign);

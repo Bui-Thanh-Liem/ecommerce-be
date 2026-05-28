@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductPromotionDto } from './dto/create-product-promotion.dto';
 import { UpdateProductPromotionDto } from './dto/update-product-promotion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductPromotionEntity } from './entities/product-promotion.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { PromotionsService } from '../promotions/promotions.service';
 import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
 
@@ -13,6 +13,7 @@ export class ProductPromotionsService {
     @InjectRepository(ProductPromotionEntity)
     private productPromotionRepository: Repository<ProductPromotionEntity>,
 
+    @Inject(forwardRef(() => PromotionsService))
     private readonly promotionsService: PromotionsService,
     private readonly variantService: ProductVariantsService,
   ) {}
@@ -41,6 +42,11 @@ export class ProductPromotionsService {
 
   async findAll() {
     return await this.productPromotionRepository.find({ relations: ['productVariant', 'promotion'] });
+  }
+
+  async exists(ids: string[]): Promise<boolean> {
+    const count = await this.productPromotionRepository.count({ where: { id: In(ids) } });
+    return count === ids.length;
   }
 
   async findOne(id: string) {

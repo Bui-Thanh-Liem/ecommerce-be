@@ -97,7 +97,12 @@ export class BrandsService {
   }
 
   async findOne(id: string) {
-    return await this.brandRepo.findOne({ where: { id } });
+    const brand = await this.brandRepo.findOne({ where: { id } });
+
+    if (brand && brand.image && brand.image.key) {
+      brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+    }
+    return brand;
   }
 
   async update(id: string, updateBrandDto: UpdateBrandDto) {
