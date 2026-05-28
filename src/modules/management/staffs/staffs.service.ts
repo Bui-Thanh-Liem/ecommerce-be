@@ -3,7 +3,6 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   OnModuleInit,
@@ -269,7 +268,7 @@ export class StaffsService implements OnModuleInit {
       return await this.staffRepo.save(targetStaff);
     } catch (error) {
       // Xử lý lỗi khác nếu cần
-      throw new InternalServerErrorException('Error updating staff', (error as Error).message);
+      throw new BadRequestException('Error updating staff', (error as Error).message);
     }
   }
 
