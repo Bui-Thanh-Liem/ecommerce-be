@@ -1,5 +1,6 @@
 import { IBase } from '../base.interface';
 import { IImage } from '../image.interface';
+import { IProductVariant } from './product-variant.interface';
 import { IPromotion } from './promotion.interface';
 
 export interface ICampaign extends IBase {
@@ -11,6 +12,7 @@ export interface ICampaign extends IBase {
   images: IImage[]; // Max 5 images
   startDate: Date; // Ngày bắt đầu khuyến mãi
   endDate: Date; // Ngày kết thúc khuyến mãi
+  productHighlighted: IProductVariant[]; // Danh sách sản phẩm được highlight trong chiến dịch (nếu có)
 
   // Relations
   promotions: IPromotion[]; // Mảng chứa ID của các khuyến mãi liên quan đến chiến dịch này

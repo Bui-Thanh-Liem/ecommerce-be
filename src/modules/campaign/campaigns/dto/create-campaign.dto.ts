@@ -45,6 +45,12 @@ export class CreateCampaignDto {
   @ArrayMaxSize(5)
   images: ImageDto[];
 
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('4', { each: true })
+  @ArrayMaxSize(5)
+  productHighlighted: string[];
+
   @IsDate()
   @IsNotEmpty()
   startDate: Date;

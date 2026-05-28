@@ -27,6 +27,13 @@ export class TeamsController {
     return await this.teamsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(TeamMetadataDto)
+  @Permissions(permissionsSeed.team.read.code)
+  async findOptions(@Query() query: TeamQueryDto) {
+    return await this.teamsService.findOptions(query);
+  }
+
   @Get(':id')
   @Permissions(permissionsSeed.team.read.code)
   async findOne(@Param('id') id: string) {

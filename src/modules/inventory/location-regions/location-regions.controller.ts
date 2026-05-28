@@ -27,6 +27,12 @@ export class LocationRegionsController {
     return await this.locationRegionsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(LocationRegionMetadataDto)
+  async findOptions(@Query() query: LocationRegionQueryDto) {
+    return await this.locationRegionsService.findOptions(query);
+  }
+
   @Get('tree')
   @Permissions(permissionsSeed.locationRegions.read.code)
   async getTreeData(@Query() query: LocationRegionQueryDto) {

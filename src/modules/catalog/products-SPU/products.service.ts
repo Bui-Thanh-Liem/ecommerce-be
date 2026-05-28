@@ -169,6 +169,27 @@ export class ProductsService {
     };
   }
 
+  async findOptions(query: ProductQueryDto): Promise<IMetadata<ProductEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.productRepo
+      .createQueryBuilder('product')
+      .select(['product.id', 'product.name', 'product.slug'])
+      .skip(skip)
+      .take(take)
+      .orderBy('product.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]) {
     const count = await this.productRepo.countBy({ id: In(ids) });
     return count === ids.length;

@@ -23,6 +23,12 @@ export class CampaignsController {
     return this.campaignsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(CampaignMetadataDto)
+  findOptions(@Query() query: CampaignQueryDto) {
+    return this.campaignsService.findOptions(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.campaignsService.findOne(id);

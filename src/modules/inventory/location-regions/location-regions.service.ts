@@ -106,6 +106,27 @@ export class LocationRegionsService implements OnModuleInit {
     };
   }
 
+  async findOptions(query: LocationRegionQueryDto): Promise<IMetadata<LocationRegionEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.locationRegionRepo
+      .createQueryBuilder('locationRegion')
+      .select(['locationRegion.id', 'locationRegion.name', 'locationRegion.type'])
+      .skip(skip)
+      .take(take)
+      .orderBy('locationRegion.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.locationRegionRepo.count({ where: { id: In(ids) } });
     return count === ids.length;

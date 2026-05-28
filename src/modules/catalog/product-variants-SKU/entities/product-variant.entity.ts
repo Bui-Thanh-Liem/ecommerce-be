@@ -10,6 +10,7 @@ import { IProductVariant, IVariantAttribute } from '@/shared/interfaces/models/p
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { ProductPromotionEntity } from '@/modules/campaign/product-promotions/entities/product-promotion.entity';
+import { CampaignEntity } from '@/modules/campaign/campaigns/entities/campaign.entity';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -58,6 +59,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @ManyToMany(() => PromotionEntity, (promotion) => promotion.productHighlighted, { nullable: true })
   promotions?: PromotionEntity[];
+
+  @ManyToMany(() => CampaignEntity, (campaign) => campaign.productHighlighted, { nullable: true })
+  campaigns?: CampaignEntity[];
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.productVariant)
   cartItems?: CartItemEntity[];

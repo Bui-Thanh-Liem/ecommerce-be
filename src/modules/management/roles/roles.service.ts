@@ -8,6 +8,7 @@ import { RoleEntity } from './entities/role.entity';
 import { RoleQueryDto } from './dto/query-role.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { StoresService } from '@/modules/inventory/stores/stores.service';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class RolesService {
@@ -56,7 +57,7 @@ export class RolesService {
     return await this.rolesRepo.save(role);
   }
 
-  async findAll(query: RoleQueryDto) {
+  async findAll(query: RoleQueryDto): Promise<IMetadata<RoleEntity>> {
     const { page, limit } = query;
 
     //
@@ -89,6 +90,27 @@ export class RolesService {
 
     // Phân trang và sắp xếp
     queryBuilder.orderBy('role.createdAt', 'DESC').skip(skip).take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
+  async findOptions(query: RoleQueryDto): Promise<IMetadata<RoleEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.rolesRepo
+      .createQueryBuilder('role')
+      .select(['role.id', 'role.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('role.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 

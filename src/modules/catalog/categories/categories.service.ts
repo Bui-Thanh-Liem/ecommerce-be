@@ -107,6 +107,27 @@ export class CategoriesService {
     };
   }
 
+  async findOptions(query: CategoryQueryDto): Promise<IMetadata<CategoryEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.categoryRepo
+      .createQueryBuilder('category')
+      .select(['category.id', 'category.name', 'category.slug'])
+      .skip(skip)
+      .take(take)
+      .orderBy('category.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async getTreeData(query: CategoryQueryDto) {
     const { filters } = query;
     const parent = filters?.parent;

@@ -1,9 +1,10 @@
 import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import type { IImage } from '@/shared/interfaces/image.interface';
 import { ICampaign } from '@/shared/interfaces/models/campaign.interface';
 import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 
 @Entity('campaigns')
 export class CampaignEntity extends BaseEntity implements ICampaign {
@@ -30,6 +31,14 @@ export class CampaignEntity extends BaseEntity implements ICampaign {
 
   @Column({ type: 'timestamp' })
   endDate: Date;
+
+  @ManyToMany(() => ProductVariantEntity, (pv) => pv.campaigns, { nullable: true })
+  @JoinTable({
+    name: 'campaign_product_highlighted',
+    joinColumn: { name: 'campaign_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'product_variant_id', referencedColumnName: 'id' },
+  })
+  productHighlighted: ProductVariantEntity[];
 
   // Relations
   @OneToMany(() => PromotionEntity, (promotion) => promotion.campaign)

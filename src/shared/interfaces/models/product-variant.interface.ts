@@ -8,6 +8,7 @@ import { IProductPromotion } from './product-promotion.interface';
 import { IPromotion } from './promotion.interface';
 import { ICartItem } from './cart-item.interface';
 import { IProductImage } from './product-image.interface';
+import { ICampaign } from './campaign.interface';
 
 /**
  * KHÔNG DÙNG BẢNG ATTRIBUTE TRUYỀN THỐNG:
@@ -44,4 +45,5 @@ export interface IProductVariant extends IBase {
   productPromotions?: IProductPromotion[];
   promotions?: IPromotion[];
   cartItems?: ICartItem[];
+  campaigns?: ICampaign[];
 }

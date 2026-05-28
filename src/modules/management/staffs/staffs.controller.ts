@@ -32,6 +32,12 @@ export class StaffsController {
     return await this.staffsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(StaffMetadataDto)
+  async findOptions(@Query() query: StaffQueryDto) {
+    return await this.staffsService.findOptions(query);
+  }
+
   @Get(':id')
   @Permissions(permissionsSeed.staffs.read.code)
   async findOne(@Param('id') id: string) {

@@ -166,6 +166,27 @@ export class PromotionsService {
     };
   }
 
+  async findOptions(query: PromotionQueryDto): Promise<IMetadata<PromotionEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.promotionRepository
+      .createQueryBuilder('promotion')
+      .select(['promotion.id', 'promotion.name', 'promotion.slug'])
+      .skip(skip)
+      .take(take)
+      .orderBy('promotion.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async findOne(id: string) {
     return await this.promotionRepository.findOne({
       where: { id },

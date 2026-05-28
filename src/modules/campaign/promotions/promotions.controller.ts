@@ -23,6 +23,12 @@ export class PromotionsController {
     return this.promotionsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(PromotionMetadataDto)
+  async findOptions(@Query() query: PromotionQueryDto) {
+    return this.promotionsService.findOptions(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.promotionsService.findOne(id);

@@ -159,6 +159,27 @@ export class StoresService {
     };
   }
 
+  async findOptions(query: StoreQueryDto): Promise<IMetadata<StoreEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.storeRepo
+      .createQueryBuilder('store')
+      .select(['store.id', 'store.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('store.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async findOne(id: string) {
     return await this.storeRepo.findOne({
       where: { id },

@@ -132,6 +132,28 @@ export class InventoriesService {
     };
   }
 
+  async findOptions(query: InventoryQueryDto): Promise<IMetadata<InventoryEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.inventoryRepo
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.store', 'store')
+      .select(['inventory.id', 'store.id', 'inventory.createdAt', 'store.name', 'store.address'])
+      .skip(skip)
+      .take(take)
+      .orderBy('inventory.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]) {
     const inventories = await this.inventoryRepo.find({ where: { id: In(ids) } });
     return inventories.length === ids.length;

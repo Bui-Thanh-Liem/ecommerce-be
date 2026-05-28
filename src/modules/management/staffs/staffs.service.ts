@@ -173,6 +173,27 @@ export class StaffsService implements OnModuleInit {
     };
   }
 
+  async findOptions(query: StaffQueryDto): Promise<IMetadata<StaffEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.staffRepo
+      .createQueryBuilder('staff')
+      .select(['staff.id', 'staff.fullName'])
+      .skip(skip)
+      .take(take)
+      .orderBy('staff.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.staffRepo.countBy({ id: In(ids) });
     return count === ids.length;

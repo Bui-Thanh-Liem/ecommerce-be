@@ -23,6 +23,12 @@ export class TeamCategoriesController {
     return this.teamCategoriesService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(TeamCategoryMetadataDto)
+  findOptions(@Query() query: TeamCategoryQueryDto) {
+    return this.teamCategoriesService.findOptions(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teamCategoriesService.findOne(id);

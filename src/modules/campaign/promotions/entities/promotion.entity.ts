@@ -38,6 +38,12 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
   @Column({ type: 'float' })
   discountPercentage: number;
 
+  @Column({ type: 'int', default: 0 })
+  limitQuantity: number;
+
+  @Column({ type: 'int', default: 0 })
+  totalSoldQuantity: number;
+
   @ManyToMany(() => ProductVariantEntity, (pv) => pv.promotions, { nullable: true })
   @JoinTable({
     name: 'promotion_product_highlighted',
@@ -45,12 +51,6 @@ export class PromotionEntity extends BaseEntity implements IPromotion {
     inverseJoinColumn: { name: 'product_variant_id', referencedColumnName: 'id' },
   })
   productHighlighted?: ProductVariantEntity[] | undefined;
-
-  @Column({ type: 'int', default: 0 })
-  limitQuantity: number;
-
-  @Column({ type: 'int', default: 0 })
-  totalSoldQuantity: number;
 
   // Relations
   @ManyToMany(() => StoreEntity, (store) => store.promotions, { nullable: true })

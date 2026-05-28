@@ -128,6 +128,28 @@ export class ProductVariantsService {
     };
   }
 
+  async findOptions(query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.productVariantRepo
+      .createQueryBuilder('pv')
+      .leftJoinAndSelect('pv.product', 'product')
+      .select(['pv.id', 'pv.sku', 'pv.createdAt', 'product.id', 'product.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('pv.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]) {
     const variants = await this.productVariantRepo.find({ where: { id: In(ids) } });
     return variants.length === ids.length;

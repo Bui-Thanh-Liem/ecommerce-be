@@ -27,6 +27,13 @@ export class CategoriesController {
     return await this.categoriesService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(CategoryMetadataDto)
+  @Permissions(permissionsSeed.category.read.code)
+  async findOptions(@Query() query: CategoryQueryDto) {
+    return await this.categoriesService.findOptions(query);
+  }
+
   @Get('tree')
   @Permissions(permissionsSeed.category.read.code)
   async getTreeData(@Query() query: CategoryQueryDto) {

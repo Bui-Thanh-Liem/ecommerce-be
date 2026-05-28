@@ -23,6 +23,12 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(ProductMetadataDto)
+  async findOptions(@Query() query: ProductQueryDto) {
+    return await this.productsService.findOptions(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);

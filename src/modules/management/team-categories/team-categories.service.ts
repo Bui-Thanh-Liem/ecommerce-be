@@ -7,6 +7,7 @@ import { In, Not, Repository } from 'typeorm';
 import { teamCategorySeed } from './seeding';
 import { TeamCategoryQueryDto } from './dto/query-team-category.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { IMetadata } from '@/shared/interfaces/metadata.interface';
 
 @Injectable()
 export class TeamCategoriesService implements OnModuleInit {
@@ -36,7 +37,7 @@ export class TeamCategoriesService implements OnModuleInit {
     return count === ids.length;
   }
 
-  async findAll(query: TeamCategoryQueryDto) {
+  async findAll(query: TeamCategoryQueryDto): Promise<IMetadata<TeamCategoryEntity>> {
     const { page, limit } = query;
 
     //
@@ -50,6 +51,27 @@ export class TeamCategoriesService implements OnModuleInit {
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
+    };
+  }
+
+  async findOptions(query: TeamCategoryQueryDto): Promise<IMetadata<TeamCategoryEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.teamCategoryRepository
+      .createQueryBuilder('teamCategory')
+      .select(['teamCategory.id', 'teamCategory.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('teamCategory.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
     };
   }
 

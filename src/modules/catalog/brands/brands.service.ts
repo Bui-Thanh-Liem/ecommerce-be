@@ -9,7 +9,6 @@ import { BrandQueryDto } from './dto/query-brand.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { IImage } from '@/shared/interfaces/image.interface';
 
 @Injectable()
 export class BrandsService {
@@ -86,6 +85,27 @@ export class BrandsService {
     };
   }
 
+  async findOptions(query: BrandQueryDto): Promise<IMetadata<BrandEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.brandRepo
+      .createQueryBuilder('brand')
+      .select(['brand.id', 'brand.name', 'brand.slug'])
+      .skip(skip)
+      .take(take)
+      .orderBy('brand.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async exists(ids: string[]) {
     const brands = await this.brandRepo.find({ where: { id: In(ids) } });
     return brands.length === ids.length;
@@ -150,7 +170,7 @@ export class BrandsService {
       });
 
       if (image !== undefined) {
-        updatedBrand.image = image as IImage; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+        updatedBrand.image = image; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
       }
 
       // Lưu vào DB qua transaction manager

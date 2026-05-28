@@ -23,6 +23,12 @@ export class InventoriesController {
     return this.inventoriesService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(InventoryMetadataDto)
+  async findOptions(@Query() query: InventoryQueryDto) {
+    return await this.inventoriesService.findOptions(query);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const inventory = await this.inventoriesService.findOne(id);

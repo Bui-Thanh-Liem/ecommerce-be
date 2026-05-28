@@ -161,9 +161,7 @@ export class CloudinaryService {
     const job = await this.cloudinaryQueue.add(
       'delete-image',
       { publicId },
-      {
-        jobId: `delete-${publicId}-${Date.now()}`,
-      },
+      { jobId: `delete-${publicId}-${Date.now()}` },
     );
 
     return {
@@ -186,9 +184,7 @@ export class CloudinaryService {
     const job = await this.cloudinaryQueue.add(
       'delete-multiple-images',
       { publicIds },
-      {
-        jobId: `delete-bulk-${Date.now()}`,
-      },
+      { jobId: `delete-bulk-${Date.now()}` },
     );
 
     return {

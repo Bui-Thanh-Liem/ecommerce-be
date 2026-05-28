@@ -19,13 +19,13 @@ export class CloudinaryProcessor extends WorkerHost {
     try {
       switch (job.name) {
         case 'upload-image':
-          return await this.handleUploadImage(job as any);
+          return await this.handleUploadImage(job as handleUpload);
 
         case 'delete-image':
-          return await this.handleDeleteImage(job as any);
+          return await this.handleDeleteImage(job as handleDelete);
 
         case 'delete-multiple-images':
-          return await this.handleDeleteMultipleImages(job as any);
+          return await this.handleDeleteMultipleImages(job as handleBulkDelete);
 
         default:
           throw new Error(`Unknown job type: ${job.name}`);
@@ -37,9 +37,7 @@ export class CloudinaryProcessor extends WorkerHost {
     }
   }
 
-  private async handleUploadImage(
-    job: Job<{ fileBuffer: Buffer; originalname: string; folder: string }>,
-  ): Promise<UploadApiResponse> {
+  private async handleUploadImage(job: handleUpload): Promise<UploadApiResponse> {
     this.logger.debug(`[JOB-${job.id}] Uploading to folder: ${job.data.folder}`);
 
     return new Promise((resolve, reject) => {
@@ -66,7 +64,7 @@ export class CloudinaryProcessor extends WorkerHost {
     });
   }
 
-  private async handleDeleteImage(job: Job<{ publicId: string }>): Promise<any> {
+  private async handleDeleteImage(job: handleDelete): Promise<any> {
     const publicId = job.data.publicId;
     this.logger.debug(`[JOB-${job.id}] Deleting: ${publicId}`);
 
@@ -84,7 +82,7 @@ export class CloudinaryProcessor extends WorkerHost {
     }
   }
 
-  private async handleDeleteMultipleImages(job: Job<{ publicIds: string[] }>): Promise<any> {
+  private async handleDeleteMultipleImages(job: handleBulkDelete): Promise<any> {
     const publicIds = job.data.publicIds;
     this.logger.debug(`[JOB-${job.id}] Bulk deleting ${publicIds.length} images`);
 
@@ -100,6 +98,10 @@ export class CloudinaryProcessor extends WorkerHost {
     }
   }
 }
+
+type handleUpload = Job<{ fileBuffer: Buffer; originalname: string; folder: string }>;
+type handleDelete = Job<{ publicId: string }>;
+type handleBulkDelete = Job<{ publicIds: string[] }>;
 
 interface CloudinaryDeleteResourcesResponse {
   deleted: Record<string, 'deleted' | 'not_found'>;

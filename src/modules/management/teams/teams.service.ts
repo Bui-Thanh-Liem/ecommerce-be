@@ -95,10 +95,10 @@ export class TeamsService {
         'team.isActive',
         'team.createdAt',
         'leader.id',
-        'leader.avatarUrl',
+        'leader.avatar',
         'leader.fullName',
         'members.id',
-        'members.avatarUrl',
+        'members.avatar',
         'members.fullName',
         'category.id',
         'category.name',
@@ -124,6 +124,27 @@ export class TeamsService {
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
+    };
+  }
+
+  async findOptions(query: TeamQueryDto): Promise<IMetadata<TeamEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.teamRepository
+      .createQueryBuilder('team')
+      .select(['team.id', 'team.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('team.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
     };
   }
 

@@ -18,6 +18,7 @@ import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignQueryDto } from './dto/query-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignEntity } from './entities/campaign.entity';
+import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
 
 @Injectable()
 export class CampaignsService {
@@ -32,12 +33,21 @@ export class CampaignsService {
 
     private readonly cloudinaryService: CloudinaryService,
 
+    private readonly pvService: ProductVariantsService,
+
     private dataSource: DataSource,
   ) {}
 
   async create(createCampaignDto: CreateCampaignDto) {
     try {
-      const { promotions: promotionIds, name, startDate, endDate, ...rest } = createCampaignDto;
+      const {
+        promotions: promotionIds,
+        productHighlighted: productVariantIds,
+        name,
+        startDate,
+        endDate,
+        ...rest
+      } = createCampaignDto;
 
       //
       if (startDate >= endDate) {
@@ -59,6 +69,14 @@ export class CampaignsService {
         }
       }
 
+      //
+      if (productVariantIds && productVariantIds?.length > 0) {
+        const productVariantsExist = await this.pvService.exists(productVariantIds);
+        if (!productVariantsExist) {
+          throw new NotFoundException(`One or more Product Variant IDs not found: ${productVariantIds.join(', ')}`);
+        }
+      }
+
       const campaign = this.campaignRepository.create({
         ...rest,
         name,
@@ -66,6 +84,7 @@ export class CampaignsService {
         startDate,
         endDate,
         promotions: promotionIds?.map((id) => ({ id })) || [],
+        productHighlighted: productVariantIds?.map((id) => ({ id })) || [],
       });
       return await this.campaignRepository.save(campaign);
     } catch (error) {
@@ -88,6 +107,8 @@ export class CampaignsService {
 
       // Join các quan hệ
       .leftJoinAndSelect('campaign.promotions', 'promotions')
+      .leftJoinAndSelect('campaign.productHighlighted', 'product_highlighted')
+      .leftJoinAndSelect('product_highlighted.product', 'product')
 
       // Select các trường cụ thể (tương đương với select của bạn)
       .select([
@@ -103,6 +124,13 @@ export class CampaignsService {
         'campaign.createdAt',
 
         'promotions.id',
+        'promotions.name',
+
+        'product_highlighted.id',
+        'product_highlighted.sku',
+
+        'product.id',
+        'product.name',
       ])
 
       // Phân trang và sắp xếp
@@ -137,10 +165,31 @@ export class CampaignsService {
     };
   }
 
+  async findOptions(query: CampaignQueryDto): Promise<IMetadata<CampaignEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.campaignRepository
+      .createQueryBuilder('campaign')
+      .select(['campaign.id', 'campaign.name'])
+      .skip(skip)
+      .take(take)
+      .orderBy('campaign.createdAt', 'DESC');
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async findOne(id: string) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['promotions'],
+      relations: ['promotions', 'productHighlighted'],
     });
 
     const mainImageKey = campaign?.mainImage?.key;
@@ -162,7 +211,16 @@ export class CampaignsService {
   }
 
   async update(id: string, updateCampaignDto: UpdateCampaignDto) {
-    const { promotions: promotionIds, name, startDate, endDate, images, mainImage, ...rest } = updateCampaignDto;
+    const {
+      promotions: promotionIds,
+      productHighlighted: productVariantIds,
+      name,
+      startDate,
+      endDate,
+      images,
+      mainImage,
+      ...rest
+    } = updateCampaignDto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -184,15 +242,18 @@ export class CampaignsService {
 
     const slug = name ? stringToSlug(name) : undefined;
     const hasPromotions = promotionIds && promotionIds.length > 0;
+    const hasProductVariants = productVariantIds && productVariantIds.length > 0;
 
     // Chạy song song các câu lệnh check độc lập
-    const [isSlugDup, isPromoValid] = await Promise.all([
+    const [isSlugDup, isPromoValid, isProductVariantValid] = await Promise.all([
       name ? this.campaignRepository.exists({ where: { slug, id: Not(id) } }) : Promise.resolve(false),
       hasPromotions ? this.promotionService.exists(promotionIds) : Promise.resolve(true),
+      hasProductVariants ? this.pvService.exists(productVariantIds) : Promise.resolve(true),
     ]);
 
     if (isSlugDup) throw new ConflictException('A campaign with the same name already exists');
     if (!isPromoValid) throw new BadRequestException(`One or more Promotion IDs not found`);
+    if (!isProductVariantValid) throw new BadRequestException(`One or more Product Variant IDs not found`);
 
     // ==========================================
     // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)
@@ -209,6 +270,7 @@ export class CampaignsService {
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
         ...(promotionIds && { promotions: promotionIds.map((pId) => ({ id: pId })) }),
+        ...(productVariantIds && { productHighlighted: productVariantIds.map((pvId) => ({ id: pvId })) }),
       });
 
       if (images !== undefined) updatedCampaign.images = images;

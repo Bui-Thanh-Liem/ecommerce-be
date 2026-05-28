@@ -27,6 +27,12 @@ export class StoresController {
     return await this.storesService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(StoreMetadataDto)
+  async findOptions(@Query() query: StoreQueryDto) {
+    return await this.storesService.findOptions(query);
+  }
+
   @Get(':id')
   @Permissions(permissionsSeed.stores.read.code)
   async findOne(@Param('id') id: string) {

@@ -27,6 +27,12 @@ export class RolesController {
     return await this.rolesService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(RoleMetadataDto)
+  async findOptions(@Query() query: RoleQueryDto) {
+    return await this.rolesService.findOptions(query);
+  }
+
   @Get(':id')
   @Permissions(permissionsSeed.roles.read.code)
   async findOne(@Param('id') id: string) {

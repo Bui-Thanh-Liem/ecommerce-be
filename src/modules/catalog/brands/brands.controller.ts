@@ -23,6 +23,12 @@ export class BrandsController {
     return await this.brandsService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(BrandMetadataDto)
+  async findOptions(@Query() query: BrandQueryDto) {
+    return await this.brandsService.findOptions(query);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.brandsService.findOne(id);
