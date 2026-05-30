@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Logger } from '@nestjs/common';
@@ -96,6 +96,20 @@ export class CloudinaryProcessor extends WorkerHost {
     } catch (error) {
       throw new Error(`Bulk delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  @OnWorkerEvent('failed')
+  onJobFailed(job: Job, error: Error) {
+    this.logger.error(
+      // eslint-disable-next-line max-len
+      `[JOB-${job.id}] 🚨 Job [${job.name}] failed completely after ${job.attemptsMade} attempts. Reason: ${error.message}`,
+    );
+    // Bạn có thể tích hợp bắn alert (Slack/Telegram) tại đây để truy vết tracking nhanh
+  }
+
+  @OnWorkerEvent('completed')
+  onJobCompleted(job: Job) {
+    this.logger.log(`[JOB-${job.id}] 🎉 Job [${job.name}] completed successfully.`);
   }
 }
 

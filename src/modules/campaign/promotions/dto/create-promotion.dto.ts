@@ -60,10 +60,6 @@ export class CreatePromotionDto {
   @Min(0)
   limitQuantity: number;
 
-  @IsNumber()
-  @Min(0)
-  totalSoldQuantity: number;
-
   @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
@@ -78,13 +74,11 @@ export class CreatePromotionDto {
 
   @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @IsUUID('4', { each: true })
   productPromotions: string[];
 
   @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @IsUUID('4', { each: true })
   categoryPromotions: string[];
 }

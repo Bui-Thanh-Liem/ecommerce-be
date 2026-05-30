@@ -79,6 +79,7 @@ export class PromotionsService {
       const promotion = this.promotionRepository.create({
         ...rest,
         slug,
+        name,
         campaign: { id: campaignId },
         productHighlighted: productHighlightedIds.map((id) => ({ id })),
         stores: storeIds ? storeIds.map((id) => ({ id })) : undefined,
@@ -106,11 +107,11 @@ export class PromotionsService {
 
       // Join các quan hệ
       .leftJoinAndSelect('promotion.campaign', 'campaign')
-      .leftJoinAndSelect('promotion.productHighlighted', 'productHighlighted')
+      .leftJoinAndSelect('promotion.productHighlighted', 'phl')
       .leftJoinAndSelect('promotion.stores', 'stores')
       .leftJoinAndSelect('promotion.locations', 'locations')
-      .leftJoinAndSelect('promotion.categoryPromotions', 'categoryPromotions')
-      .leftJoinAndSelect('promotion.productPromotions', 'productPromotions');
+      .leftJoinAndSelect('promotion.categoryPromotions', 'cp')
+      .leftJoinAndSelect('promotion.productPromotions', 'pp');
 
     // Select các trường cụ thể (tương đương với select của bạn)
     builder
@@ -119,14 +120,13 @@ export class PromotionsService {
         'promotion.name',
         'promotion.slug',
         'promotion.image',
-        'promotion.country',
         'promotion.createdAt',
 
         'campaign.id',
         'campaign.name',
 
-        'productHighlighted.id',
-        'productHighlighted.name',
+        'phl.id',
+        'phl.sku',
 
         'stores.id',
         'stores.name',
@@ -134,11 +134,9 @@ export class PromotionsService {
         'locations.id',
         'locations.name',
 
-        'categoryPromotions.id',
-        'categoryPromotions.name',
+        'cp.id',
 
-        'productPromotions.id',
-        'productPromotions.name',
+        'pp.id',
       ])
 
       // Phân trang và sắp xếp
