@@ -119,7 +119,10 @@ export class PromotionsService {
         'promotion.id',
         'promotion.name',
         'promotion.slug',
+        'promotion.isActive',
         'promotion.image',
+        'promotion.applyScope',
+        'promotion.applyType',
         'promotion.createdAt',
 
         'campaign.id',
@@ -155,6 +158,8 @@ export class PromotionsService {
         return store;
       }),
     );
+
+    console.log('data with urls :::', dataWithUrls);
 
     return {
       data: dataWithUrls,
@@ -255,6 +260,8 @@ export class PromotionsService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
+    console.log('rest :::', rest);
 
     try {
       // Merge dữ liệu mới vào thực thể cũ
