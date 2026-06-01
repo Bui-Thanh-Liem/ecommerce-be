@@ -2,9 +2,10 @@ import { CategoryEntity } from '@/modules/catalog/categories/entities/category.e
 import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategoryPromotion } from '@/shared/interfaces/models/category-promotion.interface';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity('category_promotions')
+@Index(['category', 'promotion'], { unique: true })
 export class CategoryPromotionEntity extends BaseEntity implements ICategoryPromotion {
   @ManyToOne(() => CategoryEntity, (category) => category.categoryPromotions)
   @JoinColumn({ name: 'category_id' })

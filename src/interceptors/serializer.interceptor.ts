@@ -28,7 +28,7 @@ export class SerializerInterceptor implements NestInterceptor {
 
         return {
           statusCode,
-          message: 'Success ✅✅✅',
+          message: 'Success ✅ ✅ ✅',
           metadata: plainToInstance(this.dto, data, {
             excludeExtraneousValues: true, // Chỉ giữ lại những thuộc tính có @Expose trong DTO
             // Thêm option này để xử lý tốt cả Array và Object đơn lẻ
