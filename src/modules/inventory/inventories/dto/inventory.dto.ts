@@ -1,12 +1,10 @@
 import { ProductVariantSKUDto } from '@/modules/catalog/product-variants-SKU/dto/product-variant-SKU.dto';
 import { StoreDto } from '@/modules/inventory/stores/dto/store.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
 import { Expose } from 'class-transformer';
 
-export class InventoryDto {
-  @Expose()
-  id: string;
-
+export class InventoryDto extends SerializerDto {
   @Expose()
   store: StoreDto;
 

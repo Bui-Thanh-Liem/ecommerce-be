@@ -30,9 +30,6 @@ export class StoreDto extends SerializerDto {
   manager: StaffDto;
 
   @Expose()
-  id: string;
-
-  @Expose()
   name: string;
 
   @Expose()

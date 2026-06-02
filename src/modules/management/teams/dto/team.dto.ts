@@ -2,11 +2,9 @@ import { StoreDto } from '@/modules/inventory/stores/dto/store.dto';
 import { TeamCategoryDto } from '@/modules/management/team-categories/dto/team-category.dto';
 import { Expose, Type } from 'class-transformer';
 import { StaffDto } from '../../staffs/dto/staff.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 
-export class TeamDto {
-  @Expose()
-  id: string;
-
+export class TeamDto extends SerializerDto {
   @Expose()
   name: string;
 

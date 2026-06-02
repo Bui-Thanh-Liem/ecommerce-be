@@ -8,7 +8,7 @@ import { CategoryPromotionQueryDto } from './dto/query-category-promotion.dto';
 import { CategoryPromotionMetadataDto } from './dto/metadata-category-promotion.dto';
 
 @Serializer(CategoryPromotionDto)
-@Controller('category-promotion')
+@Controller('category-promotions')
 export class CategoryPromotionController {
   constructor(private readonly categoryPromotionService: CategoryPromotionService) {}
 

@@ -3,9 +3,6 @@ import { Expose } from 'class-transformer';
 
 export class PermissionDto extends SerializerDto {
   @Expose()
-  id: string;
-
-  @Expose()
   keyGroup: string;
 
   @Expose()

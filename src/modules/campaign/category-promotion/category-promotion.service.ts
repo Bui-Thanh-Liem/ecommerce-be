@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateCategoryPromotionDto } from './dto/create-category-promotion.dto';
 import { UpdateCategoryPromotionDto } from './dto/update-category-promotion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -37,12 +37,9 @@ export class CategoryPromotionService {
       ]);
 
       //
-      if (!eC) throw new NotFoundException(`Category with ID ${categoryId} not found`);
-      if (!eP) throw new NotFoundException(`Promotion with ID ${promotionId} not found`);
-      if (eE)
-        throw new NotFoundException(
-          `Category Promotion with Category ID ${categoryId} and Promotion ID ${promotionId} already exists`,
-        );
+      if (!eC) throw new NotFoundException(`Category not found`);
+      if (!eP) throw new NotFoundException(`Promotion not found`);
+      if (eE) throw new ConflictException(`Category Promotion with Category  and Promotion already exists`);
 
       const categoryPromotion = this.categoryPromotionRepository.create({
         ...rest,
@@ -72,14 +69,32 @@ export class CategoryPromotionService {
 
     // Select các trường cụ thể (tương đương với select của bạn)
     builder
-      .select(['cp.id', 'cp.createdAt', 'promotion.id', 'promotion.name', 'category.id', 'category.name'])
+      .select([
+        'cp.id',
+        'cp.priority',
+        'cp.createdAt',
+        'cp.customDiscount',
+
+        'promotion.id',
+        'promotion.name',
+
+        'category.id',
+        'category.name',
+      ])
 
       // Phân trang và sắp xếp
       .skip(skip)
       .take(take)
       .orderBy('cp.createdAt', 'DESC');
 
-    return await this.categoryPromotionRepository.find({ relations: ['category', 'promotion'] });
+    const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
   }
 
   async exists(ids: string[]): Promise<boolean> {
@@ -115,7 +130,7 @@ export class CategoryPromotionService {
     if (categoryId) {
       checks.push(
         this.categoriesService.exists([categoryId]).then((exists) => {
-          if (!exists) throw new NotFoundException(`Category with ID ${categoryId} not found`);
+          if (!exists) throw new NotFoundException(`Category not found`);
         }),
       );
     }
@@ -124,7 +139,7 @@ export class CategoryPromotionService {
     if (promotionId) {
       checks.push(
         this.promotionsService.exists([promotionId]).then((exists) => {
-          if (!exists) throw new NotFoundException(`Promotion with ID ${promotionId} not found`);
+          if (!exists) throw new NotFoundException(`Promotion not found`);
         }),
       );
     }
@@ -141,7 +156,8 @@ export class CategoryPromotionService {
             },
           })
           .then((isDuplicate) => {
-            if (isDuplicate) throw new BadRequestException('Mối quan hệ Category và Promotion này đã tồn tại!');
+            if (isDuplicate)
+              throw new ConflictException('Category Promotion with the same Category and Promotion already exists');
           }),
       );
     }
@@ -163,7 +179,7 @@ export class CategoryPromotionService {
   async remove(id: string) {
     const categoryPromotion = await this.findOne(id);
     if (!categoryPromotion) {
-      throw new NotFoundException(`Category Promotion with ID ${id} not found`);
+      throw new NotFoundException(`Category Promotion not found`);
     }
     return await this.categoryPromotionRepository.remove(categoryPromotion);
   }

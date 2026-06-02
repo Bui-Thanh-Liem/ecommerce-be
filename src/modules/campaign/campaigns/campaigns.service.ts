@@ -19,6 +19,8 @@ import { CampaignQueryDto } from './dto/query-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { CampaignEntity } from './entities/campaign.entity';
 import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class CampaignsService {
@@ -30,6 +32,9 @@ export class CampaignsService {
 
     @Inject(forwardRef(() => PromotionsService))
     private readonly promotionService: PromotionsService,
+
+    @InjectQueue('cloudinary')
+    private readonly cloudinaryQueue: Queue,
 
     private readonly cloudinaryService: CloudinaryService,
 
@@ -308,7 +313,11 @@ export class CampaignsService {
 
       // Xóa mainImage cũ
       if (mainImage !== undefined && oldMainImageKey) {
-        await this.cloudinaryService.deleteImage(oldMainImageKey);
+        await this.cloudinaryQueue.add(
+          'delete-image',
+          { publicId: oldMainImageKey },
+          { jobId: `delete-${oldMainImageKey}-${Date.now()}` },
+        );
       }
 
       // Xóa cụm danh sách images cũ không còn dùng
@@ -316,7 +325,11 @@ export class CampaignsService {
         const newKeys = images.map((img) => img.key) || [];
         const imagesToDelete = oldImageKeys.filter((key) => !newKeys.includes(key));
         if (imagesToDelete.length > 0) {
-          await this.cloudinaryService.deleteMultipleImages(imagesToDelete);
+          await this.cloudinaryQueue.add(
+            'delete-multiple-images',
+            { publicIds: imagesToDelete },
+            { jobId: `delete-bulk-${Date.now()}` },
+          );
         }
       }
     } catch (cloudError) {
@@ -337,7 +350,11 @@ export class CampaignsService {
     if (campaign.images) {
       const imageKeys = campaign.images.map((img) => img.key).filter(Boolean);
       if (imageKeys.length > 0) {
-        await this.cloudinaryService.deleteMultipleImages(imageKeys);
+        await this.cloudinaryQueue.add(
+          'delete-multiple-images',
+          { publicIds: imageKeys },
+          { jobId: `delete-bulk-${Date.now()}` },
+        );
       }
     }
 
@@ -346,6 +363,10 @@ export class CampaignsService {
 
   private async removeImagesForError(keys?: string[]) {
     if (!keys || keys.length === 0) return;
-    return await this.cloudinaryService.deleteMultipleImages(keys);
+    return await this.cloudinaryQueue.add(
+      'delete-multiple-images',
+      { publicIds: keys },
+      { jobId: `delete-bulk-${Date.now()}` },
+    );
   }
 }

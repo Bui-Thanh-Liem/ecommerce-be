@@ -4,9 +4,6 @@ import { Expose, Type } from 'class-transformer';
 
 export class LocationRegionDto extends SerializerDto {
   @Expose()
-  id: string;
-
-  @Expose()
   name: string;
 
   @Expose()

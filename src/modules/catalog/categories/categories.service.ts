@@ -11,6 +11,8 @@ import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { StoresService } from '../../inventory/stores/stores.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class CategoriesService {
@@ -21,6 +23,8 @@ export class CategoriesService {
     private categoryRepo: Repository<CategoryEntity>,
     private readonly cloudinaryService: CloudinaryService,
     private dataSource: DataSource,
+    @InjectQueue('cloudinary')
+    private readonly cloudinaryQueue: Queue,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -304,7 +308,11 @@ export class CategoriesService {
     try {
       // Chỉ xóa ảnh cũ nếu có truyền ảnh mới lên, ảnh cũ có tồn tại và hai key khác nhau
       if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
-        await this.cloudinaryService.deleteImage(oldImageKey);
+        await this.cloudinaryQueue.add(
+          'delete-image',
+          { publicId: oldImageKey },
+          { jobId: `delete-${oldImageKey}-${Date.now()}` },
+        );
       }
     } catch (cloudError) {
       this.logger.warn(`Database updated but failed to delete old category image from Cloudinary`, cloudError);
@@ -322,7 +330,11 @@ export class CategoriesService {
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (category.image && category.image.key) {
-      await this.cloudinaryService.deleteImage(category.image.key);
+      await this.cloudinaryQueue.add(
+        'delete-image',
+        { publicId: category.image.key },
+        { jobId: `delete-${category.image.key}-${Date.now()}` },
+      );
     }
 
     return true;
@@ -344,6 +356,6 @@ export class CategoriesService {
 
   private async removeImageForError(key?: string) {
     if (!key) return;
-    return await this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
   }
 }

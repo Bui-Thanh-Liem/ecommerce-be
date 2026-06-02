@@ -50,6 +50,8 @@ import { CategoryPromotionModule } from './modules/campaign/category-promotion/c
 import redisConfig from './configs/redis.config';
 import { CacheModule } from './common/cache/cache.module';
 import { BullMqModule } from './common/bull/bull.module';
+import { AuditLogsModule } from './modules/management/audit-logs/audit-logs.module';
+import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -113,6 +115,7 @@ const isProd = process.env.NODE_ENV === 'production';
     CartItemsModule,
     TeamsModule,
     TeamCategoriesModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -141,6 +144,10 @@ const isProd = process.env.NODE_ENV === 'production';
     {
       provide: APP_INTERCEPTOR,
       useClass: OvInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
     },
     {
       provide: APP_GUARD,

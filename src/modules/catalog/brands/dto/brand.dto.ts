@@ -1,10 +1,8 @@
 import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 
-export class BrandDto {
-  @Expose()
-  id: string;
-
+export class BrandDto extends SerializerDto {
   @Expose()
   name: string;
 

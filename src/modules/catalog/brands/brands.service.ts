@@ -9,6 +9,8 @@ import { BrandQueryDto } from './dto/query-brand.dto';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class BrandsService {
@@ -19,6 +21,9 @@ export class BrandsService {
     private brandRepo: Repository<BrandEntity>,
     private readonly cloudinaryService: CloudinaryService,
     private dataSource: DataSource,
+
+    @InjectQueue('cloudinary')
+    private readonly cloudinaryQueue: Queue,
   ) {}
 
   async create(createBrandDto: CreateBrandDto) {
@@ -200,7 +205,11 @@ export class BrandsService {
     try {
       // Chỉ tiến hành xóa ảnh cũ nếu có truyền ảnh mới lên và ảnh cũ thực sự tồn tại và khác ảnh mới
       if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
-        await this.cloudinaryService.deleteImage(oldImageKey);
+        await this.cloudinaryQueue.add(
+          'delete-image',
+          { publicId: oldImageKey },
+          { jobId: `delete-${oldImageKey}-${Date.now()}` },
+        );
       }
     } catch (cloudError) {
       this.logger.warn(`Database updated but failed to delete old brand image from Cloudinary`, cloudError);
@@ -218,7 +227,11 @@ export class BrandsService {
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (brand.image && brand.image.key) {
-      await this.cloudinaryService.deleteImage(brand.image.key);
+      await this.cloudinaryQueue.add(
+        'delete-image',
+        { publicId: brand.image.key },
+        { jobId: `delete-${brand.image.key}-${Date.now()}` },
+      );
     }
 
     return true;
@@ -231,6 +244,6 @@ export class BrandsService {
 
   private async removeImageForError(key?: string) {
     if (!key) return;
-    return await this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
   }
 }

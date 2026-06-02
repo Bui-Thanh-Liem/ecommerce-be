@@ -36,9 +36,6 @@ class SpecificationDto implements ISpecification {
 
 export class ProductSPUDto extends SerializerDto {
   @Expose()
-  id: string;
-
-  @Expose()
   name: string;
 
   @Expose()

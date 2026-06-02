@@ -6,11 +6,9 @@ import { PromotionApplyScope } from '@/shared/enums/promotion-apply-scope.enum';
 import { ProductVariantSKUDto } from '@/modules/catalog/product-variants-SKU/dto/product-variant-SKU.dto';
 import { StoreDto } from '@/modules/inventory/stores/dto/store.dto';
 import { LocationRegionDto } from '@/modules/inventory/location-regions/dto/location-region.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 
-export class PromotionDto {
-  @Expose()
-  id: string;
-
+export class PromotionDto extends SerializerDto {
   @Expose()
   name: string;
 

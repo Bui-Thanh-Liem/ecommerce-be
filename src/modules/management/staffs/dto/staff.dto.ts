@@ -7,9 +7,6 @@ import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 
 export class StaffDto extends SerializerDto {
   @Expose()
-  id: string;
-
-  @Expose()
   email: string;
 
   @Expose()

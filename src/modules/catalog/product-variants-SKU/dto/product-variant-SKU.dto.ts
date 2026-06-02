@@ -1,5 +1,6 @@
 import { ProductImageDto } from '@/modules/catalog/product-images/dto/product-image.dto';
 import { ProductSPUDto } from '@/modules/catalog/products-SPU/dto/product-SPU.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { Expose, Type } from 'class-transformer';
 
@@ -16,12 +17,9 @@ class SpecificationDto {
   @Expose()
   isSKU: boolean;
 }
-export class ProductVariantSKUDto {
+export class ProductVariantSKUDto extends SerializerDto {
   @Expose()
   product: ProductSPUDto;
-
-  @Expose()
-  id: string;
 
   @Expose()
   sku: string;

@@ -1,14 +1,12 @@
 import { ProductVariantSKUDto } from '@/modules/catalog/product-variants-SKU/dto/product-variant-SKU.dto';
 import { CustomerDto } from '@/modules/customer/customers/dto/customer.dto';
 import { StoreDto } from '@/modules/inventory/stores/dto/store.dto';
+import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
 import { VoucherStatus } from '@/shared/enums/voucher-status.enum';
 import { Expose, Type } from 'class-transformer';
 
-export class VoucherDto {
-  @Expose()
-  id: string;
-
+export class VoucherDto extends SerializerDto {
   @Expose()
   code: string;
 

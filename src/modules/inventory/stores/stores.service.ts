@@ -10,6 +10,8 @@ import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { LocationRegionsService } from '../location-regions/location-regions.service';
 import { StaffsService } from '@/modules/management/staffs/staffs.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class StoresService {
@@ -26,6 +28,9 @@ export class StoresService {
     private dataSource: DataSource,
 
     private readonly cloudinaryService: CloudinaryService,
+
+    @InjectQueue('cloudinary')
+    private readonly cloudinaryQueue: Queue,
   ) {}
 
   async create(createStoreDto: CreateStoreDto) {
@@ -311,7 +316,11 @@ export class StoresService {
     try {
       // Chỉ tiến hành xóa ảnh cũ nếu có truyền ảnh mới, ảnh cũ thực sự tồn tại và khác ảnh mới
       if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
-        await this.cloudinaryService.deleteImage(oldImageKey);
+        await this.cloudinaryQueue.add(
+          'delete-image',
+          { publicId: oldImageKey },
+          { jobId: `delete-${oldImageKey}-${Date.now()}` },
+        );
       }
     } catch (cloudError) {
       this.logger.warn(`Database updated but failed to delete old store image from Cloudinary`, cloudError);
@@ -329,7 +338,11 @@ export class StoresService {
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (store.image && store.image.key) {
-      await this.cloudinaryService.deleteImage(store.image.key);
+      await this.cloudinaryQueue.add(
+        'delete-image',
+        { publicId: store.image.key },
+        { jobId: `delete-${store.image.key}-${Date.now()}` },
+      );
     }
 
     return true;
@@ -337,6 +350,6 @@ export class StoresService {
 
   private async removeImageForError(key?: string) {
     if (!key) return;
-    return await this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
   }
 }

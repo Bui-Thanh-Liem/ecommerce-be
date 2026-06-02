@@ -15,6 +15,8 @@ import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { IMetadata } from '@/shared/interfaces/metadata.interface';
 import { PromotionQueryDto } from './dto/query-promotion.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class PromotionsService {
@@ -23,7 +25,12 @@ export class PromotionsService {
   constructor(
     @InjectRepository(PromotionEntity)
     private promotionRepository: Repository<PromotionEntity>,
+
+    @InjectQueue('cloudinary')
+    private readonly cloudinaryQueue: Queue,
+
     private cloudinaryService: CloudinaryService,
+
     private dataSource: DataSource,
 
     @Inject(forwardRef(() => CampaignsService))
@@ -136,6 +143,7 @@ export class PromotionsService {
 
         'locations.id',
         'locations.name',
+        'locations.type',
 
         'cp.id',
 
@@ -158,8 +166,6 @@ export class PromotionsService {
         return store;
       }),
     );
-
-    console.log('data with urls :::', dataWithUrls);
 
     return {
       data: dataWithUrls,
@@ -307,7 +313,11 @@ export class PromotionsService {
     try {
       // Chỉ xóa ảnh cũ nếu có truyền ảnh mới lên, ảnh cũ có tồn tại và hai key khác nhau
       if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
-        await this.cloudinaryService.deleteImage(oldImageKey);
+        await this.cloudinaryQueue.add(
+          'delete-image',
+          { publicId: oldImageKey },
+          { jobId: `delete-${oldImageKey}-${Date.now()}` },
+        );
       }
     } catch (cloudError) {
       this.logger.warn(`Database updated but failed to delete old promotion image from Cloudinary`, cloudError);
@@ -325,7 +335,11 @@ export class PromotionsService {
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
     if (promotion.image && promotion.image.key) {
-      await this.cloudinaryService.deleteImage(promotion.image.key);
+      await this.cloudinaryQueue.add(
+        'delete-image',
+        { publicId: promotion.image.key },
+        { jobId: `delete-${promotion.image.key}-${Date.now()}` },
+      );
     }
 
     return true;
@@ -333,6 +347,6 @@ export class PromotionsService {
 
   private async removeImageForError(key?: string) {
     if (!key) return;
-    return await this.cloudinaryService.deleteImage(key);
+    return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
   }
 }

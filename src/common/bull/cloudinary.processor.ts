@@ -1,11 +1,15 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Logger } from '@nestjs/common';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Processor('cloudinary')
 export class CloudinaryProcessor extends WorkerHost {
   private readonly logger = new Logger(CloudinaryProcessor.name);
+
+  constructor(private cloudinaryService: CloudinaryService) {
+    super();
+  }
 
   async process(
     job: Job<
@@ -18,9 +22,6 @@ export class CloudinaryProcessor extends WorkerHost {
 
     try {
       switch (job.name) {
-        case 'upload-image':
-          return await this.handleUploadImage(job as handleUpload);
-
         case 'delete-image':
           return await this.handleDeleteImage(job as handleDelete);
 
@@ -37,39 +38,12 @@ export class CloudinaryProcessor extends WorkerHost {
     }
   }
 
-  private async handleUploadImage(job: handleUpload): Promise<UploadApiResponse> {
-    this.logger.debug(`[JOB-${job.id}] Uploading to folder: ${job.data.folder}`);
-
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: job.data.folder,
-          resource_type: 'image',
-          public_id: job.data.originalname.split('.')[0],
-        },
-        (error, result) => {
-          if (error) {
-            this.logger.error(`[JOB-${job.id}] Upload error: ${error.message}`);
-            return reject(new Error(`Cloudinary Upload Failed: ${error.message}`));
-          }
-
-          if (result) {
-            this.logger.log(`[JOB-${job.id}] ✅ Upload success: ${result.public_id}`);
-            resolve(result);
-          }
-        },
-      );
-
-      uploadStream.end(job.data.fileBuffer);
-    });
-  }
-
   private async handleDeleteImage(job: handleDelete): Promise<any> {
     const publicId = job.data.publicId;
     this.logger.debug(`[JOB-${job.id}] Deleting: ${publicId}`);
 
     try {
-      const result = (await cloudinary.uploader.destroy(publicId)) as CloudinaryDestroyResponse;
+      const result = await this.cloudinaryService.deleteImage(publicId);
 
       if (result.result !== 'ok' && result.result !== 'not_found') {
         throw new Error(`Unexpected Cloudinary response: ${result.result}`);
@@ -87,9 +61,7 @@ export class CloudinaryProcessor extends WorkerHost {
     this.logger.debug(`[JOB-${job.id}] Bulk deleting ${publicIds.length} images`);
 
     try {
-      const response = (await cloudinary.api.delete_resources(publicIds, {
-        resource_type: 'image',
-      })) as CloudinaryDeleteResourcesResponse;
+      const response = await this.cloudinaryService.deleteMultipleImages(publicIds);
 
       this.logger.log(`[JOB-${job.id}] ✅ Bulk delete completed. Deleted: ${Object.keys(response.deleted).length}`);
       return response;
@@ -113,16 +85,5 @@ export class CloudinaryProcessor extends WorkerHost {
   }
 }
 
-type handleUpload = Job<{ fileBuffer: Buffer; originalname: string; folder: string }>;
 type handleDelete = Job<{ publicId: string }>;
 type handleBulkDelete = Job<{ publicIds: string[] }>;
-
-interface CloudinaryDeleteResourcesResponse {
-  deleted: Record<string, 'deleted' | 'not_found'>;
-  partial: boolean;
-}
-
-interface CloudinaryDestroyResponse {
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  result: 'ok' | 'not_found' | string;
-}

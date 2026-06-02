@@ -1,9 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductPromotionsService } from './product-promotions.service';
 import { CreateProductPromotionDto } from './dto/create-product-promotion.dto';
 import { UpdateProductPromotionDto } from './dto/update-product-promotion.dto';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { ProductPromotionDto } from './dto/product-promotion.dto';
+import { ProductPromotionMetadataDto } from './dto/metadata-product-promotion.dto';
+import { ProductPromotionQueryDto } from './dto/query-product-promotion.dto';
 
 @Controller('product-promotions')
+@Serializer(ProductPromotionDto)
 export class ProductPromotionsController {
   constructor(private readonly productPromotionsService: ProductPromotionsService) {}
 
@@ -13,8 +18,9 @@ export class ProductPromotionsController {
   }
 
   @Get()
-  findAll() {
-    return this.productPromotionsService.findAll();
+  @Serializer(ProductPromotionMetadataDto)
+  findAll(@Query() query: ProductPromotionQueryDto) {
+    return this.productPromotionsService.findAll(query);
   }
 
   @Get(':id')

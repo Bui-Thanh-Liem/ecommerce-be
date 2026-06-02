@@ -42,36 +42,7 @@ export class CloudinaryService {
   }
 
   /**
-   * 2. UPLOAD IMAGE FROM SERVER (Dành cho việc upload file qua Interceptor của NestJS)
-   * Nhận vào Buffer từ Express.Multer.File
-   * Add job vào queue - xử lý trên worker process riêng
-   */
-  async uploadImage(file: Express.Multer.File, folder: string) {
-    if (!file) {
-      throw new BadRequestException('File không được để trống');
-    }
-
-    const job = await this.cloudinaryQueue.add(
-      'upload-image',
-      {
-        fileBuffer: file.buffer,
-        originalname: file.originalname,
-        folder: folder,
-      },
-      {
-        jobId: `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      },
-    );
-
-    return {
-      jobId: job.id,
-      status: 'processing',
-      message: 'Upload đang được xử lý trên worker process',
-    };
-  }
-
-  /**
-   * 3. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
+   * 2. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateUrl(publicId: string, customOptions?: TransformationOptions): Promise<string> {
@@ -100,7 +71,7 @@ export class CloudinaryService {
   }
 
   /**
-   * 3.3. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
+   * 3. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateUrls(images: IImage[], customOptions?: TransformationOptions): Promise<IImage[]> {
@@ -158,17 +129,17 @@ export class CloudinaryService {
       throw new BadRequestException('Public ID không được để trống');
     }
 
-    const job = await this.cloudinaryQueue.add(
-      'delete-image',
-      { publicId },
-      { jobId: `delete-${publicId}-${Date.now()}` },
-    );
+    try {
+      const result = (await cloudinary.uploader.destroy(publicId)) as CloudinaryDestroyResponse;
 
-    return {
-      jobId: job.id,
-      status: 'processing',
-      message: 'Xóa file đang được xử lý trên worker process',
-    };
+      if (result.result !== 'ok' && result.result !== 'not_found') {
+        throw new Error(`Unexpected Cloudinary response: ${result.result}`);
+      }
+
+      return { success: true, result: result.result, publicId };
+    } catch (error) {
+      throw new Error(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**
@@ -181,16 +152,24 @@ export class CloudinaryService {
       throw new BadRequestException('Danh sách Public IDs không được rỗng');
     }
 
-    const job = await this.cloudinaryQueue.add(
-      'delete-multiple-images',
-      { publicIds },
-      { jobId: `delete-bulk-${Date.now()}` },
-    );
+    try {
+      const response = (await cloudinary.api.delete_resources(publicIds, {
+        resource_type: 'image',
+      })) as CloudinaryDeleteResourcesResponse;
 
-    return {
-      jobId: job.id,
-      status: 'processing',
-      message: `Đang xử lý xóa ${publicIds.length} file trên worker process`,
-    };
+      return response;
+    } catch (error) {
+      throw new Error(`Bulk delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
+}
+
+interface CloudinaryDestroyResponse {
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  result: 'ok' | 'not_found' | string;
+}
+
+interface CloudinaryDeleteResourcesResponse {
+  deleted: Record<string, 'deleted' | 'not_found'>;
+  partial: boolean;
 }

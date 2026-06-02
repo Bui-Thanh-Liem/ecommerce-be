@@ -5,9 +5,6 @@ import { Expose, Type } from 'class-transformer';
 
 export class RoleDto extends SerializerDto {
   @Expose()
-  id: string;
-
-  @Expose()
   name: string;
 
   @Expose()
