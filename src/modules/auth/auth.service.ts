@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { StaffTokensService } from '../management/staff-tokens/staff-tokens.service';
-import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { TokenType } from '@/shared/enums/token-type.enum';
 import { StaffsService } from '../management/staffs/staffs.service';
 import { StaffEntity } from '../management/staffs/entities/staff.entity';
 
@@ -43,6 +43,6 @@ export class AuthService {
 
   // Sign out a staff by revoking the token
   async signOut(userId: string) {
-    await this.staffTokensService.delete(userId, StaffTokenType.REFRESH);
+    await this.staffTokensService.delete(userId, TokenType.REFRESH);
   }
 }

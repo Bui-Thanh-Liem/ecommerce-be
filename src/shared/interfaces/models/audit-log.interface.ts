@@ -9,6 +9,9 @@ export interface IAuditLog extends IBase {
   phone: string;
   ipAddress: string;
   userAgent: string;
+  roles?: string[];
+  isSuperAdmin: boolean;
+  isSubAdmin: boolean;
 
   // Thông tin chi tiết về hành động
   method: string; // GET, POST, PUT, DELETE, ...

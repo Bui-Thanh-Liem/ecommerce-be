@@ -10,4 +10,8 @@ export class CustomerDto extends SerializerDto {
 
   @Expose()
   addresses: string[];
+
+  //
+  @Expose()
+  message: string;
 }

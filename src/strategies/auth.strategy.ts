@@ -40,7 +40,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     this.logger.debug('#2. JwtAuthStrategy - validate called');
 
     // 1. Check database xem staff còn tồn tại hay không
-    const staff = await this.staffService.findOne(payload.staffId);
+    const staff = await this.staffService.findOne(payload?.staffId);
 
     // 2. Nếu không thấy, chặn ngay tại đây
     if (!staff) {

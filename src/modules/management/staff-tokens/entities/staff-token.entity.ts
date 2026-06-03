@@ -1,5 +1,5 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { TokenType } from '@/shared/enums/token-type.enum';
 import { IStaffToken } from '@/shared/interfaces/models/staff-token.interface';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import { StaffEntity } from '../../staffs/entities/staff.entity';
@@ -11,8 +11,8 @@ export class StaffTokenEntity extends BaseEntity implements IStaffToken {
   @JoinColumn({ name: 'staff_id' })
   staff: StaffEntity;
 
-  @Column({ type: 'enum', enum: StaffTokenType })
-  type: StaffTokenType;
+  @Column({ type: 'enum', enum: TokenType })
+  type: TokenType;
 
   @Column({ type: 'text' })
   token: string;

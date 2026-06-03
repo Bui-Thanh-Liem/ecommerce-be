@@ -1,10 +1,10 @@
-import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { TokenType } from '@/shared/enums/token-type.enum';
 import { IBase } from '../base.interface';
 import { IStaff } from './staff.interface';
 
 export interface IStaffToken extends IBase {
   staff: IStaff;
-  type: StaffTokenType;
+  type: TokenType;
   token: string;
   expiresAt: Date; // thời gian hết hạn của token
   isRevoked: boolean;

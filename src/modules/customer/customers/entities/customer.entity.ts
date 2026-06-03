@@ -6,13 +6,16 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('customers')
 export class CustomerEntity extends BaseEntity implements ICustomer {
-  @Column()
+  @Column({ type: 'varchar', length: 50 })
   fullname: string;
 
-  @Column({ unique: true, type: 'varchar', length: 15 })
+  @Column({ unique: true, type: 'varchar', length: 20 })
   phone: string;
 
-  @Column('jsonb')
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  email: string;
+
+  @Column('json')
   address: string[];
 
   // Quan hệ với các entity khác

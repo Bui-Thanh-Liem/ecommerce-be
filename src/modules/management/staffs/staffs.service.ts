@@ -198,7 +198,7 @@ export class StaffsService implements OnModuleInit {
     return count === ids.length;
   }
 
-  async findOne(id: string) {
+  async findOne(id?: string) {
     if (!id) return null;
     return await this.staffRepo.findOne({
       where: { id },

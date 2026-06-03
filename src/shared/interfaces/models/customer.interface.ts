@@ -5,9 +5,10 @@ import { IRating } from './rating.interface';
 export interface ICustomer extends IBase {
   fullname: string;
   phone: string;
+  email?: string;
   address: string[];
 
-  // Quan hệ với các entity khác
+  // Relation
   ratings?: IRating[];
-  carts?: ICart[]; // Một khách hàng có thể có nhiều giỏ hàng (nếu họ mua hàng nhiều lần)
+  carts?: ICart[];
 }

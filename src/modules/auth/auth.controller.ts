@@ -8,6 +8,7 @@ import { SigninStaffDto } from './dtos/signin-staff.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from '@/decorators/public.decorator';
 import { StaffEntity } from '../management/staffs/entities/staff.entity';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 @Serializer(AuthDto)
@@ -15,6 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 5 yêu cầu mỗi phút cho endpoint login
   @Post('signin')
   @UseGuards(LocalAuthGuard)
   async signIn(
@@ -38,7 +40,7 @@ export class AuthController {
 
   @Post('signout')
   async signOut(@Res({ passthrough: true }) res: Response, @CurrentStaff() currentStaff: StaffEntity) {
-    await this.authService.signOut(currentStaff.id);
+    await this.authService.signOut(currentStaff?.id);
     res.clearCookie('token');
     return true;
   }

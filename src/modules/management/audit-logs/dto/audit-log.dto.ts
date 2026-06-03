@@ -16,6 +16,9 @@ export class AuditLogDto extends SerializerDto {
   phone: string;
 
   @Expose()
+  roles: string[];
+
+  @Expose()
   ipAddress: string;
 
   @Expose()

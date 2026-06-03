@@ -1,6 +1,7 @@
-import { StaffTokenType } from '../enums/staff-token-type.enum';
+import { TokenType } from '../enums/token-type.enum';
 
 export interface IJwtPayload {
-  staffId: string;
-  type: StaffTokenType;
+  type: TokenType;
+  staffId?: string;
+  customerId?: string;
 }

@@ -40,6 +40,9 @@ export class AuditLogInterceptor implements NestInterceptor {
         phone: staff.phone,
         ipAddress: req.ip,
         userAgent: req.headers['user-agent'] || '',
+        roles: staff.roles?.map((role) => role.name) || [],
+        isSubAdmin: staff.isSubAdmin || false,
+        isSuperAdmin: staff.isSuperAdmin || false,
 
         //
         desc: '',

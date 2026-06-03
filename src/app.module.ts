@@ -12,7 +12,6 @@ import { RoleGuard } from './guards/role.guard';
 import { OvInterceptor } from './interceptors/ov.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionsModule } from './modules/management/permissions/permissions.module';
-import { StaffTokensModule } from './modules/management/staff-tokens/staff-tokens.module';
 import { StoresModule } from './modules/inventory/stores/stores.module';
 import { JwtAuthStrategy } from './strategies/auth.strategy';
 import { InventoriesModule } from './modules/inventory/inventories/inventories.module';
@@ -52,6 +51,9 @@ import { CacheModule } from './common/cache/cache.module';
 import { BullMqModule } from './common/bull/bull.module';
 import { AuditLogsModule } from './modules/management/audit-logs/audit-logs.module';
 import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { NotificationModule } from './common/notification/notification.module';
+import { CustomerTokensModule } from './modules/customer/customer-tokens/customer-tokens.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -76,6 +78,11 @@ const isProd = process.env.NODE_ENV === 'production';
       },
     }),
 
+    // THROTTLER Tầng 1: chặn theo ip client
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', limit: 100, ttl: 60000 }], // Giới hạn 100 yêu cầu mỗi phút cho mỗi IP
+    }),
+
     // Module chung
     CacheModule,
     BullMqModule,
@@ -98,7 +105,6 @@ const isProd = process.env.NODE_ENV === 'production';
     ProductPromotionsModule,
     CustomersModule,
     VouchersModule,
-    StaffTokensModule,
     S3Module,
     OrdersModule,
     OrderItemsModule,
@@ -116,6 +122,8 @@ const isProd = process.env.NODE_ENV === 'production';
     TeamsModule,
     TeamCategoriesModule,
     AuditLogsModule,
+    NotificationModule,
+    CustomerTokensModule,
   ],
   controllers: [AppController],
   providers: [

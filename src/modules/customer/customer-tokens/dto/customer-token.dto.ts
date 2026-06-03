@@ -1,16 +1,16 @@
-import { StaffTokenType } from '@/shared/enums/staff-token-type.enum';
+import { TokenType } from '@/shared/enums/token-type.enum';
 import { Expose } from 'class-transformer';
-import { StaffDto } from '../../staffs/dto/staff.dto';
+import { CustomerDto } from '../../customers/dto/customer.dto';
 
-export class StaffTokenDto {
+export class CustomerTokenDto {
   @Expose()
   token: string;
 
   @Expose()
-  type: StaffTokenType;
+  type: TokenType;
 
   @Expose()
-  staff: StaffDto;
+  customer: CustomerDto;
 
   @Expose()
   expiresAt: Date;

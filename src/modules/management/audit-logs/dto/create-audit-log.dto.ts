@@ -1,6 +1,16 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { AuditLogStatus } from '@/shared/enums/audit-log-status.enum';
-import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateAuditLogDto {
   @IsNotEmpty()
@@ -18,6 +28,18 @@ export class CreateAuditLogDto {
   @Trim()
   @MaxLength(100)
   email: string;
+
+  @IsOptional()
+  @IsArray()
+  roles: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  isSuperAdmin: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isSubAdmin: boolean;
 
   @IsString()
   @MaxLength(20)

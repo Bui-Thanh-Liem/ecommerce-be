@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -35,6 +36,7 @@ export class CreateStaffDto {
   @Trim()
   @IsNotEmpty()
   @MaxLength(20)
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'Phone number must be valid' })
   phone: string;
 
   @IsString()

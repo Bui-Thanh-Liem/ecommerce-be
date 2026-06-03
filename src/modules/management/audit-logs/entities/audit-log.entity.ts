@@ -26,6 +26,15 @@ export class AuditLogEntity extends BaseEntity implements IAuditLog {
   @Column({ type: 'varchar', length: 255 })
   userAgent: string;
 
+  @Column({ default: false })
+  isSuperAdmin: boolean;
+
+  @Column({ default: false })
+  isSubAdmin: boolean;
+
+  @Column({ nullable: true, type: 'json' })
+  roles: string[];
+
   @Column({ type: 'varchar', length: 10 })
   method: string;
 
@@ -38,10 +47,10 @@ export class AuditLogEntity extends BaseEntity implements IAuditLog {
   @Column({ type: 'int' })
   statusCode: number;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   requestPayload: any;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   responsePayload: any;
 
   @Column({ type: 'enum', enum: AuditLogStatus, default: AuditLogStatus.PENDING })

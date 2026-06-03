@@ -23,11 +23,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     });
   }
 
-  validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: FacebookProfile,
-  ): unknown {
+  validate(accessToken: string, refreshToken: string, profile: FacebookProfile): unknown {
     return {
       email: profile.emails?.[0]?.value,
       name: `${profile.name.givenName} ${profile.name.familyName}`,

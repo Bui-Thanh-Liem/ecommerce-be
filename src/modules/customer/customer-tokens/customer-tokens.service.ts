@@ -1,28 +1,28 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { sign } from 'jsonwebtoken';
-import ms, { StringValue } from 'ms';
+import { CustomerTokenEntity } from './entities/customer-token.entity';
+import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { TokenType } from '@/shared/enums/token-type.enum';
 import { IJwtPayload } from '@/shared/interfaces/jwt-payload.interface';
-import { Repository } from 'typeorm';
-import { StaffTokenEntity } from './entities/staff-token.entity';
+import ms, { StringValue } from 'ms';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
-export class StaffTokensService {
+export class CustomerTokensService {
   constructor(
-    @InjectRepository(StaffTokenEntity)
-    private staffTokenRepo: Repository<StaffTokenEntity>,
+    @InjectRepository(CustomerTokenEntity)
+    private customerTokenRepo: Repository<CustomerTokenEntity>,
     private configService: ConfigService,
   ) {}
 
   // Revoke a token by marking it as revoked in the database
   // This allows us to keep a record of issued tokens and their status
   async revokeToken(token: string, type: TokenType) {
-    const staffToken = await this.staffTokenRepo.findOneBy({ token, type });
-    if (staffToken) {
-      staffToken.isRevoked = true;
-      await this.staffTokenRepo.save(staffToken);
+    const customerToken = await this.customerTokenRepo.findOneBy({ token, type });
+    if (customerToken) {
+      customerToken.isRevoked = true;
+      await this.customerTokenRepo.save(customerToken);
     }
   }
 
@@ -39,16 +39,16 @@ export class StaffTokensService {
     return sign(payload, secretKey, { expiresIn });
   }
 
-  // Delete all tokens of a staff (e.g., when they log out or when we want to invalidate all sessions)
-  async delete(staffId: string, type: TokenType) {
-    await this.staffTokenRepo.delete({ staff: { id: staffId }, type, isRevoked: false });
+  // Delete all tokens of a customer (e.g., when they log out or when we want to invalidate all sessions)
+  async delete(customerId: string, type: TokenType) {
+    await this.customerTokenRepo.delete({ customer: { id: customerId }, type, isRevoked: false });
   }
 
   //
-  async updateAuthToken(staffId: string) {
-    // Tìm token hiện tại của staff
-    const existingToken = await this.staffTokenRepo.findOne({
-      where: { staff: { id: staffId }, type: TokenType.REFRESH },
+  async updateAuthToken(customerId: string) {
+    // Tìm token hiện tại của customer
+    const existingToken = await this.customerTokenRepo.findOne({
+      where: { customer: { id: customerId }, type: TokenType.REFRESH },
     });
 
     // Nếu token đã bị thu hồi, không cho phép tạo token mới
@@ -57,38 +57,42 @@ export class StaffTokensService {
     }
 
     if (existingToken) {
-      // Xóa token cũ nếu đã tồn tại (chỉ tồn tại một phiên làm việc cho mỗi staff)
-      await this.staffTokenRepo.remove(existingToken);
+      // Xóa token cũ nếu đã tồn tại (chỉ tồn tại một phiên làm việc cho mỗi customer)
+      await this.customerTokenRepo.remove(existingToken);
     }
 
     // Tạo token mới
-    return await this.generateAuthTokenPair({ staffId });
+    return await this.generateAuthTokenPair({ customerId });
   }
 
   //
-  private async generateAuthTokenPair({ staffId }: { staffId: string }): Promise<{ access: string; refresh: string }> {
+  private async generateAuthTokenPair({
+    customerId,
+  }: {
+    customerId: string;
+  }): Promise<{ access: string; refresh: string }> {
     const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '7d';
 
     // Tạo access token và refresh token
     const accessToken = this.generateToken({
-      payload: { staffId, type: TokenType.ACCESS },
+      payload: { customerId, type: TokenType.ACCESS },
       secretKey: this.configService.get<string>('JWT_ACCESS_SECRET') || 'key-secret',
       expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN') || '15m',
     });
     const refreshToken = this.generateToken({
-      payload: { staffId, type: TokenType.REFRESH },
+      payload: { customerId, type: TokenType.REFRESH },
       secretKey: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh-key-secret',
       expiresIn: expiresInRefresh,
     });
 
     // Lưu refresh token vào database
-    const staffToken = this.staffTokenRepo.create({
+    const customerToken = this.customerTokenRepo.create({
       token: refreshToken,
-      staff: { id: staffId },
+      customer: { id: customerId },
       type: TokenType.REFRESH,
       expiresAt: new Date(Date.now() + ms(expiresInRefresh)), // Tính thời gian hết hạn dựa trên expiresInRefresh
     });
-    await this.staffTokenRepo.save(staffToken);
+    await this.customerTokenRepo.save(customerToken);
 
     return { access: accessToken, refresh: refreshToken };
   }
