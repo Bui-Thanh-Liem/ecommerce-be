@@ -7,6 +7,7 @@ export interface ICustomer extends IBase {
   phone: string;
   email?: string;
   address: string[];
+  isActive: boolean;
 
   // Relation
   ratings?: IRating[];

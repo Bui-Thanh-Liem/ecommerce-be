@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { LoginCustomerDto } from './login-customer.dto';
-import { IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 import { Trim } from '@/decorators/trim.decorator';
 
 export class UpdateCustomerDto extends PartialType(LoginCustomerDto) {
@@ -19,4 +19,8 @@ export class UpdateCustomerDto extends PartialType(LoginCustomerDto) {
   @Trim()
   @MaxLength(100)
   email?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }

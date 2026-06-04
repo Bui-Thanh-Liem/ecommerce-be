@@ -22,7 +22,6 @@ export class RolesService {
 
   async create(createRoleDto: CreateRoleDto) {
     const { permissions: permissionIds, stores: storeIds, name, ...rest } = createRoleDto;
-    console.log('Create Role DTO:', createRoleDto);
 
     //
     const existingRole = await this.rolesRepo.exists({ where: { name } });

@@ -12,6 +12,9 @@ export class CustomerEntity extends BaseEntity implements ICustomer {
   @Column({ unique: true, type: 'varchar', length: 20 })
   phone: string;
 
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @Column({ type: 'varchar', length: 100, nullable: true })
   email: string;
 

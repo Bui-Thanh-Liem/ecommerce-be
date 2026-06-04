@@ -9,6 +9,12 @@ export class CustomerDto extends SerializerDto {
   phone: string;
 
   @Expose()
+  isActive: boolean;
+
+  @Expose()
+  email: string;
+
+  @Expose()
   addresses: string[];
 
   //

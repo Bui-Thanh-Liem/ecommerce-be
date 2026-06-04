@@ -146,10 +146,6 @@ const isProd = process.env.NODE_ENV === 'production';
       }),
     },
     {
-      provide: APP_FILTER,
-      useClass: ErrorExceptionFilter,
-    },
-    {
       provide: APP_INTERCEPTOR,
       useClass: OvInterceptor,
     },
@@ -168,6 +164,10 @@ const isProd = process.env.NODE_ENV === 'production';
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ErrorExceptionFilter,
     },
   ],
 })

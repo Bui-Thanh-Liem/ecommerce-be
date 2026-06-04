@@ -12,16 +12,19 @@ import { LoginCustomerDto } from './dto/login-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerEntity } from './entities/customer.entity';
 import { CustomerTokensService } from '../customer-tokens/customer-tokens.service';
+import { CustomerQueryDto } from './dto/query-customer.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { CacheService } from '@/common/cache/cache.service';
 
 @Injectable()
 export class CustomersService {
   private readonly logger = new Logger(CustomersService.name);
-  private otp = '123456';
 
   constructor(
     @InjectRepository(CustomerEntity)
     private readonly customerRepo: Repository<CustomerEntity>,
     private customerTokensService: CustomerTokensService,
+    private cacheService: CacheService,
   ) {}
 
   async login(loginCustomerDto: LoginCustomerDto) {
@@ -36,8 +39,11 @@ export class CustomersService {
 
     //
     try {
-      // Gửi mã OTP qua SMS (giả lập)
-      this.logger.debug(`Sending OTP code ${this.otp} to phone number ${phone}`);
+      // Gửi mã OTP qua SMS
+      const otp = this.randomOtp();
+      await this.cacheService.set(`otp:${phone}`, otp, 5 * 60 * 1000); // Lưu OTP trong cache với TTL 5 phút
+      this.logger.debug(`Sending OTP code ${otp} to phone number ${phone}`);
+
       return { message: 'OTP code sent successfully' };
     } catch (error) {
       this.logger.error(`Failed to send OTP code to ${phone}: ${(error as Error)?.message}`);
@@ -45,23 +51,63 @@ export class CustomersService {
     }
   }
 
-  async verifyOtp(customer: CustomerEntity) {
+  async verifyLoginOtp(customer: CustomerEntity) {
     const { access } = await this.customerTokensService.updateAuthToken(customer.id);
     return { customer, token: access };
   }
 
   async validateCustomer(phone: string, otp: string) {
-    //
-    if (otp !== this.otp) throw new UnauthorizedException('Invalid OTP code');
+    // Lấy OTP từ cache
+    const cachedOtp = await this.cacheService.get(`otp:${phone}`);
+    if (!cachedOtp) throw new UnauthorizedException('OTP code has expired or is invalid, please request a new one');
 
-    //
+    // So sánh OTP nhập vào với OTP trong cache
+    if (otp !== cachedOtp) throw new UnauthorizedException('Invalid OTP code');
+    await this.cacheService.delete(`otp:${phone}`); // Xóa OTP sau khi xác thực thành công
+
+    // Tìm khách hàng theo số điện thoại
     const customer = await this.customerRepo.findOne({ where: { phone } });
     if (!customer) throw new NotFoundException('Customer not found');
+
+    //
     return customer;
   }
 
-  async findAll() {
-    return await this.customerRepo.find();
+  async findAll(queries: CustomerQueryDto) {
+    const { page, limit } = queries;
+
+    //
+    const { skip, take } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.customerRepo
+      .createQueryBuilder('customer')
+
+      // Join các quan hệ
+      // .leftJoinAndSelect('customer.ratings', 'rating')
+
+      // Select các trường cụ thể
+      .select([
+        'customer.id',
+        'customer.fullname',
+        'customer.phone',
+        'customer.email',
+        'customer.isActive',
+        'customer.address',
+        'customer.createdAt',
+      ]);
+
+    // Phân trang và sắp xếp
+    queryBuilder.orderBy('customer.createdAt', 'DESC').skip(skip).take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async findOne(id: string) {
@@ -88,6 +134,10 @@ export class CustomersService {
       throw new NotFoundException('Customer not found');
     }
     return await this.customerRepo.save(customer);
+  }
+
+  private randomOtp() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async remove(id: string) {

@@ -1,5 +1,5 @@
 import { CurrentStaff } from '@/decorators/current-staff.decorator';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { LoginCustomerDto } from './dto/login-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -7,13 +7,15 @@ import { GoogleAuthGuard } from './guards/google.guard';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { CustomerDto } from './dto/customer.dto';
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
-import { VerifyOtpCustomerDto } from './dto/verify-otp-customer.dto';
+import { VerifyLoginOtpCustomerDto } from './dto/verify-login-otp-customer.dto';
 import { Throttle } from '@nestjs/throttler';
 import { LocalAuthGuard } from './guards/local.guard';
 import { CurrentCustomer } from '@/decorators/current-customer.decorator';
 import { CustomerEntity } from './entities/customer.entity';
 import { type Response } from 'express';
 import { CustomerMetadataDto } from './dto/metadata-customer.dto';
+import { CustomerQueryDto } from './dto/query-customer.dto';
+import { CustomerVerifiedDto } from './dto/customer-verified.dto';
 
 @Controller('customers')
 @Serializer(CustomerDto)
@@ -26,15 +28,16 @@ export class CustomersController {
     return await this.customersService.login(loginCustomerDto);
   }
 
-  @Post('verify-otp')
+  @Post('verify-login-otp')
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 5 yêu cầu mỗi phút cho endpoint verify OTP
   @UseGuards(LocalAuthGuard)
-  async verifyOtp(
-    @Body() verifyOtpCustomerDto: VerifyOtpCustomerDto,
+  @Serializer(CustomerVerifiedDto)
+  async verifyLoginOtp(
+    @Body() verifyLoginOtpCustomerDto: VerifyLoginOtpCustomerDto, // Giữ lại cho ValidationPipe - Swagger
     @CurrentCustomer() currentCustomer: CustomerEntity,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { customer, token } = await this.customersService.verifyOtp(currentCustomer);
+    const { customer, token } = await this.customersService.verifyLoginOtp(currentCustomer);
 
     // Set token in cookie
     res.cookie('token-customer', token, {
@@ -59,8 +62,8 @@ export class CustomersController {
 
   @Get()
   @Serializer(CustomerMetadataDto)
-  async findAll() {
-    return await this.customersService.findAll();
+  async findAll(@Query() queries: CustomerQueryDto) {
+    return await this.customersService.findAll(queries);
   }
 
   @Get(':id')
