@@ -26,6 +26,13 @@ export class AuditLogInterceptor implements NestInterceptor {
     const method = req.method;
     const auditKey = `${staff?.id}-${Date.now()}`;
 
+    // const excludedPaths = ['/api/v1/audit-logs'];
+    // if (excludedPaths.some((path) => url.includes(path))) {
+    //   return next.handle();
+    // }
+
+    console.log('url :::', url);
+
     if (method === 'GET' && url.includes('/api/v1/audit-logs')) {
       return next.handle();
     }
