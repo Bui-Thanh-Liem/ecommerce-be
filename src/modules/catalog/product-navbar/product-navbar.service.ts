@@ -58,6 +58,33 @@ export class ProductNavbarService {
     };
   }
 
+  async findOptions(query: ProductNavbarQueryDto): Promise<IMetadata<ProductNavbarEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.navbarRepository
+      .createQueryBuilder('navbar')
+      // Join các quan hệ
+      // Select các trường cụ thể
+      .select(['navbar.id', 'navbar.name', 'navbar.link'])
+
+      // Phân trang và sắp xếp
+      .orderBy('navbar.createdAt', 'DESC') // Nên có orderBy khi phân trang
+      .skip(skip)
+      .take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
   async findOne(id: string) {
     return await this.navbarRepository.findOne({ where: { id } });
   }

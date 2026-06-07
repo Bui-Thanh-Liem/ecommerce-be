@@ -23,6 +23,12 @@ export class ProductNavbarController {
     return this.navbarService.findAll(query);
   }
 
+  @Get('options')
+  @Serializer(ProductNavbarMetadataDto)
+  async findOptions(@Query() query: ProductNavbarQueryDto) {
+    return await this.navbarService.findOptions(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.navbarService.findOne(id);

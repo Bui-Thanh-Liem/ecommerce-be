@@ -23,6 +23,9 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ type: 'varchar', length: 20 })
   code: string;
 
+  @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
+  minPrice: number;
+
   @ManyToOne(() => CategoryEntity, (c) => c.children, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'parent' })
   @TreeParent()

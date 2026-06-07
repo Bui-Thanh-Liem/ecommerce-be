@@ -30,7 +30,7 @@ import { MoMoModule } from './modules/payments/momo/momo.module';
 import { VnPayModule } from './modules/payments/vnpay/vnpay.module';
 import { ZaloPayModule } from './modules/payments/zalopay/zalopay.module';
 import { RatingModule } from './modules/customer/rating/rating.module';
-import { ProductNavbarModule } from './modules/catalog/product-navbar/navbar.module';
+import { ProductNavbarModule } from './modules/catalog/product-navbar/product-navbar.module';
 import { CustomerProductsModule } from './modules/customer/customer-products/customer-products.module';
 import { PromotionsModule } from './modules/campaign/promotions/promotions.module';
 import { CartsModule } from './modules/customer/carts/carts.module';

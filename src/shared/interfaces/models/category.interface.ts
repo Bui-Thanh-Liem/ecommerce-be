@@ -6,8 +6,9 @@ import { IProduct } from './product.interface';
 export interface ICategory extends IBase {
   name: string;
   slug: string;
-  image?: IImage;
   code: string;
+  image?: IImage;
+  minPrice?: number;
   desc?: string | null;
   parent?: ICategory | null;
   children?: ICategory[] | null;

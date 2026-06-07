@@ -107,15 +107,34 @@ export class LocationRegionsService implements OnModuleInit {
   }
 
   async findOptions(query: LocationRegionQueryDto): Promise<IMetadata<LocationRegionEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
+
+    //
     const { take, skip } = calculatePagination(page, limit);
 
+    //
     const queryBuilder = this.locationRegionRepo
       .createQueryBuilder('locationRegion')
-      .select(['locationRegion.id', 'locationRegion.name', 'locationRegion.type'])
-      .skip(skip)
-      .take(take)
-      .orderBy('locationRegion.createdAt', 'DESC');
+      .leftJoinAndSelect('locationRegion.parent', 'parent')
+      .select([
+        'locationRegion.id',
+        'locationRegion.name',
+        'locationRegion.type',
+        'locationRegion.createdAt',
+        'parent.id',
+        'parent.name',
+      ]);
+
+    // Áp dụng filter nếu có (ví dụ: filter theo type)
+    if (filters?.type) {
+      queryBuilder.andWhere('locationRegion.type = :type', { type: filters.type });
+    }
+    if (filters?.parent) {
+      queryBuilder.andWhere('locationRegion.parent = :parent', { parent: filters.parent });
+    }
+
+    //
+    queryBuilder.orderBy('locationRegion.createdAt', 'DESC').skip(skip).take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 

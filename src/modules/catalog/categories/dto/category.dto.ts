@@ -16,6 +16,9 @@ export class CategoryDto extends SerializerDto {
   image: ResponseImageDto;
 
   @Expose()
+  minPrice: number;
+
+  @Expose()
   desc?: string | null;
 
   @Expose()

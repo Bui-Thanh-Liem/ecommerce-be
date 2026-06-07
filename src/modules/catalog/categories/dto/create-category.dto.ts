@@ -1,7 +1,16 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsObject, IsOptional, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -24,4 +33,8 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsUUID('4')
   parent?: string;
+
+  @IsOptional()
+  @IsNumber()
+  minPrice: number;
 }

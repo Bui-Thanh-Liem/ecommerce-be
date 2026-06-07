@@ -80,8 +80,9 @@ export class CategoriesService {
         'category.name',
         'category.slug',
         'category.desc',
-        'category.image',
         'category.code',
+        'category.image',
+        'category.minPrice',
         'category.createdAt',
         'parent.id',
         'parent.name',
@@ -117,7 +118,7 @@ export class CategoriesService {
 
     const queryBuilder = this.categoryRepo
       .createQueryBuilder('category')
-      .select(['category.id', 'category.name', 'category.slug'])
+      .select(['category.id', 'category.name', 'category.slug', 'minPrice', 'category.createdAt'])
       .skip(skip)
       .take(take)
       .orderBy('category.createdAt', 'DESC');
