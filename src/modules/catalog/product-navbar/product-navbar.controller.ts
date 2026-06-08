@@ -6,6 +6,7 @@ import { ProductNavbarMetadataDto } from './dto/metadata-product-navbar.dto';
 import { CreateProductNavbarDto } from './dto/create-product-navbar.dto';
 import { UpdateProductNavbarDto } from './dto/update-product-navbar.dto';
 import { ProductNavbarService } from './product-navbar.service';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('product-navbars')
 @Serializer(ProductNavbarDto)
@@ -23,6 +24,7 @@ export class ProductNavbarController {
     return this.navbarService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Serializer(ProductNavbarMetadataDto)
   async findOptions(@Query() query: ProductNavbarQueryDto) {

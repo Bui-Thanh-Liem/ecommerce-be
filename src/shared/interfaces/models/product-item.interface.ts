@@ -1,5 +1,5 @@
 import { ProductItemStatus } from '@/shared/enums/product-item-status.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IInventory } from './inventory.interface';
 import { IOrder } from './order.interface';

@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IPromotion } from './promotion.interface';
 

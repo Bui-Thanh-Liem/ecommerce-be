@@ -1,4 +1,4 @@
-import { IStaff } from './models/staff.interface';
+import { IStaff } from '../models/staff.interface';
 
 export interface IBase {
   id: string;

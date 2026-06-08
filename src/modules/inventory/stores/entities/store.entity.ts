@@ -1,9 +1,9 @@
 import { InventoryEntity } from '@/modules/inventory/inventories/entities/inventory.entity';
 import { VoucherEntity } from '@/modules/payments/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { type IImage } from '@/shared/interfaces/image.interface';
+import { type IImage } from '@/shared/interfaces/common/image.interface';
 import { IStore } from '@/shared/interfaces/models/store.interface';
-import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
+import { IPhoneStore } from '@/shared/interfaces/common/phone-store.interface';
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { LocationRegionEntity } from '../../location-regions/entities/location-region.entity';
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';

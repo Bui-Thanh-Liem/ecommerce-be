@@ -1,6 +1,6 @@
-import { IBase } from '../base.interface';
-import { IImage } from '../image.interface';
-import { IPhoneStore } from '../phone-store.interface';
+import { IBase } from '../common/base.interface';
+import { IImage } from '../common/image.interface';
+import { IPhoneStore } from '../common/phone-store.interface';
 import { IInventory } from './inventory.interface';
 import { ILocationRegion } from './location-region.interface';
 import { IPromotion } from './promotion.interface';

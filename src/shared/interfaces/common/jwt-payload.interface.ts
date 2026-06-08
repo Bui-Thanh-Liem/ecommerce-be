@@ -1,4 +1,4 @@
-import { TokenType } from '../enums/token-type.enum';
+import { TokenType } from '../../enums/token-type.enum';
 
 export interface IJwtPayload {
   type: TokenType;

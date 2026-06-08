@@ -8,6 +8,10 @@ import { LocationRegionsService } from './location-regions.service';
 import { LocationRegionMetadataDto } from './dto/metadata-location-region.dto';
 import { LocationRegionQueryDto } from './dto/query-location-region.dto';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
+import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
+import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
+import { LocationRegionSelectionDto } from './dto/location-region-selection.dto';
 
 @Controller('location-regions')
 @Serializer(LocationRegionDto)
@@ -27,6 +31,7 @@ export class LocationRegionsController {
     return await this.locationRegionsService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Serializer(LocationRegionMetadataDto)
   async findOptions(@Query() query: LocationRegionQueryDto) {
@@ -55,5 +60,12 @@ export class LocationRegionsController {
   @Permissions(permissionsSeed.locationRegions.delete.code)
   async remove(@Param('id') id: string) {
     return await this.locationRegionsService.remove(id);
+  }
+
+  @Public()
+  @Serializer(LocationRegionSelectionDto)
+  @Post('selection')
+  handleLocationSelection(@GetInfoGuest() infoGuest: IInfoGuest) {
+    return this.locationRegionsService.handleLocationSelection(infoGuest);
   }
 }

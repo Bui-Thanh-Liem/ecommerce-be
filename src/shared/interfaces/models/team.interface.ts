@@ -1,5 +1,5 @@
 import { TeamType } from '@/shared/enums/team-type.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IStaff } from './staff.interface';
 import { IStore } from './store.interface';
 import { ITeamCategory } from './team-category.interface';

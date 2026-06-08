@@ -1,4 +1,7 @@
-import { LocationRegionNode, TreeDataLocationRegionQuery } from '@/shared/interfaces/treedata-location-query.interface';
+import {
+  LocationRegionNode,
+  TreeDataLocationRegionQuery,
+} from '@/shared/interfaces/common/treedata-location-query.interface';
 import {
   BadRequestException,
   ConflictException,
@@ -16,7 +19,8 @@ import { LocationRegionEntity } from './entities/location-region.entity';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { LocationRegionQueryDto } from './dto/query-location-region.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
+import { IInfoGuest } from '@/shared/interfaces/common/info-guest';
 
 @Injectable()
 export class LocationRegionsService implements OnModuleInit {
@@ -306,5 +310,32 @@ export class LocationRegionsService implements OnModuleInit {
     await this.locationRegionRepo.save(rootRegion);
     this.logger.debug('Initialized root location region with name "World".');
     return rootRegion;
+  }
+
+  // REFACTOR:
+  /**
+   * @desc khi khách hàng đã chọn một địa điểm cụ thể
+   */
+  async handleLocationSelection(payload: IInfoGuest) {
+    this.logger.debug('Handling location selection:', payload);
+    // ...
+
+    //
+    const [ward, district] = await Promise.all([
+      this.locationRegionRepo.findOneBy({ id: payload.personal.wardCommune }),
+      this.locationRegionRepo.findOneBy({ id: payload.personal.districtTown }),
+    ]);
+
+    //
+    if (!ward || !district) {
+      throw new NotFoundException('Selected ward or district not found');
+    }
+
+    //
+    return {
+      wardCommune: ward,
+      districtTown: district,
+      addressDetail: payload.personal.addressDetail,
+    };
   }
 }

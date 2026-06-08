@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 
 export interface IProductNavbar extends IBase {
   name: string; // Tên của product navbar, ví dụ: "Máy giặc giá rẻ", "Phụ kiện điện tử giá rẻ"

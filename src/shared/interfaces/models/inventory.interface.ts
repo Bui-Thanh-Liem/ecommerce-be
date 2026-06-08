@@ -1,5 +1,5 @@
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IStore } from './store.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IProductItem } from './product-item.interface';

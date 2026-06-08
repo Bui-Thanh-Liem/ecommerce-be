@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { CreateAuditLogDto } from '@/modules/management/audit-logs/dto/create-audit-log.dto';
+import { JOB_NAMES } from '@/shared/constants/bull.constant';
 import { AuditLogStatus } from '@/shared/enums/audit-log-status.enum';
 import { sanitizeAuditPayload } from '@/utils/audit-log.util';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -26,14 +27,8 @@ export class AuditLogInterceptor implements NestInterceptor {
     const method = req.method;
     const auditKey = `${staff?.id}-${Date.now()}`;
 
-    // const excludedPaths = ['/api/v1/audit-logs'];
-    // if (excludedPaths.some((path) => url.includes(path))) {
-    //   return next.handle();
-    // }
-
-    console.log('url :::', url);
-
-    if (method === 'GET' && url.includes('/api/v1/audit-logs')) {
+    const excludedPaths = ['tree', '/options', '/api/v1/audit-logs', '/location-regions/selection'];
+    if (excludedPaths.some((path) => url.includes(path))) {
       return next.handle();
     }
 
@@ -63,7 +58,7 @@ export class AuditLogInterceptor implements NestInterceptor {
       } as CreateAuditLogDto;
 
       //
-      await this.auditLogQueue.add('create-audit-log', dataCreate);
+      await this.auditLogQueue.add(JOB_NAMES.CREATE_AUDIT_LOG, dataCreate);
     }
 
     //
@@ -73,7 +68,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       switchMap((data) =>
         from(
-          this.auditLogQueue.add('update-audit-log', {
+          this.auditLogQueue.add(JOB_NAMES.UPDATE_AUDIT_LOG, {
             keySession: auditKey,
             updateAuditLogDto: {
               status: AuditLogStatus.SUCCESS,
@@ -90,7 +85,7 @@ export class AuditLogInterceptor implements NestInterceptor {
       catchError((err) => {
         const responseError = err?.response;
         return from(
-          this.auditLogQueue.add('update-audit-log', {
+          this.auditLogQueue.add(JOB_NAMES.UPDATE_AUDIT_LOG, {
             keySession: auditKey,
             updateAuditLogDto: {
               status: AuditLogStatus.FAILURE,

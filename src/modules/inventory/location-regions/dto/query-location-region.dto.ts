@@ -1,10 +1,10 @@
 import { createQueryDto } from '@/shared/dtos/req/query.dto';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 class LocationRegionFilterDto {
   @IsOptional()
-  @IsString()
+  @IsUUID('4', { message: 'Invalid parent UUID format for id' })
   parent: string;
 
   @IsOptional()

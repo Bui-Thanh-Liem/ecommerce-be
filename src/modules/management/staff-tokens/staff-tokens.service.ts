@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { sign } from 'jsonwebtoken';
 import ms, { StringValue } from 'ms';
 import { TokenType } from '@/shared/enums/token-type.enum';
-import { IJwtPayload } from '@/shared/interfaces/jwt-payload.interface';
+import { IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
 import { Repository } from 'typeorm';
 import { StaffTokenEntity } from './entities/staff-token.entity';
 

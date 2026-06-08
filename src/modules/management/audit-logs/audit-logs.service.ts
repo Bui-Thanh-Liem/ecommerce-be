@@ -74,4 +74,17 @@ export class AuditLogsService {
     //
     return await this.auditLogRepository.remove(auditLog);
   }
+
+  //
+  async remoteOldLogs() {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    await this.auditLogRepository
+      .createQueryBuilder()
+      .delete()
+      .from(AuditLogEntity)
+      .where('createdAt < :oneMonthAgo', { oneMonthAgo })
+      .execute();
+  }
 }

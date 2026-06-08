@@ -1,5 +1,5 @@
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

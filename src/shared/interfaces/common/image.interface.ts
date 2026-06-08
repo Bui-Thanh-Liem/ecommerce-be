@@ -1,4 +1,4 @@
-import { Provider } from '../enums/provider.enum';
+import { Provider } from '../../enums/provider.enum';
 
 export interface IImage {
   key: string;

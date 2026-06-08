@@ -18,7 +18,7 @@ import { RolesService } from '../roles/roles.service';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
 import { StaffQueryDto } from './dto/query-staff.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { StoresService } from '@/modules/inventory/stores/stores.service';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 

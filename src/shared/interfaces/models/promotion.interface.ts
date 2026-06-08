@@ -1,5 +1,5 @@
 import { PromotionApplyType } from '@/shared/enums/promotion-apply-type.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IProductPromotion } from './product-promotion.interface';
 import { IProductVariant } from './product-variant.interface';
 import { ICampaign } from './campaign.interface';
@@ -7,7 +7,7 @@ import { ICategoryPromotion } from './category-promotion.interface';
 import { IStore } from './store.interface';
 import { ILocationRegion } from './location-region.interface';
 import { PromotionApplyScope } from '@/shared/enums/promotion-apply-scope.enum';
-import { IImage } from '../image.interface';
+import { IImage } from '../common/image.interface';
 
 export interface IPromotion extends IBase {
   campaign: ICampaign; // ID của chiến dịch mà khuyến mãi này thuộc về

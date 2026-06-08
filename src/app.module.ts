@@ -54,6 +54,7 @@ import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { NotificationModule } from './common/notification/notification.module';
 import { CustomerTokensModule } from './modules/customer/customer-tokens/customer-tokens.module';
+import { TaskModule } from './common/tasks/task.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -87,6 +88,7 @@ const isProd = process.env.NODE_ENV === 'production';
     CacheModule,
     BullMqModule,
     CloudinaryModule,
+    TaskModule,
 
     // Các module chức năng của ứng dụng
     AuthModule,

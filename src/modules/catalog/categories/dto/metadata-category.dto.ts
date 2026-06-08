@@ -1,6 +1,6 @@
 import { BaseMetadataDto } from '@/shared/dtos/res/base-metadata.dto';
 import { Expose, Type } from 'class-transformer';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CategoryDto } from './category.dto';
 
 export class CategoryMetadataDto extends BaseMetadataDto implements IMetadata<CategoryDto> {

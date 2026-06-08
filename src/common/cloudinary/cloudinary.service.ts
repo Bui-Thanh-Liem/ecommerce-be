@@ -1,4 +1,4 @@
-import { IImage } from '@/shared/interfaces/image.interface';
+import { IImage } from '@/shared/interfaces/common/image.interface';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { v2 as cloudinary, SignApiOptions, TransformationOptions } from 'cloudinary';

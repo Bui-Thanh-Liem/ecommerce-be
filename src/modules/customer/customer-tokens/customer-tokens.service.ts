@@ -4,7 +4,7 @@ import { CustomerTokenEntity } from './entities/customer-token.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { TokenType } from '@/shared/enums/token-type.enum';
-import { IJwtPayload } from '@/shared/interfaces/jwt-payload.interface';
+import { IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
 import ms, { StringValue } from 'ms';
 import { sign } from 'jsonwebtoken';
 

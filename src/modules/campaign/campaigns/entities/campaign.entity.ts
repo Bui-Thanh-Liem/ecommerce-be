@@ -1,7 +1,7 @@
 import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import type { IImage } from '@/shared/interfaces/image.interface';
+import type { IImage } from '@/shared/interfaces/common/image.interface';
 import { ICampaign } from '@/shared/interfaces/models/campaign.interface';
 import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';

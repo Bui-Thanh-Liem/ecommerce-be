@@ -1,5 +1,5 @@
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IProduct } from './product.interface';
 import { IInventory } from './inventory.interface';
 import { IProductItem } from './product-item.interface';

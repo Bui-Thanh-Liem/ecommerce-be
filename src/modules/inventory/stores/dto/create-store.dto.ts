@@ -1,6 +1,6 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { ImageDto } from '@/shared/dtos/req/image.dto';
-import { IPhoneStore } from '@/shared/interfaces/phone-store.interface';
+import { IPhoneStore } from '@/shared/interfaces/common/phone-store.interface';
 import { Type } from 'class-transformer';
 import {
   IsArray,

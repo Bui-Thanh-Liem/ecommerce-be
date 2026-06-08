@@ -6,7 +6,7 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandEntity } from './entities/brand.entity';
 import { BrandQueryDto } from './dto/query-brand.dto';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { InjectQueue } from '@nestjs/bullmq';

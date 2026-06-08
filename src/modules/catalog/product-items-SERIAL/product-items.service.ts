@@ -8,7 +8,7 @@ import { ProductVariantsService } from '../product-variants-SKU/product-variants
 import { InventoriesService } from '../../inventory/inventories/inventories.service';
 import { ProductItemQueryDto } from './dto/query-product-item.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 
 @Injectable()
 export class ProductItemsService {

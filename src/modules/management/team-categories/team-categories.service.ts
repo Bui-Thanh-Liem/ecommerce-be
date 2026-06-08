@@ -7,7 +7,7 @@ import { In, Not, Repository } from 'typeorm';
 import { teamCategorySeed } from './seeding';
 import { TeamCategoryQueryDto } from './dto/query-team-category.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 
 @Injectable()
 export class TeamCategoriesService implements OnModuleInit {

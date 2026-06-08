@@ -1,5 +1,5 @@
-import { IBase } from '../base.interface';
-import { IImage } from '../image.interface';
+import { IBase } from '../common/base.interface';
+import { IImage } from '../common/image.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IPromotion } from './promotion.interface';
 

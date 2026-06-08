@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IPermission } from './permission.interface';
 import { IStaff } from './staff.interface';
 import { IStore } from './store.interface';

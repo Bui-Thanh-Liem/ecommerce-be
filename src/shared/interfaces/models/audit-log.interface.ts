@@ -1,5 +1,5 @@
 import { AuditLogStatus } from '@/shared/enums/audit-log-status.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 
 export interface IAuditLog extends IBase {
   // Thông tin người thực hiện hành động

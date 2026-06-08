@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IRole } from './role.interface';
 
 export interface IPermission extends IBase {

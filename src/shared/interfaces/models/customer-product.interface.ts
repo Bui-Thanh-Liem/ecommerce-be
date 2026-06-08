@@ -1,5 +1,5 @@
 import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { ICustomer } from './customer.interface';
 import { IProductVariant } from './product-variant.interface';
 

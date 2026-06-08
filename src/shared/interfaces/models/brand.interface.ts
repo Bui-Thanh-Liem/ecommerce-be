@@ -1,5 +1,5 @@
-import { IBase } from '../base.interface';
-import { IImage } from '../image.interface';
+import { IBase } from '../common/base.interface';
+import { IImage } from '../common/image.interface';
 import { IProduct } from './product.interface';
 
 export interface IBrand extends IBase {

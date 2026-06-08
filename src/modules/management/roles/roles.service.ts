@@ -8,7 +8,7 @@ import { RoleEntity } from './entities/role.entity';
 import { RoleQueryDto } from './dto/query-role.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { StoresService } from '@/modules/inventory/stores/stores.service';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 
 @Injectable()
 export class RolesService {

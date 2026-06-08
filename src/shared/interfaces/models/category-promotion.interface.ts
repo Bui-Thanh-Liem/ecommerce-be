@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { ICategory } from './category.interface';
 import { IPromotion } from './promotion.interface';
 

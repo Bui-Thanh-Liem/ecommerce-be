@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductNavbarEntity } from './entities/product-navbar.entity';
 import { Not, Repository } from 'typeorm';
 import { stringToSlug } from '@/utils/string-to-slug.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { ProductNavbarQueryDto } from './dto/query-product-navbar.dto';
 import { UpdateProductNavbarDto } from './dto/update-product-navbar.dto';

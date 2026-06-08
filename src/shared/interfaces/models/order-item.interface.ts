@@ -1,4 +1,4 @@
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 
 export interface IOrderItem extends IBase {
   order: string;

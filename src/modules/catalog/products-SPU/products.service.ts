@@ -18,7 +18,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
 import { ProductQueryDto } from './dto/query-product.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { ProductImageEntity } from '../product-images/entities/product-image.entity';
 import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';

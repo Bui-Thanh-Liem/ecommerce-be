@@ -1,4 +1,4 @@
-import { CategoryNode, TreeDataCategoryQuery } from '@/shared/interfaces/treedata-category-query.interface';
+import { CategoryNode, TreeDataCategoryQuery } from '@/shared/interfaces/common/treedata-category-query.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,7 +7,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entities/category.entity';
 import { CategoryQueryDto } from './dto/query-category.dto';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { StoresService } from '../../inventory/stores/stores.service';

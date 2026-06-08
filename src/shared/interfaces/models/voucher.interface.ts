@@ -2,7 +2,7 @@ import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
 import { ICustomer } from './customer.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IStore } from './store.interface';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { VoucherStatus } from '@/shared/enums/voucher-status.enum';
 import { ICart } from './cart.interface';
 

@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { CreateAuditLogDto } from '@/modules/management/audit-logs/dto/create-audit-log.dto';
 import { AuditLogsService } from '@/modules/management/audit-logs/audit-logs.service';
 import { UpdateAuditLogDto } from '@/modules/management/audit-logs/dto/update-audit-log.dto';
+import { JOB_NAMES } from '@/shared/constants/bull.constant';
 
 @Processor('audit-log')
 export class AuditLogProcessor extends WorkerHost {
@@ -18,11 +19,14 @@ export class AuditLogProcessor extends WorkerHost {
 
     try {
       switch (job.name) {
-        case 'create-audit-log':
+        case JOB_NAMES.CREATE_AUDIT_LOG:
           return await this.handleCreateAuditLog(job as Job<CreateAuditLogDto>);
 
-        case 'update-audit-log':
+        case JOB_NAMES.UPDATE_AUDIT_LOG:
           return await this.handleUpdateAuditLog(job as handleUpdateAuditLog);
+
+        case JOB_NAMES.REMOVE_OLD_LOGS:
+          return await this.handleRemoveOldLogs(job);
 
         default:
           throw new Error(`Unknown job type: ${job.name}`);
@@ -42,6 +46,11 @@ export class AuditLogProcessor extends WorkerHost {
   private async handleUpdateAuditLog(job: handleUpdateAuditLog) {
     this.logger.debug(`[JOB-${job.id}] Updating audit log: ${job.data.keySession}`);
     return await this.auditLogService.update(job.data.keySession, job.data.updateAuditLogDto);
+  }
+
+  private async handleRemoveOldLogs(job: Job) {
+    this.logger.debug(`[JOB-${job.id}] Removing old audit logs`);
+    return await this.auditLogService.remoteOldLogs();
   }
 
   @OnWorkerEvent('failed')

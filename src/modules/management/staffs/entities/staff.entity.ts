@@ -5,7 +5,7 @@ import { IStaff } from '@/shared/interfaces/models/staff.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { RoleEntity } from '../../roles/entities/role.entity';
 import { TeamEntity } from '../../teams/entities/team.entity';
-import type { IImage } from '@/shared/interfaces/image.interface';
+import type { IImage } from '@/shared/interfaces/common/image.interface';
 
 @Entity('staffs')
 export class StaffEntity extends BaseEntity implements IStaff {

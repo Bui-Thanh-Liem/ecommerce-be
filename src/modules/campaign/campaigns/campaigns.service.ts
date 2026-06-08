@@ -1,5 +1,5 @@
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import {

@@ -12,7 +12,7 @@ import { CategoryPromotionService } from '../category-promotion/category-promoti
 import { ProductPromotionsService } from '../product-promotions/product-promotions.service';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { IMetadata } from '@/shared/interfaces/metadata.interface';
+import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { PromotionQueryDto } from './dto/query-promotion.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { InjectQueue } from '@nestjs/bullmq';

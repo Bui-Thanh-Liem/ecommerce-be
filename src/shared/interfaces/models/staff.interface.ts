@@ -1,9 +1,9 @@
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IRole } from './role.interface';
 import { IStore } from './store.interface';
 import { ITeam } from './team.interface';
-import { IImage } from '../image.interface';
+import { IImage } from '../common/image.interface';
 
 export interface IStaff extends IBase {
   avatar?: IImage;

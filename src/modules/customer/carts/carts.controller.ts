@@ -3,7 +3,8 @@ import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { GuestInterceptor } from '@/interceptors/guest.interceptor';
-import { Guest } from '@/decorators/guest.decorator';
+import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
+import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
 
 @Controller('carts')
 export class CartsController {
@@ -11,8 +12,8 @@ export class CartsController {
 
   @Post()
   @UseInterceptors(GuestInterceptor)
-  async create(@Guest() sessionId: string, @Body() createCartDto: CreateCartDto) {
-    return await this.cartsService.create(createCartDto, sessionId);
+  async create(@GetInfoGuest() infoGuest: IInfoGuest, @Body() createCartDto: CreateCartDto) {
+    return await this.cartsService.create(createCartDto, infoGuest.session);
   }
 
   @Get()
@@ -27,13 +28,13 @@ export class CartsController {
 
   @Patch(':id')
   @UseInterceptors(GuestInterceptor)
-  async update(@Guest() sessionId: string, @Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return await this.cartsService.update(id, updateCartDto, sessionId);
+  async update(@GetInfoGuest() infoGuest: IInfoGuest, @Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
+    return await this.cartsService.update(id, updateCartDto, infoGuest.session);
   }
 
   @Delete(':id')
   @UseInterceptors(GuestInterceptor)
-  async remove(@Guest() sessionId: string, @Param('id') id: string) {
+  async remove(@GetInfoGuest() infoGuest: IInfoGuest, @Param('id') id: string) {
     return await this.cartsService.remove(id);
   }
 }

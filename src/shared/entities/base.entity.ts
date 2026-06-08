@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { IBase } from '../interfaces/base.interface';
+import { IBase } from '../interfaces/common/base.interface';
 
 export abstract class BaseEntity implements IBase {
   @Exclude()

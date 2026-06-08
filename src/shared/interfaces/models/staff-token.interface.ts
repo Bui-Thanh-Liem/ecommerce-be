@@ -1,5 +1,5 @@
 import { TokenType } from '@/shared/enums/token-type.enum';
-import { IBase } from '../base.interface';
+import { IBase } from '../common/base.interface';
 import { IStaff } from './staff.interface';
 
 export interface IStaffToken extends IBase {
