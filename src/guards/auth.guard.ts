@@ -16,9 +16,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
-    if (isPublic) {
-      return true; // Cho phép truy cập mà không cần token
-    }
+    if (isPublic) return true; // Cho phép truy cập mà không cần token
+
     this.logger.debug('#1. JwtAuthGuard - canActivate called');
     return super.canActivate(context);
   }

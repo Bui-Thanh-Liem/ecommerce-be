@@ -13,4 +13,7 @@ export class ProductNavbarDto extends SerializerDto {
 
   @Expose()
   link: string;
+
+  @Expose()
+  isActive: boolean;
 }

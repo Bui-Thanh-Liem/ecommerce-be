@@ -6,4 +6,5 @@ export interface IMainBanner extends IBase {
   slug: string;
   desc?: string;
   image: IImage;
+  isActive: boolean;
 }

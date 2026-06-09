@@ -1,5 +1,5 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateProductNavbarDto {
   @IsString()
@@ -19,4 +19,8 @@ export class CreateProductNavbarDto {
   @IsNotEmpty()
   @MaxLength(100)
   link: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive: boolean;
 }

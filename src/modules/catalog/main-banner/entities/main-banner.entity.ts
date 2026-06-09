@@ -17,6 +17,9 @@ export class MainBannerEntity extends BaseEntity implements IMainBanner {
   @Column({ type: 'json' })
   image: IImage;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công MainBanner có title: ${this.title}`);
   }

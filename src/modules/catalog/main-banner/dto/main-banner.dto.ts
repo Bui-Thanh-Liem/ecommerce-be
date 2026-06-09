@@ -14,4 +14,7 @@ export class MainBannerDto extends SerializerDto {
 
   @Expose()
   desc?: string;
+
+  @Expose()
+  isActive: boolean;
 }

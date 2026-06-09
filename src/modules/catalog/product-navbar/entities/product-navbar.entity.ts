@@ -16,6 +16,9 @@ export class ProductNavbarEntity extends BaseEntity implements IProductNavbar {
   @Column({ length: 100 })
   link: string;
 
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công ProductNavbar có name: ${this.name}`);
   }

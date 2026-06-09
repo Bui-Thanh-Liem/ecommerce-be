@@ -66,6 +66,7 @@ export class MainBannerService {
         'mainBanner.slug',
         'mainBanner.desc',
         'mainBanner.image',
+        'mainBanner.isActive',
         'mainBanner.createdAt',
       ]);
 
@@ -121,15 +122,13 @@ export class MainBannerService {
       throw new NotFoundException(`Main banner with ID ${id} not found`);
     }
 
+    // Nếu có đổi title, cần check trùng slug với các main banner khác (trừ chính nó)
     const slug = title ? stringToSlug(title) : undefined;
-
-    // Chạy song song các câu lệnh check độc lập ngoài transaction
-    const [isSlugDup] = await Promise.all([
-      title ? this.mainBannerRepo.exists({ where: { slug, id: Not(id) } }) : Promise.resolve(false),
-    ]);
-
-    if (isSlugDup) {
-      throw new ConflictException('Main banner with this title already exists');
+    if (slug && slug !== oldMainBanner.slug) {
+      const existingMainBanner = await this.mainBannerRepo.exists({ where: { slug, id: Not(id) } });
+      if (existingMainBanner) {
+        throw new ConflictException('Main banner with this title already exists');
+      }
     }
 
     // Ghi nhận key ảnh cũ phục vụ việc xóa sau khi commit thành công

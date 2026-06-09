@@ -41,7 +41,7 @@ export class ProductNavbarService {
       .createQueryBuilder('navbar')
       // Join các quan hệ
       // Select các trường cụ thể
-      .select(['navbar.id', 'navbar.name', 'navbar.slug', 'navbar.desc', 'navbar.link'])
+      .select(['navbar.id', 'navbar.name', 'navbar.slug', 'navbar.desc', 'navbar.link', 'navbar.isActive'])
 
       // Phân trang và sắp xếp
       .skip(skip)
@@ -91,6 +91,7 @@ export class ProductNavbarService {
 
   async update(id: string, updateProductNavbarDto: UpdateProductNavbarDto) {
     const { name } = updateProductNavbarDto;
+    console.log('updateProductNavbarDto :::', updateProductNavbarDto);
 
     let slug: string | undefined = undefined;
     if (name) {
