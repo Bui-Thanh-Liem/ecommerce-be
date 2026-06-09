@@ -19,7 +19,7 @@ export class CategoryDto extends SerializerDto {
   minPrice: number;
 
   @Expose()
-  desc?: string | null;
+  desc?: string;
 
   @Expose()
   @Type(() => CategoryDto)

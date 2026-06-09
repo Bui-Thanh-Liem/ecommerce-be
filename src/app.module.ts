@@ -55,6 +55,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { NotificationModule } from './common/notification/notification.module';
 import { CustomerTokensModule } from './modules/customer/customer-tokens/customer-tokens.module';
 import { TaskModule } from './common/tasks/task.module';
+import { MainBannerModule } from './modules/dashboard/main-banner/main-banner.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -126,6 +127,7 @@ const isProd = process.env.NODE_ENV === 'production';
     AuditLogsModule,
     NotificationModule,
     CustomerTokensModule,
+    MainBannerModule,
   ],
   controllers: [AppController],
   providers: [

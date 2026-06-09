@@ -89,7 +89,7 @@ export class CategoriesService {
       ]);
 
     // Phân trang và sắp xếp
-    queryBuilder.skip(skip).take(take).orderBy('category.createdAt', 'DESC');
+    queryBuilder.orderBy('category.createdAt', 'DESC').skip(skip).take(take);
 
     //
     const [data, total] = await queryBuilder.getManyAndCount();
