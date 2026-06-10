@@ -96,15 +96,24 @@ export class BrandsService {
 
     const queryBuilder = this.brandRepo
       .createQueryBuilder('brand')
-      .select(['brand.id', 'brand.name', 'brand.slug'])
+      .select(['brand.id', 'brand.name', 'brand.image', 'brand.slug'])
       .skip(skip)
       .take(take)
       .orderBy('brand.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    const dataWithUrls = await Promise.all(
+      data.map(async (brand) => {
+        if (brand.image && brand.image.key) {
+          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+        }
+        return brand;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

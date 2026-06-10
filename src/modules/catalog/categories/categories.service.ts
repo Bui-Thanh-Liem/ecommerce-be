@@ -113,20 +113,43 @@ export class CategoriesService {
   }
 
   async findOptions(query: CategoryQueryDto): Promise<IMetadata<CategoryEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const { take, skip } = calculatePagination(page, limit);
 
     const queryBuilder = this.categoryRepo
       .createQueryBuilder('category')
-      .select(['category.id', 'category.name', 'category.slug', 'minPrice', 'category.createdAt'])
+      .select([
+        'category.id',
+        'category.name',
+        'category.image',
+        'category.slug',
+        'category.minPrice',
+        'category.createdAt',
+      ])
       .skip(skip)
       .take(take)
       .orderBy('category.createdAt', 'DESC');
 
+    if (filters?.name) {
+      queryBuilder.andWhere('unaccent(category.name) ILIKE unaccent(:name)', {
+        name: `%${filters.name}%`,
+      });
+    }
+
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    //
+    const dataWithUrls = await Promise.all(
+      data.map(async (category) => {
+        if (category.image && category.image.key) {
+          category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
+        }
+        return category;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

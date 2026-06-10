@@ -146,24 +146,26 @@ export class CampaignsService {
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
     //
-    const dataWithUrls = data.map(async (cam) => {
-      const imageKeys = cam.images || [];
-      const mainImageKey = cam.mainImage?.key;
-      const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
-      const images = await this.cloudinaryService.generateUrls(imageKeys);
+    const dataWithUrls = await Promise.all(
+      data.map(async (cam) => {
+        const imageKeys = cam.images || [];
+        const mainImageKey = cam.mainImage?.key;
+        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
+        const images = await this.cloudinaryService.generateUrls(imageKeys);
 
-      return {
-        ...cam,
-        images: images,
-        mainImage: {
-          ...cam.mainImage,
-          url: mainImageUrl,
-        },
-      } as CampaignEntity;
-    });
+        return {
+          ...cam,
+          images: images,
+          mainImage: {
+            ...cam.mainImage,
+            url: mainImageUrl,
+          },
+        } as CampaignEntity;
+      }),
+    );
 
     return {
-      data: await Promise.all(dataWithUrls),
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),
@@ -176,15 +178,30 @@ export class CampaignsService {
 
     const queryBuilder = this.campaignRepository
       .createQueryBuilder('campaign')
-      .select(['campaign.id', 'campaign.name'])
+      .select(['campaign.id', 'campaign.name', 'campaign.mainImage'])
       .skip(skip)
       .take(take)
       .orderBy('campaign.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    const dataWithUrls = await Promise.all(
+      data.map(async (cam) => {
+        const mainImageKey = cam.mainImage?.key;
+        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
+
+        return {
+          ...cam,
+          mainImage: {
+            ...cam.mainImage,
+            url: mainImageUrl,
+          },
+        } as CampaignEntity;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

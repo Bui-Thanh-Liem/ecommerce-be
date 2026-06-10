@@ -47,11 +47,12 @@ export class ProductsService {
       const slug = stringToSlug(name);
 
       // 1. Kiểm tra trùng (Unique constraint check)
-      const [eS, eM, categoryCode, brandCode] = await Promise.all([
+      const [eS, eM, categoryCode, brandCode, thumb] = await Promise.all([
         this.productRepo.findOne({ where: { slug } }),
         this.productRepo.findOne({ where: { model } }),
         this.cateService.findCodeById(categoryId),
         this.brandService.findCodeById(brandId),
+        productImages?.length > 0 ? this.cloudinaryService.generateUrl(productImages[0].image.key) : null,
       ]);
       if (eS) throw new ConflictException('Product with this name already exists');
       if (eM) throw new ConflictException('Product with this model already exists');
@@ -74,6 +75,7 @@ export class ProductsService {
         model,
         productImages, // Thêm productImages vào đây để cascade lưu
         brand: { id: brandId },
+        thumbnail: thumb ?? undefined, // Lấy thumbnail từ productImages nếu có
         category: { id: categoryId },
       });
       return await this.productRepo.save(product);
@@ -175,7 +177,7 @@ export class ProductsService {
 
     const queryBuilder = this.productRepo
       .createQueryBuilder('product')
-      .select(['product.id', 'product.name', 'product.slug'])
+      .select(['product.id', 'product.name', 'product.slug', 'product.thumbnail'])
       .skip(skip)
       .take(take)
       .orderBy('product.createdAt', 'DESC');
@@ -292,6 +294,7 @@ export class ProductsService {
 
       if (productImages !== undefined) {
         updatedProduct.productImages = productImages as ProductImageEntity[];
+        updatedProduct.thumbnail = await this.cloudinaryService.generateUrl(productImages[0].image.key);
       }
 
       // Lưu vào DB qua transaction manager

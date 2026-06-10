@@ -178,15 +178,25 @@ export class StaffsService implements OnModuleInit {
 
     const queryBuilder = this.staffRepo
       .createQueryBuilder('staff')
-      .select(['staff.id', 'staff.fullName'])
+      .select(['staff.id', 'staff.fullName', 'staff.email', 'staff.avatar'])
       .skip(skip)
       .take(take)
       .orderBy('staff.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    // Chuyển đổi URL ảnh nếu có
+    const dataWithUrls = await Promise.all(
+      data.map(async (staff) => {
+        if (staff.avatar && staff.avatar.key) {
+          staff.avatar.url = await this.cloudinaryService.generateUrl(staff.avatar.key);
+        }
+        return staff;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),
@@ -241,8 +251,8 @@ export class StaffsService implements OnModuleInit {
 
     // Nếu có roles, kiểm tra từng roleId có tồn tại hay không (có thể thêm logic này nếu cần)
     if (roleIds) {
-      const store = await this.rolesService.exists(roleIds);
-      if (!store) {
+      const roles = await this.rolesService.exists(roleIds);
+      if (!roles) {
         throw new NotFoundException(`Roles with IDs ${roleIds.join(', ')} not found`);
       }
     }
@@ -255,10 +265,10 @@ export class StaffsService implements OnModuleInit {
       }
     }
 
-    // Cập nhật staff (không dùng preload, dùng merge do đã query ở SuperAdminGuard)
-    this.staffRepo.merge(targetStaff, {
+    // Cập nhật staff
+    Object.assign(targetStaff, {
       ...rest,
-      managedStore: undefined, // Mặc định khi cập nhật staff sẽ không gán managedStore, khi tạo store mới sẽ cập nhật
+      managedStore: undefined,
       store: storeId ? { id: storeId } : undefined,
       roles: roleIds ? roleIds.map((id) => ({ id })) : undefined,
       directManager: directManagerId ? { id: directManagerId } : undefined,

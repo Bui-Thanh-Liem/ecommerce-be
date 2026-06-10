@@ -17,6 +17,10 @@ export class CreateAuditLogDto {
   @IsUUID('4')
   staffId: string;
 
+  @IsNotEmpty()
+  @IsUUID('4')
+  storeId: string;
+
   @IsOptional()
   @IsString()
   @Trim()

@@ -99,26 +99,28 @@ export class ProductVariantsService {
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
-    const dataWithUrls = data.map((product) => {
-      const flattenedImages = product?.productImages?.flat() || [];
+    const dataWithUrls = await Promise.all(
+      data.map(async (product) => {
+        const flattenedImages = product?.productImages?.flat() || [];
 
-      const updatedImages = flattenedImages.map((img) => {
-        const publicId = img?.image?.key || '';
-        const url = publicId ? this.cloudinaryService.generateUrl(publicId) : '';
+        const updatedImages = flattenedImages.map(async (img) => {
+          const publicId = img?.image?.key || '';
+          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
 
-        return {
-          ...img,
-          image: {
-            ...img.image,
-            url,
-          },
-        } as ProductImageEntity;
-      });
+          return {
+            ...img,
+            image: {
+              ...img.image,
+              url,
+            },
+          } as ProductImageEntity;
+        });
 
-      product.productImages = updatedImages;
+        product.productImages = await Promise.all(updatedImages);
 
-      return product;
-    });
+        return product;
+      }),
+    );
 
     return {
       data: dataWithUrls,
@@ -135,15 +137,49 @@ export class ProductVariantsService {
     const queryBuilder = this.productVariantRepo
       .createQueryBuilder('pv')
       .leftJoinAndSelect('pv.product', 'product')
-      .select(['pv.id', 'pv.sku', 'pv.createdAt', 'product.id', 'product.name'])
+      .leftJoinAndSelect('pv.productImages', 'productImages')
+
+      .select([
+        'pv.id',
+        'pv.sku',
+        'pv.createdAt',
+        'product.id',
+        'product.name',
+        'productImages.id',
+        'productImages.image',
+      ])
       .skip(skip)
       .take(take)
       .orderBy('pv.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    //
+    const dataWithUrls = await Promise.all(
+      data.map(async (product) => {
+        const flattenedImages = product?.productImages?.flat() || [];
+
+        const updatedImages = flattenedImages.map(async (img) => {
+          const publicId = img?.image?.key || '';
+          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+
+          return {
+            ...img,
+            image: {
+              ...img.image,
+              url,
+            },
+          } as ProductImageEntity;
+        });
+
+        product.productImages = await Promise.all(updatedImages);
+
+        return product;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

@@ -170,15 +170,25 @@ export class StoresService {
 
     const queryBuilder = this.storeRepo
       .createQueryBuilder('store')
-      .select(['store.id', 'store.name'])
+      .select(['store.id', 'store.name', 'store.image'])
       .skip(skip)
       .take(take)
       .orderBy('store.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    // Chuyển đổi URL ảnh nếu có
+    const dataWithUrls = await Promise.all(
+      data.map(async (store) => {
+        if (store.image && store.image.key) {
+          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+        }
+        return store;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),

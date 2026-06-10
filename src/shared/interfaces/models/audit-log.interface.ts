@@ -4,6 +4,7 @@ import { IBase } from '../common/base.interface';
 export interface IAuditLog extends IBase {
   // Thông tin người thực hiện hành động
   staffId: string;
+  storeId: string;
   username: string;
   email: string;
   phone: string;

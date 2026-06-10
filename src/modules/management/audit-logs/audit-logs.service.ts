@@ -66,15 +66,6 @@ export class AuditLogsService {
     return await this.auditLogRepository.save(auditLog);
   }
 
-  async remove(id: string) {
-    //
-    const auditLog = await this.auditLogRepository.findOne({ where: { id } });
-    if (!auditLog) throw new NotFoundException('Audit log not found');
-
-    //
-    return await this.auditLogRepository.remove(auditLog);
-  }
-
   //
   async remoteOldLogs() {
     const oneMonthAgo = new Date();

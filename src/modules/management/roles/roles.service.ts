@@ -78,7 +78,7 @@ export class RolesService {
         'role.isActive',
         'role.createdAt',
         'store.id',
-        'store.address',
+        'store.name',
         'permission.id',
         'permission.name',
         'permission.desc',

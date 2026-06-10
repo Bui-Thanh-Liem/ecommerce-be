@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { Permissions } from '@/decorators/permission.decorator';
+import { permissionsSeed } from '@/modules/management/permissions/seeding';
 
 @Controller('orders')
 export class OrdersController {
@@ -13,11 +15,13 @@ export class OrdersController {
   }
 
   @Get()
+  @Permissions(permissionsSeed.order.read.code)
   findAll() {
     return this.ordersService.findAll();
   }
 
   @Get(':id')
+  @Permissions(permissionsSeed.order.read.code)
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);
   }

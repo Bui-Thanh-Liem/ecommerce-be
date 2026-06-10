@@ -139,7 +139,16 @@ export class InventoriesService {
     const queryBuilder = this.inventoryRepo
       .createQueryBuilder('inventory')
       .leftJoinAndSelect('inventory.store', 'store')
-      .select(['inventory.id', 'store.id', 'inventory.createdAt', 'store.name', 'store.address'])
+      .leftJoinAndSelect('inventory.productVariant', 'productVariant')
+      .select([
+        'inventory.id',
+        'store.id',
+        'inventory.createdAt',
+        'store.name',
+        'store.address',
+        'productVariant.id',
+        'productVariant.sku',
+      ])
       .skip(skip)
       .take(take)
       .orderBy('inventory.createdAt', 'DESC');

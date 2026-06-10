@@ -7,6 +7,9 @@ export class AuditLogDto extends SerializerDto {
   staffId: string;
 
   @Expose()
+  storeId: string;
+
+  @Expose()
   username: string;
 
   @Expose()

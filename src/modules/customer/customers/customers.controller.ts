@@ -16,6 +16,8 @@ import { type Response } from 'express';
 import { CustomerMetadataDto } from './dto/metadata-customer.dto';
 import { CustomerQueryDto } from './dto/query-customer.dto';
 import { CustomerVerifiedDto } from './dto/customer-verified.dto';
+import { Permissions } from '@/decorators/permission.decorator';
+import { permissionsSeed } from '@/modules/management/permissions/seeding';
 
 @Controller('customers')
 @Serializer(CustomerDto)
@@ -61,17 +63,20 @@ export class CustomersController {
   }
 
   @Get()
+  @Permissions(permissionsSeed.customer.read.code)
   @Serializer(CustomerMetadataDto)
   async findAll(@Query() queries: CustomerQueryDto) {
     return await this.customersService.findAll(queries);
   }
 
   @Get(':id')
+  @Permissions(permissionsSeed.customer.read.code)
   async findOne(@Param('id') id: string) {
     return await this.customersService.findOne(id);
   }
 
   @Patch(':id')
+  @Permissions(permissionsSeed.customer.update.code)
   async update(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto) {
     return await this.customersService.update(id, updateCustomerDto);
   }

@@ -5,11 +5,15 @@ import { Column, Entity, Index } from 'typeorm';
 
 @Entity('audit_logs')
 @Index('idx_audit_logs_email', ['email'])
+@Index('idx_audit_logs_storeId', ['storeId'])
 @Index('idx_audit_logs_username', ['username'])
 @Index('idx_audit_logs_statusCode', ['statusCode'])
 export class AuditLogEntity extends BaseEntity implements IAuditLog {
   @Column()
   staffId: string;
+
+  @Column()
+  storeId: string;
 
   @Column({ nullable: true, type: 'varchar', length: 50 })
   username: string;

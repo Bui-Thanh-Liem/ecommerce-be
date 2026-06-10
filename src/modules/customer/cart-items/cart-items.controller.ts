@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CartItemsService } from './cart-items.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { Permissions } from '@/decorators/permission.decorator';
+import { permissionsSeed } from '@/modules/management/permissions/seeding';
 
 @Controller('cart-items')
 export class CartItemsController {
@@ -13,11 +15,13 @@ export class CartItemsController {
   }
 
   @Get()
+  @Permissions(permissionsSeed.cartItem.read.code)
   async findAll() {
     return await this.cartItemsService.findAll();
   }
 
   @Get(':id')
+  @Permissions(permissionsSeed.cartItem.read.code)
   async findOne(@Param('id') id: string) {
     return await this.cartItemsService.findOne(id);
   }

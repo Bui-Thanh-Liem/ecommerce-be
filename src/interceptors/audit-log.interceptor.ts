@@ -37,6 +37,7 @@ export class AuditLogInterceptor implements NestInterceptor {
       const dataCreate = {
         //
         staffId: staff.id,
+        storeId: staff?.store?.id,
         username: staff.fullName,
         email: staff.email,
         phone: staff.phone,
@@ -66,8 +67,9 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     //
     return next.handle().pipe(
-      switchMap((data) =>
-        from(
+      switchMap((data) => {
+        if (!staff) return from([data]);
+        return from(
           this.auditLogQueue.add(JOB_NAMES.UPDATE_AUDIT_LOG, {
             keySession: auditKey,
             updateAuditLogDto: {
@@ -79,10 +81,11 @@ export class AuditLogInterceptor implements NestInterceptor {
               desc: data?.message || '',
             },
           }),
-        ).pipe(map(() => data)),
-      ),
+        ).pipe(map(() => data));
+      }),
 
       catchError((err) => {
+        if (!staff) return throwError(() => err);
         const responseError = err?.response;
         return from(
           this.auditLogQueue.add(JOB_NAMES.UPDATE_AUDIT_LOG, {

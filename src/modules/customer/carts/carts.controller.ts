@@ -5,6 +5,8 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 import { GuestInterceptor } from '@/interceptors/guest.interceptor';
 import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
 import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
+import { Permissions } from '@/decorators/permission.decorator';
+import { permissionsSeed } from '@/modules/management/permissions/seeding';
 
 @Controller('carts')
 export class CartsController {
@@ -17,11 +19,13 @@ export class CartsController {
   }
 
   @Get()
+  @Permissions(permissionsSeed.cart.read.code)
   findAll() {
     return this.cartsService.findAll();
   }
 
   @Get(':id')
+  @Permissions(permissionsSeed.cart.read.code)
   findOne(@Param('id') id: string) {
     return this.cartsService.findOne(id);
   }

@@ -45,6 +45,9 @@ export class ProductSPUDto extends SerializerDto {
   model: string;
 
   @Expose()
+  thumbnail: string;
+
+  @Expose()
   desc: string;
 
   @Expose()

@@ -181,15 +181,24 @@ export class PromotionsService {
 
     const queryBuilder = this.promotionRepository
       .createQueryBuilder('promotion')
-      .select(['promotion.id', 'promotion.name', 'promotion.slug'])
+      .select(['promotion.id', 'promotion.name', 'promotion.image', 'promotion.slug'])
       .skip(skip)
       .take(take)
       .orderBy('promotion.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
+    const dataWithUrls = await Promise.all(
+      data.map(async (store) => {
+        if (store.image && store.image.key) {
+          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+        }
+        return store;
+      }),
+    );
+
     return {
-      data,
+      data: dataWithUrls,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),
