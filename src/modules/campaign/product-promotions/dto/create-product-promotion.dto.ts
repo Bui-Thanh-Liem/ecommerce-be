@@ -19,4 +19,8 @@ export class CreateProductPromotionDto {
   @IsNotEmpty()
   @Min(0)
   priority: number;
+
+  @IsNumber()
+  @Min(0)
+  limitQuantity: number;
 }

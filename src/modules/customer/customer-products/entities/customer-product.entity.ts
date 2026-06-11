@@ -7,12 +7,16 @@ import { Column, Entity, Index, ManyToOne } from 'typeorm';
 
 @Entity('customer_products')
 @Index(['customer', 'productVariant', 'type'], { unique: true })
+@Index(['session', 'productVariant', 'type'], { unique: true })
 export class CustomerProductEntity extends BaseEntity implements ICustomerProduct {
   @Column({ type: 'enum', enum: CustomerProductType })
   type: CustomerProductType;
 
-  @ManyToOne(() => CustomerEntity, { nullable: false })
+  @ManyToOne(() => CustomerEntity, { nullable: true })
   customer: CustomerEntity;
+
+  @Column({ nullable: true })
+  session: string;
 
   @ManyToOne(() => ProductVariantEntity, { nullable: false })
   productVariant: ProductVariantEntity;

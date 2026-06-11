@@ -1,12 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, UseInterceptors } from '@nestjs/common';
 import { CartsService } from './carts.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 import { GuestInterceptor } from '@/interceptors/guest.interceptor';
 import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
 import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { CurrentCustomer } from '@/decorators/current-customer.decorator';
+import { CustomerEntity } from '../customers/entities/customer.entity';
 
 @Controller('carts')
 export class CartsController {
@@ -14,8 +14,8 @@ export class CartsController {
 
   @Post()
   @UseInterceptors(GuestInterceptor)
-  async create(@GetInfoGuest() infoGuest: IInfoGuest, @Body() createCartDto: CreateCartDto) {
-    return await this.cartsService.create(createCartDto, infoGuest.session);
+  async create(@GetInfoGuest() guest: IInfoGuest, @CurrentCustomer() customer: CustomerEntity) {
+    return await this.cartsService.create({ guest, customer });
   }
 
   @Get()
@@ -30,15 +30,13 @@ export class CartsController {
     return this.cartsService.findOne(id);
   }
 
-  @Patch(':id')
-  @UseInterceptors(GuestInterceptor)
-  async update(@GetInfoGuest() infoGuest: IInfoGuest, @Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return await this.cartsService.update(id, updateCartDto, infoGuest.session);
-  }
-
   @Delete(':id')
   @UseInterceptors(GuestInterceptor)
-  async remove(@GetInfoGuest() infoGuest: IInfoGuest, @Param('id') id: string) {
-    return await this.cartsService.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @GetInfoGuest() guest: IInfoGuest,
+    @CurrentCustomer() customer: CustomerEntity,
+  ) {
+    return await this.cartsService.remove({ id, guest, customer });
   }
 }

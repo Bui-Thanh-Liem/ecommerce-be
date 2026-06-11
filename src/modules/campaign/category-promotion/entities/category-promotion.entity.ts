@@ -21,6 +21,12 @@ export class CategoryPromotionEntity extends BaseEntity implements ICategoryProm
   @Column({ default: 0 })
   priority: number;
 
+  @Column({ type: 'int', default: 0 })
+  limitQuantity: number;
+
+  @Column({ type: 'int', default: 0 })
+  totalSoldQuantity: number;
+
   logInsert(): void {
     this.logger.debug(
       `Đã chèn thành công Category có name: ${this.category.name} với Promotion có name: ${this.promotion.applyType}`,

@@ -4,7 +4,8 @@ import { ICustomer } from './customer.interface';
 import { IProductVariant } from './product-variant.interface';
 
 export interface ICustomerProduct extends IBase {
-  customer: ICustomer;
+  customer?: ICustomer;
+  session?: string; // Guest session ID, có thể null nếu là user đã đăng nhập
   type: CustomerProductType;
   productVariant: IProductVariant;
 }

@@ -18,4 +18,8 @@ export class CreateCategoryPromotionDto {
   @Min(0)
   @Max(100)
   priority: number;
+
+  @IsNumber()
+  @Min(0)
+  limitQuantity: number;
 }

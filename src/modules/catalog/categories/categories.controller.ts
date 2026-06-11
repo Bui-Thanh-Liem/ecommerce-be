@@ -8,6 +8,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryQueryDto } from './dto/query-category.dto';
 import { CategoryMetadataDto } from './dto/metadata-category.dto';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('categories')
 @Serializer(CategoryDto)
@@ -27,6 +28,7 @@ export class CategoriesController {
     return await this.categoriesService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Serializer(CategoryMetadataDto)
   @Permissions(permissionsSeed.category.read.code)
