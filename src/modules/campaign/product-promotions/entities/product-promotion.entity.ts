@@ -21,6 +21,12 @@ export class ProductPromotionEntity extends BaseEntity implements IProductPromot
   @Column({ default: 0 })
   priority: number;
 
+  @Column({ type: 'int', default: 0 })
+  limitQuantity: number;
+
+  @Column({ type: 'int', default: 0 })
+  totalSoldQuantity: number;
+
   logInsert(): void {
     this.logger.debug(
       // eslint-disable-next-line max-len

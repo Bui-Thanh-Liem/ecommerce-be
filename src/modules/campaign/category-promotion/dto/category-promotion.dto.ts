@@ -15,4 +15,10 @@ export class CategoryPromotionDto extends SerializerDto {
 
   @Expose()
   priority: number;
+
+  @Expose()
+  limitQuantity: number;
+
+  @Expose()
+  totalSoldQuantity: number;
 }

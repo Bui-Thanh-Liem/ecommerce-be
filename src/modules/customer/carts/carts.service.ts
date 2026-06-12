@@ -1,6 +1,4 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartEntity } from './entities/cart.entity';
 import { DataSource, In, Repository } from 'typeorm';
@@ -9,6 +7,7 @@ import { CartStatus } from '@/shared/enums/cart-status.enum';
 import { CustomerEntity } from '../customers/entities/customer.entity';
 import { CartItemsService } from '../cart-items/cart-items.service';
 import { CartItemEntity } from '../cart-items/entities/cart-item.entity';
+import { IInfoGuest } from '@/shared/interfaces/common/info-guest';
 
 @Injectable()
 export class CartsService {
@@ -23,20 +22,19 @@ export class CartsService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createCartDto: CreateCartDto, sessionId?: string) {
-    const { customer: customerId, ...cartData } = createCartDto;
+  async create({ guest, customer }: { guest?: IInfoGuest; customer?: CustomerEntity }) {
+    const obj = (customer && { customer: { id: customer.id } }) || { session: guest?.session };
 
-    if (customerId) {
-      const customer = await this.customersService.exists([customerId]);
-      if (!customer) {
+    //
+    if (customer && customer.id) {
+      const existCustomer = await this.customersService.exists([customer.id]);
+      if (!existCustomer) {
         throw new NotFoundException('Customer not found');
       }
     }
 
     const cart = this.cartRepository.create({
-      ...cartData,
-      customer: customerId ? { id: customerId } : undefined,
-      session: sessionId,
+      ...obj,
     });
     return await this.cartRepository.save(cart);
   }
@@ -103,56 +101,16 @@ export class CartsService {
     return count === ids.length;
   }
 
-  async update(id: string, updateCartDto: UpdateCartDto, sessionId?: string) {
-    const { customer: customerId, ...cartData } = updateCartDto;
+  async remove({ id, guest, customer }: { id: string; guest?: IInfoGuest; customer?: CustomerEntity }) {
+    const obj = (customer && { customer: { id: customer.id } }) || { session: guest?.session };
 
-    if (customerId) {
-      const customer = await this.customersService.exists([customerId]);
-      if (!customer) {
-        throw new NotFoundException('Customer not found');
-      }
-    }
-
-    if (sessionId) {
-      const cart = await this.cartRepository.findOne({ where: { id }, relations: ['customer'] });
-      if (!cart) {
-        throw new NotFoundException('Cart not found');
-      }
-
-      // Chỉ cho phép cập nhật nếu sessionId trùng hoặc cart đã có customer
-      if (cart.session !== sessionId && !cart.customer) {
-        throw new NotFoundException('Cart not found for this session');
-      }
-    }
-
-    const cart = await this.cartRepository.preload({
-      ...cartData,
-      id: id ? id : undefined,
-      session: sessionId ? sessionId : undefined,
-      customer: customerId ? { id: customerId } : undefined,
-    });
+    //
+    const cart = await this.cartRepository.findOne({ where: { id, ...obj } });
     if (!cart) {
       throw new NotFoundException('Cart not found');
     }
 
-    return await this.cartRepository.save(cart);
-  }
-
-  async remove(id: string, sessionId?: string) {
-    if (!id && !sessionId) return null;
-
-    if (id) {
-      const cart = await this.findOne(id);
-      if (!cart) {
-        throw new NotFoundException('Cart not found');
-      }
-      return await this.cartRepository.remove(cart);
-    } else {
-      const cart = await this.cartRepository.findOne({ where: { session: sessionId } });
-      if (!cart) {
-        throw new NotFoundException('Cart not found for this session');
-      }
-      return await this.cartRepository.remove(cart);
-    }
+    //
+    return await this.cartRepository.remove(cart);
   }
 }
