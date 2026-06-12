@@ -1,4 +1,4 @@
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
 import { ILocationRegion } from '@/shared/interfaces/models/location-region.interface';

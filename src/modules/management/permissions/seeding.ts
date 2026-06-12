@@ -527,4 +527,30 @@ export const permissionsSeed = {
       code: '084',
     },
   },
+  mktProgram: {
+    create: {
+      keyGroup: 'Danh mục chương trình marketing',
+      name: 'create:mktPrograms',
+      desc: 'Tạo chương trình marketing',
+      code: '085',
+    },
+    read: {
+      keyGroup: 'Danh mục chương trình marketing',
+      name: 'read:mktPrograms',
+      desc: 'Xem chương trình marketing',
+      code: '086',
+    },
+    update: {
+      keyGroup: 'Danh mục chương trình marketing',
+      name: 'update:mktPrograms',
+      desc: 'Cập nhật chương trình marketing',
+      code: '087',
+    },
+    delete: {
+      keyGroup: 'Danh mục chương trình marketing',
+      name: 'delete:mktPrograms',
+      desc: 'Xóa chương trình marketing',
+      code: '088',
+    },
+  },
 };

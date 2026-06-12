@@ -32,7 +32,7 @@ import { ZaloPayModule } from './modules/payments/zalopay/zalopay.module';
 import { RatingModule } from './modules/customer/rating/rating.module';
 import { ProductNavbarModule } from './modules/catalog/product-navbar/product-navbar.module';
 import { CustomerProductsModule } from './modules/customer/customer-products/customer-products.module';
-import { PromotionsModule } from './modules/campaign/promotions/promotions.module';
+import { PromotionsModule } from './modules/marketing-program/promotions/promotions.module';
 import { CartsModule } from './modules/customer/carts/carts.module';
 import { TeamCategoriesModule } from './modules/management/team-categories/team-categories.module';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
@@ -43,9 +43,9 @@ import { LocationRegionsModule } from './modules/inventory/location-regions/loca
 import { TeamsModule } from './modules/management/teams/teams.module';
 import { CustomersModule } from './modules/customer/customers/customers.module';
 import { CartItemsModule } from './modules/customer/cart-items/cart-items.module';
-import { ProductPromotionsModule } from './modules/campaign/product-promotions/product-promotions.module';
-import { CampaignModule } from './modules/campaign/campaigns/campaigns.module';
-import { CategoryPromotionModule } from './modules/campaign/category-promotion/category-promotion.module';
+import { ProductPromotionsModule } from './modules/marketing-program/product-promotions/product-promotions.module';
+import { CampaignModule } from './modules/marketing-program/campaigns/campaigns.module';
+import { CategoryPromotionModule } from './modules/marketing-program/category-promotions/category-promotion.module';
 import redisConfig from './configs/redis.config';
 import { CacheModule } from './common/cache/cache.module';
 import { BullMqModule } from './common/bull/bull.module';
@@ -56,6 +56,7 @@ import { NotificationModule } from './common/notification/notification.module';
 import { CustomerTokensModule } from './modules/customer/customer-tokens/customer-tokens.module';
 import { TaskModule } from './common/tasks/task.module';
 import { MainBannerModule } from './modules/catalog/main-banner/main-banner.module';
+import { MarketingProgramsModule } from './modules/marketing-program/marketing-programs/marketing-programs.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -128,6 +129,7 @@ const isProd = process.env.NODE_ENV === 'production';
     NotificationModule,
     CustomerTokensModule,
     MainBannerModule,
+    MarketingProgramsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,5 +1,5 @@
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IProductPromotion } from '@/shared/interfaces/models/product-promotion.interface';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';

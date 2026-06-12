@@ -5,7 +5,7 @@ import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { ProductPromotionEntity } from '../../product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '../../campaigns/entities/campaign.entity';
-import { CategoryPromotionEntity } from '../../category-promotion/entities/category-promotion.entity';
+import { CategoryPromotionEntity } from '../../category-promotions/entities/category-promotion.entity';
 import type { IImage } from '@/shared/interfaces/common/image.interface';
 import { PromotionApplyScope } from '@/shared/enums/promotion-apply-scope.enum';
 import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';

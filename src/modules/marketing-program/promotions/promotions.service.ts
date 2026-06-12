@@ -8,7 +8,7 @@ import { ProductVariantsService } from '../../catalog/product-variants-SKU/produ
 import { CampaignsService } from '../campaigns/campaigns.service';
 import { StoresService } from '@/modules/inventory/stores/stores.service';
 import { LocationRegionsService } from '@/modules/inventory/location-regions/location-regions.service';
-import { CategoryPromotionService } from '../category-promotion/category-promotion.service';
+import { CategoryPromotionService } from '../category-promotions/category-promotion.service';
 import { ProductPromotionsService } from '../product-promotions/product-promotions.service';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';

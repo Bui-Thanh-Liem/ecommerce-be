@@ -1,4 +1,4 @@
-import { CategoryPromotionEntity } from '@/modules/campaign/category-promotion/entities/category-promotion.entity';
+import { CategoryPromotionEntity } from '@/modules/marketing-program/category-promotions/entities/category-promotion.entity';
 import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';

@@ -8,7 +8,7 @@ import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne 
 import { LocationRegionEntity } from '../../location-regions/entities/location-region.entity';
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
 import { RoleEntity } from '@/modules/management/roles/entities/role.entity';
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity implements IStore {

@@ -1,10 +1,11 @@
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import type { IImage } from '@/shared/interfaces/common/image.interface';
 import { ICampaign } from '@/shared/interfaces/models/campaign.interface';
 import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { MarketingProgramEntity } from '../../marketing-programs/entities/marketing-program.entity';
 
 @Entity('campaigns')
 export class CampaignEntity extends BaseEntity implements ICampaign {
@@ -39,6 +40,9 @@ export class CampaignEntity extends BaseEntity implements ICampaign {
     inverseJoinColumn: { name: 'product_variant_id', referencedColumnName: 'id' },
   })
   productHighlighted: ProductVariantEntity[];
+
+  @ManyToOne(() => MarketingProgramEntity, (mp) => mp.campaigns, { nullable: true })
+  marketingProgram?: MarketingProgramEntity;
 
   // Relations
   @OneToMany(() => PromotionEntity, (promotion) => promotion.campaign)

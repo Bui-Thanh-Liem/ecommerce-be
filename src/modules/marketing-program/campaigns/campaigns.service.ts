@@ -3,6 +3,7 @@ import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
   forwardRef,
@@ -43,7 +44,7 @@ export class CampaignsService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createCampaignDto: CreateCampaignDto) {
+  async create(dto: CreateCampaignDto) {
     try {
       const {
         promotions: promotionIds,
@@ -52,18 +53,18 @@ export class CampaignsService {
         startDate,
         endDate,
         ...rest
-      } = createCampaignDto;
+      } = dto;
 
       //
       if (startDate >= endDate) {
-        throw new NotFoundException('Start date must be before end date');
+        throw new BadGatewayException('Start date must be before end date');
       }
 
       //
       const slug = stringToSlug(name);
       const existingCampaign = await this.campaignRepository.exists({ where: { slug } });
       if (existingCampaign) {
-        throw new NotFoundException('A campaign with the same name already exists');
+        throw new ConflictException('A campaign with the same name already exists');
       }
 
       //
@@ -93,7 +94,7 @@ export class CampaignsService {
       });
       return await this.campaignRepository.save(campaign);
     } catch (error) {
-      const keys = [...(createCampaignDto?.images?.map((img) => img.key) || []), createCampaignDto?.mainImage.key];
+      const keys = [...(dto?.images?.map((img) => img.key) || []), dto?.mainImage.key];
       await this.removeImagesForError(keys);
       this.logger.error(`Failed to create brand`, error);
       throw error;
@@ -139,30 +140,14 @@ export class CampaignsService {
       ])
 
       // Phân trang và sắp xếp
+      .orderBy('campaign.createdAt', 'DESC') // Nên có orderBy khi phân trang
       .skip(skip)
-      .take(take)
-      .orderBy('campaign.createdAt', 'DESC'); // Nên có orderBy khi phân trang
+      .take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
     //
-    const dataWithUrls = await Promise.all(
-      data.map(async (cam) => {
-        const imageKeys = cam.images || [];
-        const mainImageKey = cam.mainImage?.key;
-        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
-        const images = await this.cloudinaryService.generateUrls(imageKeys);
-
-        return {
-          ...cam,
-          images: images,
-          mainImage: {
-            ...cam.mainImage,
-            url: mainImageUrl,
-          },
-        } as CampaignEntity;
-      }),
-    );
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -176,6 +161,7 @@ export class CampaignsService {
     const { page, limit } = query;
     const { take, skip } = calculatePagination(page, limit);
 
+    //
     const queryBuilder = this.campaignRepository
       .createQueryBuilder('campaign')
       .select(['campaign.id', 'campaign.name', 'campaign.mainImage'])
@@ -183,23 +169,13 @@ export class CampaignsService {
       .take(take)
       .orderBy('campaign.createdAt', 'DESC');
 
+    //
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
-    const dataWithUrls = await Promise.all(
-      data.map(async (cam) => {
-        const mainImageKey = cam.mainImage?.key;
-        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
+    //
+    const dataWithUrls = await this.signUrl(data);
 
-        return {
-          ...cam,
-          mainImage: {
-            ...cam.mainImage,
-            url: mainImageUrl,
-          },
-        } as CampaignEntity;
-      }),
-    );
-
+    //
     return {
       data: dataWithUrls,
       totalData,
@@ -232,7 +208,7 @@ export class CampaignsService {
     return count === ids.length;
   }
 
-  async update(id: string, updateCampaignDto: UpdateCampaignDto) {
+  async update(id: string, dto: UpdateCampaignDto) {
     const {
       promotions: promotionIds,
       productHighlighted: productVariantIds,
@@ -242,7 +218,7 @@ export class CampaignsService {
       images,
       mainImage,
       ...rest
-    } = updateCampaignDto;
+    } = dto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -268,9 +244,9 @@ export class CampaignsService {
 
     // Chạy song song các câu lệnh check độc lập
     const [isSlugDup, isPromoValid, isProductVariantValid] = await Promise.all([
-      name ? this.campaignRepository.exists({ where: { slug, id: Not(id) } }) : Promise.resolve(false),
-      hasPromotions ? this.promotionService.exists(promotionIds) : Promise.resolve(true),
-      hasProductVariants ? this.pvService.exists(productVariantIds) : Promise.resolve(true),
+      name ? this.campaignRepository.exists({ where: { slug, id: Not(id) } }) : null,
+      hasPromotions ? this.promotionService.exists(promotionIds) : null,
+      hasProductVariants ? this.pvService.exists(productVariantIds) : null,
     ]);
 
     if (isSlugDup) throw new ConflictException('A campaign with the same name already exists');
@@ -384,6 +360,26 @@ export class CampaignsService {
       'delete-multiple-images',
       { publicIds: keys },
       { jobId: `delete-bulk-${Date.now()}` },
+    );
+  }
+
+  private async signUrl(data: CampaignEntity[]): Promise<CampaignEntity[]> {
+    return await Promise.all(
+      data.map(async (cam) => {
+        const imageKeys = cam.images || [];
+        const mainImageKey = cam.mainImage?.key;
+        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
+        const images = await this.cloudinaryService.generateUrls(imageKeys);
+
+        return {
+          ...cam,
+          images: images,
+          mainImage: {
+            ...cam.mainImage,
+            url: mainImageUrl,
+          },
+        } as CampaignEntity;
+      }),
     );
   }
 }

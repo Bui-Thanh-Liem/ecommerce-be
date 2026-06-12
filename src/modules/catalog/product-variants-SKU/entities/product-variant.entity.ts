@@ -2,15 +2,15 @@ import { InventoryEntity } from '@/modules/inventory/inventories/entities/invent
 import { ProductImageEntity } from '@/modules/catalog/product-images/entities/product-image.entity';
 import { ProductItemEntity } from '@/modules/catalog/product-items-SERIAL/entities/product-item.entity';
 import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { RatingEntity } from '@/modules/customer/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IProductVariant, IVariantAttribute } from '@/shared/interfaces/models/product-variant.interface';
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
-import { ProductPromotionEntity } from '@/modules/campaign/product-promotions/entities/product-promotion.entity';
-import { CampaignEntity } from '@/modules/campaign/campaigns/entities/campaign.entity';
+import { ProductPromotionEntity } from '@/modules/marketing-program/product-promotions/entities/product-promotion.entity';
+import { CampaignEntity } from '@/modules/marketing-program/campaigns/entities/campaign.entity';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {

@@ -6,7 +6,7 @@ import { PromotionEntity } from './entities/promotion.entity';
 import { CampaignModule } from '../campaigns/campaigns.module';
 import { ProductVariantsModule } from '../../catalog/product-variants-SKU/product-variants.module';
 import { ProductPromotionsModule } from '../product-promotions/product-promotions.module';
-import { CategoryPromotionModule } from '../category-promotion/category-promotion.module';
+import { CategoryPromotionModule } from '../category-promotions/category-promotion.module';
 import { StoresModule } from '@/modules/inventory/stores/stores.module';
 import { LocationRegionsModule } from '@/modules/inventory/location-regions/location-regions.module';
 

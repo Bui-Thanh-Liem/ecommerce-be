@@ -1,5 +1,5 @@
 import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
-import { PromotionEntity } from '@/modules/campaign/promotions/entities/promotion.entity';
+import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICategoryPromotion } from '@/shared/interfaces/models/category-promotion.interface';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
