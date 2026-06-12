@@ -2,7 +2,7 @@ import { InventoryEntity } from '@/modules/inventory/inventories/entities/invent
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductItemStatus } from '@/shared/enums/product-item-status.enum';
-import { IProductItem } from '@/shared/interfaces/models/product-item.interface';
+import { IProductItem } from '@/shared/interfaces/models/catalog/product-item.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('product_items')

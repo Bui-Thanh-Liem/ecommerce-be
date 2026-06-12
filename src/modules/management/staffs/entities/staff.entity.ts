@@ -1,11 +1,11 @@
 import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { StaffWorkLocationID } from '@/shared/enums/staff-work-location-id.enum';
-import { IStaff } from '@/shared/interfaces/models/staff.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { RoleEntity } from '../../roles/entities/role.entity';
 import { TeamEntity } from '../../teams/entities/team.entity';
 import type { IImage } from '@/shared/interfaces/common/image.interface';
+import { IStaff } from '@/shared/interfaces/models/management/staff.interface';
 
 @Entity('staffs')
 export class StaffEntity extends BaseEntity implements IStaff {

@@ -1,6 +1,6 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { AuditLogStatus } from '@/shared/enums/audit-log-status.enum';
-import { IAuditLog } from '@/shared/interfaces/models/audit-log.interface';
+import { IAuditLog } from '@/shared/interfaces/models/management/audit-log.interface';
 import { Column, Entity, Index } from 'typeorm';
 
 @Entity('audit_logs')

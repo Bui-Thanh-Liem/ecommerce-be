@@ -1,5 +1,5 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { IProductNavbar } from '@/shared/interfaces/models/navbar.interface';
+import { IProductNavbar } from '@/shared/interfaces/models/catalog/product-navbar.interface';
 import { Column, Entity } from 'typeorm';
 
 @Entity('product_navbars')

@@ -1,6 +1,6 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';
-import { IMainBanner } from '@/shared/interfaces/models/main-banner.interface';
+import { IMainBanner } from '@/shared/interfaces/models/catalog/main-banner.interface';
 import { Column, Entity } from 'typeorm';
 
 @Entity('main_banners')

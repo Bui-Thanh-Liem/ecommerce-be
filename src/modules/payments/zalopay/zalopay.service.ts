@@ -4,7 +4,7 @@ import { UpdateZaloPayDto } from './dto/update-zalopay.dto';
 
 @Injectable()
 export class ZaloPayService {
-  create(createZaloPayDto: CreateZaloPayDto) {
+  create(dto: CreateZaloPayDto) {
     return 'This action adds a new zalo pay';
   }
 
@@ -16,7 +16,7 @@ export class ZaloPayService {
     return `This action returns a #${id} zalo pay`;
   }
 
-  update(id: number, updateZaloPayDto: UpdateZaloPayDto) {
+  update(id: number, dto: UpdateZaloPayDto) {
     return `This action updates a #${id} zalo pay`;
   }
 

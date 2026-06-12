@@ -2,7 +2,7 @@ import { BrandDto } from '@/modules/catalog/brands/dto/brand.dto';
 import { CategoryDto } from '@/modules/catalog/categories/dto/category.dto';
 import { ProductImageDto } from '@/modules/catalog/product-images/dto/product-image.dto';
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
-import { ISpecification, ISpecificationItem } from '@/shared/interfaces/models/product.interface';
+import { ISpecification, ISpecificationItem } from '@/shared/interfaces/models/catalog/product.interface';
 import { Expose, Type } from 'class-transformer';
 
 class SpecificationItemDto implements ISpecificationItem {

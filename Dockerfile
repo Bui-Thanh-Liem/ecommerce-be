@@ -1,5 +1,5 @@
 # Build stage
-FROM node:24-alpine  AS build-stage
+FROM node:24-alpine AS build-stage
 
 WORKDIR /app
 
@@ -14,13 +14,13 @@ RUN npm run build
 # Production stage
 FROM node:24-alpine AS prod-stage
 
+WORKDIR /app
+
 COPY --from=build-stage /app/dist ./app
 COPY --from=build-stage /app/package.json ./app/package.json
 
-WORKDIR /app
-
 RUN npm install --only=production
 
-EXPOSE 9000
+EXPOSE 3001
 
 CMD ["node", "main.js"] 

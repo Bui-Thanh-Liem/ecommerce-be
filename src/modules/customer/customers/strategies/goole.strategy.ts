@@ -20,11 +20,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-  validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: IGoogleProfile,
-  ): unknown {
+  validate(accessToken: string, refreshToken: string, profile: IGoogleProfile): unknown {
     return {
       email: profile.emails[0].value,
       name: profile.displayName,

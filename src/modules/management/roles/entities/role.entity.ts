@@ -1,7 +1,7 @@
 import { PermissionEntity } from '@/modules/management/permissions/entities/permission.entity';
 import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { IRole } from '@/shared/interfaces/models/role.interface';
+import { IRole } from '@/shared/interfaces/models/management/role.interface';
 import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 import { StaffEntity } from '../../staffs/entities/staff.entity';
 

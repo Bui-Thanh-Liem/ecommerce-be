@@ -1,8 +1,8 @@
 import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { LocationRegionType } from '@/shared/enums/location-region-type.enum';
-import { ILocationRegion } from '@/shared/interfaces/models/location-region.interface';
-import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
+import { ILocationRegion } from '@/shared/interfaces/models/inventory/location-region.interface';
+import { IPromotion } from '@/shared/interfaces/models/mkt-program/promotion.interface';
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
 @Entity('location_regions')

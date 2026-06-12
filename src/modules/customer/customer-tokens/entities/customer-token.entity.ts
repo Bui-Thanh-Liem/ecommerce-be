@@ -1,8 +1,8 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { TokenType } from '@/shared/enums/token-type.enum';
-import { ICustomerToken } from '@/shared/interfaces/models/customer-token.interface';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { CustomerEntity } from '../../customers/entities/customer.entity';
+import { ICustomerToken } from '@/shared/interfaces/models/management/customer-token.interface';
 
 @Entity('customer_tokens')
 export class CustomerTokenEntity extends BaseEntity implements ICustomerToken {

@@ -5,9 +5,9 @@ import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { VoucherDiscountType } from '@/shared/enums/voucher-discount-type.enum';
 import { VoucherStatus } from '@/shared/enums/voucher-status.enum';
-import { IVoucher } from '@/shared/interfaces/models/voucher.interface';
+import { IVoucher } from '@/shared/interfaces/models/customer/voucher.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
-import { IStaff } from '@/shared/interfaces/models/staff.interface';
+import { IStaff } from '@/shared/interfaces/models/management/staff.interface';
 
 @Entity('vouchers')
 export class VoucherEntity extends BaseEntity implements IVoucher {

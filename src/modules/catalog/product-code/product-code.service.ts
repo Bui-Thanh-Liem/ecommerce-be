@@ -1,4 +1,4 @@
-import { IVariantAttribute } from '@/shared/interfaces/models/product-variant.interface';
+import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 import { Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()

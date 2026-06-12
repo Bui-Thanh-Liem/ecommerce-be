@@ -1,7 +1,7 @@
 import { CartEntity } from '@/modules/customer/carts/entities/cart.entity';
 import { RatingEntity } from '@/modules/customer/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { ICustomer } from '@/shared/interfaces/models/customer.interface';
+import { ICustomer } from '@/shared/interfaces/models/customer/customer.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('customers')

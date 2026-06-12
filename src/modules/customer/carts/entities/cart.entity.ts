@@ -2,7 +2,7 @@ import { CustomerEntity } from '@/modules/customer/customers/entities/customer.e
 import { VoucherEntity } from '@/modules/payments/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { CartStatus } from '@/shared/enums/cart-status.enum';
-import { ICart } from '@/shared/interfaces/models/cart.interface';
+import { ICart } from '@/shared/interfaces/models/customer/cart.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { CartItemEntity } from '../../cart-items/entities/cart-item.entity';
 

@@ -1,7 +1,7 @@
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { PromotionApplyType } from '@/shared/enums/promotion-apply-type.enum';
-import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
+import { IPromotion } from '@/shared/interfaces/models/mkt-program/promotion.interface';
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { ProductPromotionEntity } from '../../product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '../../campaigns/entities/campaign.entity';

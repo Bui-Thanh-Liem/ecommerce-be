@@ -1,5 +1,28 @@
 scrape_configs:
-  - job_name: 'nestjs-app'
+  - job_name: 'e-commerce'
     metrics_path: '/metrics' # Đường dẫn mặc định, không cần sửa thành /api/v1/metrics nữa
     static_configs:
       - targets: ['host.docker.internal:3001'] # Dùng host.docker.internal nếu Prometheus chạy trong Docker còn NestJS chạy ở máy ngoài (local)
+      # - targets: ['e-commerce-be:3001'] # Dùng ecommerce-be nếu Prometheus chạy trong Docker, NestJS cũng chạy trong Docker (cùng network với docker-compose.yml)
+
+
+
+
+
+
+
+
+# Request rate (req/s trong 5 phút)
+# rate(http_requests_total[5m])
+
+# P99 latency
+# histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+
+# Error rate (%)
+# rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]) * 100
+
+# Memory heap đang dùng
+# nodejs_heap_size_used_bytes
+
+# Event loop lag
+# nodejs_eventloop_lag_seconds

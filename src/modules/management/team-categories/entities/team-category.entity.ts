@@ -1,9 +1,9 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { TeamCategoryCode } from '@/shared/enums/team-category-code.enum';
 import { TeamType } from '@/shared/enums/team-type.enum';
-import { ITeamCategory } from '@/shared/interfaces/models/team-category.interface';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { TeamEntity } from '../../teams/entities/team.entity';
+import { ITeamCategory } from '@/shared/interfaces/models/management/team-category.interface';
 
 @Entity('team_categories')
 @Index(['name', 'code'], { unique: true })

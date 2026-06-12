@@ -2,7 +2,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';
-import { IProductImage } from '@/shared/interfaces/models/product-image.interface';
+import { IProductImage } from '@/shared/interfaces/models/catalog/product-image.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('product_images')

@@ -1,6 +1,6 @@
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { IRating } from '@/shared/interfaces/models/rating.interface';
+import { IRating } from '@/shared/interfaces/models/customer/rating.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { CustomerEntity } from '../../customers/entities/customer.entity';
 

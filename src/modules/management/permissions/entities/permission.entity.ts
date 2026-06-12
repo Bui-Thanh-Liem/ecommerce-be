@@ -1,7 +1,7 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { IPermission } from '@/shared/interfaces/models/permission.interface';
 import { Column, Entity, Index, ManyToMany } from 'typeorm';
 import { RoleEntity } from '../../roles/entities/role.entity';
+import { IPermission } from '@/shared/interfaces/models/management/permission.interface';
 
 @Entity('permissions')
 @Index('idx_active_permissions', ['name', 'code'], { where: '"isActive" = \'true\'' })

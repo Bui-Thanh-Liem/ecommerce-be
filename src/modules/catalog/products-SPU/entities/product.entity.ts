@@ -5,7 +5,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
-import { IProduct, ISpecification } from '@/shared/interfaces/models/product.interface';
+import { IProduct, ISpecification } from '@/shared/interfaces/models/catalog/product.interface';
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('products')

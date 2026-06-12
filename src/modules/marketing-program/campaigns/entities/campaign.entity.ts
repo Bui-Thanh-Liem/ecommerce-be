@@ -2,10 +2,10 @@ import { PromotionEntity } from '@/modules/marketing-program/promotions/entities
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import type { IImage } from '@/shared/interfaces/common/image.interface';
-import { ICampaign } from '@/shared/interfaces/models/campaign.interface';
-import { IPromotion } from '@/shared/interfaces/models/promotion.interface';
+import { IPromotion } from '@/shared/interfaces/models/mkt-program/promotion.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { MarketingProgramEntity } from '../../marketing-programs/entities/marketing-program.entity';
+import { ICampaign } from '@/shared/interfaces/models/mkt-program/campaign.interface';
 
 @Entity('campaigns')
 export class CampaignEntity extends BaseEntity implements ICampaign {

@@ -2,8 +2,8 @@ import { CartEntity } from '@/modules/customer/carts/entities/cart.entity';
 import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
 import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
-import { ICartItem } from '@/shared/interfaces/models/cart-item.interface';
 import { Column, Entity, ManyToOne } from 'typeorm';
+import { ICartItem } from '@/shared/interfaces/models/customer/cart-item.interface';
 
 @Entity('cart_items')
 export class CartItemEntity extends BaseEntity implements ICartItem {

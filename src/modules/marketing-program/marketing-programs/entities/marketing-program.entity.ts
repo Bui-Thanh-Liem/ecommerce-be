@@ -1,6 +1,6 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { MarketingProgramStatus } from '@/shared/enums/marketing-program-status.enum';
-import { IMarketingProgram } from '@/shared/interfaces/models/marketing-program.interface';
+import { IMarketingProgram } from '@/shared/interfaces/models/mkt-program/marketing-program.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CampaignEntity } from '../../campaigns/entities/campaign.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';

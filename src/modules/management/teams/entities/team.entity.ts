@@ -2,7 +2,7 @@ import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { TeamCategoryEntity } from '@/modules/management/team-categories/entities/team-category.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { TeamType } from '@/shared/enums/team-type.enum';
-import { ITeam } from '@/shared/interfaces/models/team.interface';
+import { ITeam } from '@/shared/interfaces/models/management/team.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { StaffEntity } from '../../staffs/entities/staff.entity';
 

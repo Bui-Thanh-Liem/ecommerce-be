@@ -3,7 +3,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { StoreEntity } from '@/modules/inventory/stores/entities/store.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
-import { IInventory } from '@/shared/interfaces/models/inventory.interface';
+import { IInventory } from '@/shared/interfaces/models/inventory/inventory.interface';
 import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('inventories')

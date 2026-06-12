@@ -1,4 +1,4 @@
-import { ICustomer } from '@/shared/interfaces/models/customer.interface';
+import { ICustomer } from '@/shared/interfaces/models/customer/customer.interface';
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';

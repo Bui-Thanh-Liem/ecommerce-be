@@ -2,7 +2,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { CustomerEntity } from '@/modules/customer/customers/entities/customer.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
-import { ICustomerProduct } from '@/shared/interfaces/models/customer-product.interface';
+import { ICustomerProduct } from '@/shared/interfaces/models/customer/customer-product.interface';
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 
 @Entity('customer_products')

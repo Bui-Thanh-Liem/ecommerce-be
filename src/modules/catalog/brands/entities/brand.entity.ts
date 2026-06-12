@@ -1,7 +1,7 @@
 import { ProductEntity } from '@/modules/catalog/products-SPU/entities/product.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';
-import { IBrand } from '@/shared/interfaces/models/brand.interface';
+import { IBrand } from '@/shared/interfaces/models/catalog/brand.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('brands')

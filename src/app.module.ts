@@ -57,6 +57,8 @@ import { CustomerTokensModule } from './modules/customer/customer-tokens/custome
 import { TaskModule } from './common/tasks/task.module';
 import { MainBannerModule } from './modules/catalog/main-banner/main-banner.module';
 import { MarketingProgramsModule } from './modules/marketing-program/marketing-programs/marketing-programs.module';
+import { MetricsModule } from './common/metrics/metrics.module';
+import { HttpMetricsInterceptor } from './interceptors/http-metrics.interceptor';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -91,6 +93,7 @@ const isProd = process.env.NODE_ENV === 'production';
     BullMqModule,
     CloudinaryModule,
     TaskModule,
+    MetricsModule,
 
     // Các module chức năng của ứng dụng
     AuthModule,
@@ -158,6 +161,10 @@ const isProd = process.env.NODE_ENV === 'production';
     {
       provide: APP_INTERCEPTOR,
       useClass: AuditLogInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpMetricsInterceptor,
     },
     {
       provide: APP_GUARD,

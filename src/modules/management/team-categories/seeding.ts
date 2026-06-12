@@ -1,6 +1,6 @@
 import { TeamCategoryCode } from '@/shared/enums/team-category-code.enum';
 import { TeamType } from '@/shared/enums/team-type.enum';
-import { ITeamCategory } from '@/shared/interfaces/models/team-category.interface';
+import { ITeamCategory } from '@/shared/interfaces/models/management/team-category.interface';
 
 export const teamCategorySeed: Pick<ITeamCategory, 'code' | 'name' | 'type'>[] = [
   {

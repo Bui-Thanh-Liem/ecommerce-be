@@ -1,8 +1,8 @@
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { TokenType } from '@/shared/enums/token-type.enum';
-import { IStaffToken } from '@/shared/interfaces/models/staff-token.interface';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import { StaffEntity } from '../../staffs/entities/staff.entity';
+import { IStaffToken } from '@/shared/interfaces/models/management/staff-token.interface';
 
 @Entity('staff_tokens')
 @Index('idx_active_staff_tokens', ['staff'], { where: '"isRevoked" = \'false\'' })
