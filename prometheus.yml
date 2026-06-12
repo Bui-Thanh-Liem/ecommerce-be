@@ -1,0 +1,5 @@
+scrape_configs:
+  - job_name: 'nestjs-app'
+    metrics_path: '/metrics' # Đường dẫn mặc định, không cần sửa thành /api/v1/metrics nữa
+    static_configs:
+      - targets: ['host.docker.internal:3001'] # Dùng host.docker.internal nếu Prometheus chạy trong Docker còn NestJS chạy ở máy ngoài (local)

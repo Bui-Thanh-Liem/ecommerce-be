@@ -38,3 +38,11 @@ cat ${BACKUP_FILE} | docker exec -i ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB
 
 # 
 npx typeorm migration:create src/migrations/unaccent
+
+# Cài đặt k6 để chạy load test
+brew install k6
+k6 run --summary-export=result.json script.js
+k6 run -o experimental-prometheus-rw=http://localhost:9090/api/v1/write test-brands.js
+
+# 
+npm install prom-client

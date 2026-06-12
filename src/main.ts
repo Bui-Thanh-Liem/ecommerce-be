@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppLogger } from './logger/app.logger';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as prometheusClient from 'prom-client';
+import { Response } from 'express';
 
 async function bootstrap() {
   //
@@ -31,7 +33,20 @@ async function bootstrap() {
   // Cookies
   app.use(cookieParser());
 
-  //
+  // --- CẤU HÌNH PROMETHEUS METRICS ---
+  // Tự động thu thập các chỉ số mặc định (CPU, RAM, Heap Size, v.v.)
+  const collectDefaultMetrics = prometheusClient.collectDefaultMetrics;
+  collectDefaultMetrics({ register: prometheusClient.register, prefix: 'ecommerce_' });
+
+  // Lấy thực thể Express bên dưới NestJS để tạo Route nằm NGOÀI 'api/v1' prefix
+  const server = app.getHttpAdapter().getInstance();
+  server.get('/metrics', async (req: any, res: Response) => {
+    res.setHeader('Content-Type', prometheusClient.register.contentType);
+    res.send(await prometheusClient.register.metrics());
+  });
+  // ------------------------------------
+
+  // Cấu hình Swagger
   const config = new DocumentBuilder()
     .setTitle('E-commerce API')
     .setDescription('API documentation for E-commerce application')
