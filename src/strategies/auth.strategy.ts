@@ -13,8 +13,8 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   private readonly logger = new Logger(JwtAuthStrategy.name);
 
   constructor(
-    private configService: ConfigService,
-    private staffService: StaffsService,
+    private readonly configService: ConfigService,
+    private readonly staffService: StaffsService,
   ) {
     const secret = configService.get<string>('JWT_ACCESS_SECRET');
     if (!secret) {
@@ -24,10 +24,10 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const token: string | null = (req.cookies as { token?: string })?.token ?? null;
+          const token: string | null = (req.cookies as { e_token?: string })?.e_token ?? null;
           if (!token) {
             this.logger.error('Không tìm thấy token trong cookie');
-            throw new UnauthorizedException('No token found in cookies');
+            throw new UnauthorizedException();
           }
           return token;
         },
@@ -44,7 +44,8 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // 2. Nếu không thấy, chặn ngay tại đây
     if (!staff) {
-      throw new UnauthorizedException('Staff not found');
+      this.logger.error('Không tìm thấy staff với ID từ payload');
+      throw new UnauthorizedException();
     }
 
     // 3. Nếu OK, trả về staff. Object này sẽ được truyền vào handleRequest

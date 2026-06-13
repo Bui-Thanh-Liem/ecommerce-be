@@ -28,7 +28,7 @@ export class AuthController {
     const { staff, token } = await this.authService.signIn(currentStaff);
 
     // Set token in cookie
-    res.cookie('token', token, {
+    res.cookie('e_token', token, {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
@@ -41,7 +41,7 @@ export class AuthController {
   @Post('signout')
   async signOut(@Res({ passthrough: true }) res: Response, @CurrentStaff() currentStaff: StaffEntity) {
     await this.authService.signOut(currentStaff?.id);
-    res.clearCookie('token');
+    res.clearCookie('e_token');
     return true;
   }
 

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class ApiGuard implements CanActivate {
-  logger = new Logger(ApiGuard.name);
+  private readonly logger = new Logger(ApiGuard.name);
 
   constructor(
     private readonly reflector: Reflector,
@@ -26,12 +26,14 @@ export class ApiGuard implements CanActivate {
 
     // Nếu không có API key, trả về lỗi Forbidden
     if (!apiKey) {
-      throw new ForbiddenException('API key is required');
+      this.logger.error('API key is missing in request headers');
+      throw new ForbiddenException();
     }
 
     // Kiểm tra API key
     if (apiKey !== this.configService.get('API_KEY')) {
-      throw new ForbiddenException('Invalid API key');
+      this.logger.error('Invalid API key provided');
+      throw new ForbiddenException();
     }
 
     return true;

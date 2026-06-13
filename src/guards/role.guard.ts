@@ -35,8 +35,5 @@ export class RoleGuard implements CanActivate {
       this.logger.warn(`Access denied for staff ${staff.id} - Missing permission: ${permissionCodeRequired}`);
     }
     return hasPermission;
-
-    //
-    return false;
   }
 }

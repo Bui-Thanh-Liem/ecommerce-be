@@ -42,7 +42,7 @@ npx typeorm migration:create src/migrations/unaccent
 # Cài đặt k6 để chạy load test
 brew install k6
 k6 run --summary-export=result.json script.js
-k6 run -o experimental-prometheus-rw=http://localhost:9090/api/v1/write test-brands.js
+k6 run --out experimental-prometheus-rw=url=http://localhost:9090/api/v1/write test-categories.js
 
 # 
 npm install prom-client

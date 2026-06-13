@@ -60,6 +60,10 @@ export class CreateCampaignDto {
   endDate: Date;
 
   @IsOptional()
+  @IsUUID('4')
+  marketingProgram: string;
+
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   promotions: string[];

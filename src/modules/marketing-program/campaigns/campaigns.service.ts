@@ -22,6 +22,7 @@ import { CampaignEntity } from './entities/campaign.entity';
 import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { MarketingProgramsService } from '../marketing-programs/marketing-programs.service';
 
 @Injectable()
 export class CampaignsService {
@@ -41,17 +42,21 @@ export class CampaignsService {
 
     private readonly pvService: ProductVariantsService,
 
+    @Inject(forwardRef(() => MarketingProgramsService))
+    private readonly mktProgramService: MarketingProgramsService,
+
     private dataSource: DataSource,
   ) {}
 
   async create(dto: CreateCampaignDto) {
     try {
       const {
-        promotions: promotionIds,
-        productHighlighted: productVariantIds,
         name,
-        startDate,
         endDate,
+        startDate,
+        promotions: promotionIds,
+        marketingProgram: marketingProgramId,
+        productHighlighted: productVariantIds,
         ...rest
       } = dto;
 
@@ -62,25 +67,27 @@ export class CampaignsService {
 
       //
       const slug = stringToSlug(name);
-      const existingCampaign = await this.campaignRepository.exists({ where: { slug } });
+      const hasPromotions = promotionIds && promotionIds.length > 0;
+      const hasProductVariants = productVariantIds && productVariantIds.length > 0;
+      const [existingCampaign, promotionsExist, productVariantsExist, marketingProgramExist] = await Promise.all([
+        this.campaignRepository.exists({ where: { slug } }),
+        hasPromotions ? this.promotionService.exists(promotionIds) : null,
+        hasProductVariants ? this.pvService.exists(productVariantIds) : null,
+        marketingProgramId ? this.mktProgramService.exists([marketingProgramId]) : null,
+      ]);
+
+      //
       if (existingCampaign) {
         throw new ConflictException('A campaign with the same name already exists');
       }
-
-      //
-      if (promotionIds && promotionIds?.length > 0) {
-        const promotionsExist = await this.promotionService.exists(promotionIds);
-        if (!promotionsExist) {
-          throw new NotFoundException(`One or more Promotion IDs not found: ${promotionIds.join(', ')}`);
-        }
+      if (hasPromotions && !promotionsExist) {
+        throw new NotFoundException('One or more Promotion not found');
       }
-
-      //
-      if (productVariantIds && productVariantIds?.length > 0) {
-        const productVariantsExist = await this.pvService.exists(productVariantIds);
-        if (!productVariantsExist) {
-          throw new NotFoundException(`One or more Product Variant IDs not found: ${productVariantIds.join(', ')}`);
-        }
+      if (hasProductVariants && !productVariantsExist) {
+        throw new NotFoundException('One or more Product Variant not found');
+      }
+      if (marketingProgramId && !marketingProgramExist) {
+        throw new NotFoundException('Marketing program not found');
       }
 
       const campaign = this.campaignRepository.create({
@@ -91,6 +98,7 @@ export class CampaignsService {
         endDate,
         promotions: promotionIds?.map((id) => ({ id })) || [],
         productHighlighted: productVariantIds?.map((id) => ({ id })) || [],
+        marketingProgram: marketingProgramId ? { id: marketingProgramId } : undefined,
       });
       return await this.campaignRepository.save(campaign);
     } catch (error) {
@@ -114,6 +122,7 @@ export class CampaignsService {
       // Join các quan hệ
       .leftJoinAndSelect('campaign.promotions', 'promotions')
       .leftJoinAndSelect('campaign.productHighlighted', 'product_highlighted')
+      .leftJoinAndSelect('campaign.marketingProgram', 'marketing_program')
       .leftJoinAndSelect('product_highlighted.product', 'product')
 
       // Select các trường cụ thể (tương đương với select của bạn)
@@ -134,6 +143,10 @@ export class CampaignsService {
 
         'product_highlighted.id',
         'product_highlighted.sku',
+
+        'marketing_program.id',
+        'marketing_program.name',
+        'marketing_program.mainImage',
 
         'product.id',
         'product.name',
@@ -158,16 +171,20 @@ export class CampaignsService {
   }
 
   async findOptions(query: CampaignQueryDto): Promise<IMetadata<CampaignEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const { take, skip } = calculatePagination(page, limit);
 
     //
     const queryBuilder = this.campaignRepository
       .createQueryBuilder('campaign')
-      .select(['campaign.id', 'campaign.name', 'campaign.mainImage'])
-      .skip(skip)
-      .take(take)
-      .orderBy('campaign.createdAt', 'DESC');
+      .select(['campaign.id', 'campaign.name', 'campaign.mainImage', 'campaign.startDate', 'campaign.endDate']);
+
+    //
+    if (filters?.marketingProgram) {
+      queryBuilder.andWhere('campaign.marketingProgram = :mktId', { mktId: filters.marketingProgram });
+    }
+
+    queryBuilder.skip(skip).take(take).orderBy('campaign.createdAt', 'DESC');
 
     //
     const [data, totalData] = await queryBuilder.getManyAndCount();
@@ -187,7 +204,7 @@ export class CampaignsService {
   async findOne(id: string) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['promotions', 'productHighlighted'],
+      relations: ['promotions', 'productHighlighted', 'marketingProgram'],
     });
 
     const mainImageKey = campaign?.mainImage?.key;
@@ -210,13 +227,14 @@ export class CampaignsService {
 
   async update(id: string, dto: UpdateCampaignDto) {
     const {
-      promotions: promotionIds,
-      productHighlighted: productVariantIds,
       name,
-      startDate,
-      endDate,
       images,
+      endDate,
       mainImage,
+      startDate,
+      promotions: promotionIds,
+      marketingProgram: marketingProgramId,
+      productHighlighted: productVariantIds,
       ...rest
     } = dto;
 
@@ -243,15 +261,19 @@ export class CampaignsService {
     const hasProductVariants = productVariantIds && productVariantIds.length > 0;
 
     // Chạy song song các câu lệnh check độc lập
-    const [isSlugDup, isPromoValid, isProductVariantValid] = await Promise.all([
+    const [isSlugDup, isPromoValid, isProductVariantValid, isMarketingProgramValid] = await Promise.all([
       name ? this.campaignRepository.exists({ where: { slug, id: Not(id) } }) : null,
       hasPromotions ? this.promotionService.exists(promotionIds) : null,
       hasProductVariants ? this.pvService.exists(productVariantIds) : null,
+      marketingProgramId ? this.mktProgramService.exists([marketingProgramId]) : null,
     ]);
 
+    // Nếu có lỗi, trả về ngay mà không cần đụng vào DB nữa
     if (isSlugDup) throw new ConflictException('A campaign with the same name already exists');
-    if (!isPromoValid) throw new BadRequestException(`One or more Promotion IDs not found`);
-    if (!isProductVariantValid) throw new BadRequestException(`One or more Product Variant IDs not found`);
+    if (hasPromotions && !isPromoValid) throw new BadRequestException(`One or more Promotion IDs not found`);
+    if (hasProductVariants && !isProductVariantValid)
+      throw new BadRequestException(`One or more Product Variant IDs not found`);
+    if (marketingProgramId && !isMarketingProgramValid) throw new BadRequestException(`Marketing Program ID not found`);
 
     // ==========================================
     // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)
@@ -267,6 +289,7 @@ export class CampaignsService {
         ...(name && { name, slug }),
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
+        ...(marketingProgramId && { marketingProgram: { id: marketingProgramId } }),
         ...(promotionIds && { promotions: promotionIds.map((pId) => ({ id: pId })) }),
         ...(productVariantIds && { productHighlighted: productVariantIds.map((pvId) => ({ id: pvId })) }),
       });
@@ -370,9 +393,17 @@ export class CampaignsService {
         const mainImageKey = cam.mainImage?.key;
         const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
         const images = await this.cloudinaryService.generateUrls(imageKeys);
+        const mktImageUrl = await this.cloudinaryService.generateUrl(cam.marketingProgram?.mainImage?.key || '');
 
         return {
           ...cam,
+          marketingProgram: {
+            ...cam.marketingProgram,
+            mainImage: {
+              ...cam.marketingProgram?.mainImage,
+              url: mktImageUrl,
+            },
+          },
           images: images,
           mainImage: {
             ...cam.mainImage,

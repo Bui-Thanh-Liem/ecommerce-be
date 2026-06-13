@@ -46,7 +46,7 @@ export class CloudinaryService {
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateUrl(publicId: string, customOptions?: TransformationOptions): Promise<string> {
-    if (!publicId) throw new BadRequestException('Public ID không hợp lệ');
+    if (!publicId) return '';
 
     const cachedUrl = await this.cacheService.get<string>(publicId);
 
@@ -75,9 +75,7 @@ export class CloudinaryService {
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateUrls(images: IImage[], customOptions?: TransformationOptions): Promise<IImage[]> {
-    if (!images || images.length === 0) {
-      throw new BadRequestException('Images không hợp lệ');
-    }
+    if (!images || images.length === 0) return [];
 
     const defaultOptions: TransformationOptions = {
       secure: true,

@@ -2,6 +2,8 @@ import {
   BadGatewayException,
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -32,6 +34,7 @@ export class MarketingProgramsService {
     @InjectQueue('cloudinary')
     private readonly cloudinaryQueue: Queue,
 
+    @Inject(forwardRef(() => CampaignsService))
     private readonly campaignService: CampaignsService,
 
     private dataSource: DataSource,
@@ -192,7 +195,7 @@ export class MarketingProgramsService {
       select: { id: true, mainImage: true },
     });
     if (!oldMarketingProgram) {
-      throw new NotFoundException(`Marketing program with ID ${id} not found`);
+      throw new NotFoundException(`Marketing program not found`);
     }
 
     const slug = name ? stringToSlug(name) : undefined;
@@ -205,7 +208,7 @@ export class MarketingProgramsService {
     ]);
 
     if (isSlugDup) throw new ConflictException('A marketing program with the same name already exists');
-    if (!isCampaignValid) throw new BadRequestException(`One or more Campaign IDs not found`);
+    if (hasCampaigns && !isCampaignValid) throw new BadRequestException(`One or more Campaign ids not found`);
 
     // ==========================================
     // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)

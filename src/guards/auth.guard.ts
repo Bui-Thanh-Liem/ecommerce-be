@@ -28,7 +28,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized
     if (err || !staff) {
-      throw new UnauthorizedException(info || 'Unauthorized');
+      this.logger.error(info || 'Unauthorized');
+      throw new UnauthorizedException();
     }
 
     // Thay vì để mặc định gán vào req.user, ta gán vào req.staff
