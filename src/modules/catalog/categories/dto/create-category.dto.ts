@@ -19,7 +19,7 @@ export class CreateCategoryDto {
   @MaxLength(50)
   name: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => ImageDto)

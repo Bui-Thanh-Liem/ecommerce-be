@@ -12,7 +12,7 @@ export class AuditLogEntity extends BaseEntity implements IAuditLog {
   @Column()
   staffId: string;
 
-  @Column()
+  @Column({ nullable: true })
   storeId: string;
 
   @Column({ nullable: true, type: 'varchar', length: 50 })

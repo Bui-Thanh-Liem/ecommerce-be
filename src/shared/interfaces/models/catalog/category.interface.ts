@@ -7,9 +7,9 @@ export interface ICategory extends IBase {
   name: string;
   slug: string;
   code: string;
-  image?: IImage;
   minPrice?: number;
   desc?: string | null;
+  image?: IImage | null;
   parent?: ICategory | null;
   children?: ICategory[] | null;
 

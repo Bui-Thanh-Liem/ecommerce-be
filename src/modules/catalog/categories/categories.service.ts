@@ -297,12 +297,14 @@ export class CategoriesService {
       // Merge dữ liệu mới vào thực thể cũ
       const updatedCategory = this.categoryRepo.merge(oldCategory, {
         ...rest,
-        ...(name && { name, slug, code: this.generateCategoryCode(name) }),
         ...(parentId && { parent: { id: parentId } }),
+        ...(name && { name, slug, code: this.generateCategoryCode(name) }),
       });
 
+      console.log('image :::', image);
+
       if (image !== undefined) {
-        updatedCategory.image = image; // Hoặc kiểu dữ liệu Entity tương ứng của bạn
+        updatedCategory.image = image;
       }
 
       // Lưu vào DB qua transaction manager
@@ -331,7 +333,9 @@ export class CategoriesService {
     // ==========================================
     try {
       // Chỉ xóa ảnh cũ nếu có truyền ảnh mới lên, ảnh cũ có tồn tại và hai key khác nhau
-      if (image !== undefined && oldImageKey && image.key !== oldImageKey) {
+      // Tránh xóa ảnh cũ nếu người dùng chỉ cập nhật tên mà không thay đổi ảnh
+
+      if (image !== undefined && oldImageKey && image?.key !== oldImageKey) {
         await this.cloudinaryQueue.add(
           'delete-image',
           { publicId: oldImageKey },

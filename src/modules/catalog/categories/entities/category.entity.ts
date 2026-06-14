@@ -17,8 +17,8 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ unique: true, type: 'varchar', length: 100 })
   slug: string;
 
-  @Column({ type: 'json' })
-  image: IImage;
+  @Column({ type: 'json', nullable: true })
+  image: IImage | null;
 
   @Column({ type: 'varchar', length: 20 })
   code: string;
