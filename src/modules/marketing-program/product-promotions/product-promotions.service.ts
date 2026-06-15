@@ -9,6 +9,7 @@ import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/p
 import { ProductPromotionQueryDto } from './dto/query-product-promotion.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { Logger } from '@nestjs/common';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductPromotionsService {
@@ -21,6 +22,8 @@ export class ProductPromotionsService {
     @Inject(forwardRef(() => PromotionsService))
     private readonly promotionsService: PromotionsService,
     private readonly variantService: ProductVariantsService,
+
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createProductPromotionDto: CreateProductPromotionDto) {
@@ -79,6 +82,7 @@ export class ProductPromotionsService {
 
         'promotion.id',
         'promotion.name',
+        'promotion.image',
 
         'pv.id',
         'pv.sku',
@@ -95,8 +99,10 @@ export class ProductPromotionsService {
 
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
 
+    const signedData = await this.signUrl(data);
+
     return {
-      data,
+      data: signedData,
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
@@ -127,6 +133,7 @@ export class ProductPromotionsService {
 
       'promotion.id',
       'promotion.name',
+      'promotion.image',
 
       'pv.id',
       'pv.sku',
@@ -148,8 +155,10 @@ export class ProductPromotionsService {
 
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
 
+    const signedData = await this.signUrl(data);
+
     return {
-      data,
+      data: signedData,
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
@@ -241,5 +250,25 @@ export class ProductPromotionsService {
     }
 
     return await this.productPromotionRepository.remove(productPromotion);
+  }
+
+  async signUrl(data: ProductPromotionEntity[]): Promise<ProductPromotionEntity[]> {
+    return await Promise.all(
+      data.map(async (cp) => {
+        const imageKey = cp.promotion.image?.key;
+        const imageUrl = await this.cloudinaryService.generateUrl(imageKey);
+
+        return {
+          ...cp,
+          promotion: {
+            ...cp.promotion,
+            image: {
+              ...cp.promotion.image,
+              url: imageUrl,
+            },
+          },
+        } as ProductPromotionEntity;
+      }),
+    );
   }
 }

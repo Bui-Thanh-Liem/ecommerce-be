@@ -16,3 +16,7 @@ CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1;
 -- Lấy giá trị tiếp theo từ sequence
 -- const queryResult = await query<{ val: string }[]>("SELECT nextval('order_number_seq') as val");
 -- const nextSeq = Number(queryResult[0].val);
+
+-- 
+CREATE EXTENSION IF NOT EXISTS unaccent;
+SELECT * FROM pg_extension;

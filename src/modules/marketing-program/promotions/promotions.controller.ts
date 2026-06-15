@@ -8,6 +8,7 @@ import { PromotionDto } from './dto/promotion.dto';
 import { PromotionQueryDto } from './dto/query-promotion.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('promotions')
 @Serializer(PromotionDto)
@@ -27,6 +28,7 @@ export class PromotionsController {
     return this.promotionsService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Permissions(permissionsSeed.promotion.read.code)
   @Serializer(PromotionMetadataDto)
