@@ -301,8 +301,6 @@ export class CategoriesService {
         ...(name && { name, slug, code: this.generateCategoryCode(name) }),
       });
 
-      console.log('image :::', image);
-
       if (image !== undefined) {
         updatedCategory.image = image;
       }
@@ -334,8 +332,7 @@ export class CategoriesService {
     try {
       // Chỉ xóa ảnh cũ nếu có truyền ảnh mới lên, ảnh cũ có tồn tại và hai key khác nhau
       // Tránh xóa ảnh cũ nếu người dùng chỉ cập nhật tên mà không thay đổi ảnh
-
-      if (image !== undefined && oldImageKey && image?.key !== oldImageKey) {
+      if ((image !== undefined && oldImageKey && image?.key !== oldImageKey) || image === null) {
         await this.cloudinaryQueue.add(
           'delete-image',
           { publicId: oldImageKey },

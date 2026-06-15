@@ -103,6 +103,59 @@ export class ProductPromotionsService {
     };
   }
 
+  async findOptions(query: ProductPromotionQueryDto) {
+    const { page, limit, filters } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const builder = this.productPromotionRepository
+      .createQueryBuilder('pp')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('pp.promotion', 'promotion')
+      .leftJoinAndSelect('pp.productVariant', 'pv')
+      .leftJoinAndSelect('pv.product', 'product');
+
+    // Select các trường cụ thể (tương đương với select của bạn)
+    builder.select([
+      'pp.id',
+      'pp.priority',
+      'pp.createdAt',
+      'pp.customDiscount',
+
+      'promotion.id',
+      'promotion.name',
+
+      'pv.id',
+      'pv.sku',
+      'pv.price',
+      'pv.salesAttributes',
+
+      'product.id',
+      'product.name',
+      'product.thumbnail',
+    ]);
+
+    //
+    if (filters?.promotion) {
+      builder.andWhere('pp.promotion = :promotionId', { promotionId: filters.promotion });
+    }
+
+    // Phân trang và sắp xếp
+    builder.skip(skip).take(take).orderBy('pp.createdAt', 'DESC');
+
+    const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+
+    return {
+      data,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
+  }
+
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.productPromotionRepository.count({ where: { id: In(ids) } });
     return count === ids.length;

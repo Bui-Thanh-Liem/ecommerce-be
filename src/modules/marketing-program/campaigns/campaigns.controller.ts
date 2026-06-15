@@ -8,6 +8,7 @@ import { CampaignMetadataDto } from './dto/metadata-campaign.dto';
 import { CampaignQueryDto } from './dto/query-campaign.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('campaigns')
 @Serializer(CampaignDto)
@@ -27,6 +28,7 @@ export class CampaignsController {
     return await this.campaignsService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Permissions(permissionsSeed.campaign.read.code)
   @Serializer(CampaignMetadataDto)

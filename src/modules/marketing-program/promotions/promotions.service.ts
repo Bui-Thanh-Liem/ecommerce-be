@@ -116,9 +116,7 @@ export class PromotionsService {
       .leftJoinAndSelect('promotion.campaign', 'campaign')
       .leftJoinAndSelect('promotion.productHighlighted', 'phl')
       .leftJoinAndSelect('promotion.stores', 'stores')
-      .leftJoinAndSelect('promotion.locations', 'locations')
-      .leftJoinAndSelect('promotion.categoryPromotions', 'cp')
-      .leftJoinAndSelect('promotion.productPromotions', 'pp');
+      .leftJoinAndSelect('promotion.locations', 'locations');
 
     // Select các trường cụ thể (tương đương với select của bạn)
     builder
@@ -130,6 +128,7 @@ export class PromotionsService {
         'promotion.image',
         'promotion.applyScope',
         'promotion.applyType',
+        'promotion.discountPercentage',
         'promotion.createdAt',
 
         'campaign.id',
@@ -144,10 +143,6 @@ export class PromotionsService {
         'locations.id',
         'locations.name',
         'locations.type',
-
-        'cp.id',
-
-        'pp.id',
       ])
 
       // Phân trang và sắp xếp
@@ -176,15 +171,26 @@ export class PromotionsService {
   }
 
   async findOptions(query: PromotionQueryDto): Promise<IMetadata<PromotionEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const { take, skip } = calculatePagination(page, limit);
 
     const queryBuilder = this.promotionRepository
       .createQueryBuilder('promotion')
-      .select(['promotion.id', 'promotion.name', 'promotion.image', 'promotion.slug'])
-      .skip(skip)
-      .take(take)
-      .orderBy('promotion.createdAt', 'DESC');
+      .select([
+        'promotion.id',
+        'promotion.name',
+        'promotion.image',
+        'promotion.slug',
+        'promotion.applyType',
+        'promotion.discountPercentage',
+      ]);
+
+    //
+    if (filters?.campaign) {
+      queryBuilder.andWhere('promotion.campaign_id = :campaignId', { campaignId: filters.campaign });
+    }
+
+    queryBuilder.skip(skip).take(take).orderBy('promotion.createdAt', 'DESC');
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
@@ -219,16 +225,18 @@ export class PromotionsService {
 
   async update(id: string, updatePromotionDto: UpdatePromotionDto) {
     const {
-      campaign: campaignId,
-      productHighlighted: productHighlightedIds,
-      stores: storeIds,
-      locations: locationIds,
-      categoryPromotions: categoryPromotionIds,
-      productPromotions: productPromotionIds,
       name,
       image,
+      stores: storeIds,
+      campaign: campaignId,
+      locations: locationIds,
+      productPromotions: productPromotionIds,
+      categoryPromotions: categoryPromotionIds,
+      productHighlighted: productHighlightedIds,
       ...rest
     } = updatePromotionDto;
+    const hasPp = productPromotionIds !== undefined && productPromotionIds.length > 0;
+    const hasCp = categoryPromotionIds !== undefined && categoryPromotionIds.length > 0;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -251,8 +259,8 @@ export class PromotionsService {
       productHighlightedIds ? this.pvService.exists(productHighlightedIds) : null,
       storeIds ? this.storesService.exists(storeIds) : null,
       locationIds ? this.locationRegionsService.exists(locationIds) : null,
-      categoryPromotionIds ? this.categoryPromotionService.exists(categoryPromotionIds) : null,
-      productPromotionIds ? this.productPromotionService.exists(productPromotionIds) : null,
+      hasCp ? this.categoryPromotionService.exists(categoryPromotionIds) : null,
+      hasPp ? this.productPromotionService.exists(productPromotionIds) : null,
     ]);
 
     if (isSlugDup) {
@@ -263,8 +271,8 @@ export class PromotionsService {
     if (productHighlightedIds && !ePv) throw new NotFoundException('One or more ProductVariant IDs not found');
     if (storeIds && !eS) throw new NotFoundException('One or more Store IDs not found');
     if (locationIds && !eL) throw new NotFoundException('One or more LocationRegion IDs not found');
-    if (categoryPromotionIds && !eCP) throw new NotFoundException('One or more CategoryPromotion IDs not found');
-    if (productPromotionIds && !ePP) throw new NotFoundException('One or more ProductPromotion IDs not found');
+    if (hasCp && !eCP) throw new NotFoundException('One or more CategoryPromotion IDs not found');
+    if (hasPp && !ePP) throw new NotFoundException('One or more ProductPromotion IDs not found');
 
     // Ghi nhận key ảnh cũ phục vụ việc xóa sau khi commit thành công
     const oldImageKey = oldPromotion.image?.key;
@@ -276,19 +284,17 @@ export class PromotionsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    console.log('rest :::', rest);
-
     try {
       // Merge dữ liệu mới vào thực thể cũ
       const updatedPromotion = this.promotionRepository.merge(oldPromotion, {
         ...rest,
         ...(name && { name, slug }),
         ...(campaignId && { campaign: { id: campaignId } }),
-        ...(productHighlightedIds && { productHighlighted: productHighlightedIds.map((id) => ({ id })) }),
         ...(storeIds && { stores: storeIds.map((id) => ({ id })) }),
         ...(locationIds && { locations: locationIds.map((id) => ({ id })) }),
-        ...(categoryPromotionIds && { categoryPromotions: categoryPromotionIds.map((id) => ({ id })) }),
-        ...(productPromotionIds && { productPromotions: productPromotionIds.map((id) => ({ id })) }),
+        ...(productHighlightedIds && { productHighlighted: productHighlightedIds.map((id) => ({ id })) }),
+        ...(hasPp ? { productPromotions: productPromotionIds.map((id) => ({ id })) } : undefined),
+        ...(hasCp ? { categoryPromotions: categoryPromotionIds.map((id) => ({ id })) } : undefined),
       });
 
       if (image !== undefined) {

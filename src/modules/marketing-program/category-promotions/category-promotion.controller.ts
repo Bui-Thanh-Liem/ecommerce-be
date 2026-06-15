@@ -8,6 +8,7 @@ import { CategoryPromotionQueryDto } from './dto/query-category-promotion.dto';
 import { CategoryPromotionMetadataDto } from './dto/metadata-category-promotion.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Serializer(CategoryPromotionDto)
 @Controller('category-promotions')
@@ -25,6 +26,22 @@ export class CategoryPromotionController {
   @Serializer(CategoryPromotionMetadataDto)
   findAll(@Query() query: CategoryPromotionQueryDto) {
     return this.categoryPromotionService.findAll(query);
+  }
+
+  @Public()
+  @Get('options')
+  @Permissions(permissionsSeed.promotionCategory.read.code)
+  @Serializer(CategoryPromotionMetadataDto)
+  findOptions(@Query() query: CategoryPromotionQueryDto) {
+    return this.categoryPromotionService.findOptions(query);
+  }
+
+  @Public()
+  @Get('variants')
+  @Permissions(permissionsSeed.promotionCategory.read.code)
+  @Serializer(CategoryPromotionMetadataDto)
+  findVariantByPromotion(@Query() query: CategoryPromotionQueryDto) {
+    return this.categoryPromotionService.findVariantByPromotion(query);
   }
 
   @Get(':id')

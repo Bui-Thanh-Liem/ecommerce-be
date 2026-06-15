@@ -8,6 +8,8 @@ import { PromotionsService } from '../promotions/promotions.service';
 import { CategoriesService } from '@/modules/catalog/categories/categories.service';
 import { CategoryPromotionQueryDto } from './dto/query-category-promotion.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant.entity';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class CategoryPromotionService {
@@ -17,10 +19,15 @@ export class CategoryPromotionService {
     @InjectRepository(CategoryPromotionEntity)
     private categoryPromotionRepository: Repository<CategoryPromotionEntity>,
 
+    @InjectRepository(ProductVariantEntity)
+    private productVariantRepo: Repository<ProductVariantEntity>,
+
     @Inject(forwardRef(() => PromotionsService))
     private readonly promotionsService: PromotionsService,
 
     private readonly categoriesService: CategoriesService,
+
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createCategoryPromotionDto: CreateCategoryPromotionDto) {
@@ -77,6 +84,7 @@ export class CategoryPromotionService {
 
         'promotion.id',
         'promotion.name',
+        'promotion.image',
 
         'category.id',
         'category.name',
@@ -89,8 +97,163 @@ export class CategoryPromotionService {
 
     const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
 
+    const signedData = await this.signUrl(data);
+
     return {
-      data,
+      data: signedData,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
+  }
+
+  async findOptions(query: CategoryPromotionQueryDto) {
+    const { page, limit, filters } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const builder = this.categoryPromotionRepository
+      .createQueryBuilder('cp')
+
+      // Join các quan hệ
+      .leftJoinAndSelect('cp.promotion', 'promotion')
+      .leftJoinAndSelect('cp.category', 'category');
+
+    //
+    if (filters?.promotion) {
+      builder.andWhere('cp.promotion = :promotionId', { promotionId: filters.promotion });
+    }
+
+    // Select các trường cụ thể (tương đương với select của bạn)
+    builder
+      .select([
+        'cp.id',
+        'cp.priority',
+        'cp.createdAt',
+        'cp.customDiscount',
+
+        'promotion.id',
+        'promotion.name',
+        'promotion.image',
+
+        'category.id',
+        'category.name',
+      ])
+
+      // Phân trang và sắp xếp
+      .skip(skip)
+      .take(take)
+      .orderBy('cp.createdAt', 'DESC');
+
+    const [data, total] = await builder.take(take).skip(skip).getManyAndCount();
+
+    const signedData = await this.signUrl(data);
+
+    return {
+      data: signedData,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
+  }
+
+  async findVariantByPromotion(query: CategoryPromotionQueryDto) {
+    const { page, limit, filters } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    // 1. Khởi tạo gốc từ bảng 'product_variants'
+    const queryBuilder = this.productVariantRepo.createQueryBuilder('variant');
+
+    // Join các bảng liên quan (Chỉ dùng leftJoin, không dùng leftJoinAndSelect để tránh lấy thừa dữ liệu)
+    queryBuilder.leftJoin('variant.product', 'product').leftJoin('product.category', 'category');
+
+    // Khởi tạo các trường select mặc định (giống cấu trúc pv và product bên findOptions)
+    queryBuilder.select([
+      'variant.id',
+      'variant.sku',
+      'variant.price',
+      'variant.salesAttributes',
+      'variant.createdAt', // Dùng để bổ sung sắp xếp nếu không có promotion
+
+      'product.id',
+      'product.name',
+      'product.thumbnail',
+    ]);
+
+    // 2. Xử lý bộ lọc theo Chiến dịch Khuyến mãi Danh mục
+    if (filters?.promotion) {
+      // Inner join với bảng trung gian category_promotions
+      queryBuilder.innerJoin('category_promotions', 'cp', 'cp.category = category.id AND cp.promotion = :promotionId', {
+        promotionId: filters.promotion,
+      });
+
+      // Left join sang bảng promotions tổng
+      queryBuilder.leftJoin('promotions', 'promotion', 'promotion.id = cp.promotionId');
+
+      // Bổ sung các trường của Promotion và bảng cấu hình trung gian vào danh sách Select
+      queryBuilder.addSelect([
+        'cp.id',
+        'cp.priority',
+        'cp.customDiscount',
+
+        'promotion.id',
+        'promotion.name',
+        'promotion.discountPercentage',
+      ]);
+
+      // Sắp xếp ưu tiên theo cấu hình của chiến dịch danh mục giống code cũ của bạn
+      queryBuilder.orderBy('cp.priority', 'DESC');
+    } else {
+      queryBuilder.orderBy('variant.createdAt', 'DESC');
+    }
+
+    // Thêm điều kiện sắp xếp phụ
+    queryBuilder.addOrderBy('variant.createdAt', 'DESC');
+
+    // 3. Phân trang và lấy dữ liệu
+    const { raw, entities } = await queryBuilder.skip(skip).take(take).getRawAndEntities();
+
+    // 4. Map lại cấu trúc data output cho giống hệt findOptions nếu cần
+    const total = await queryBuilder.getCount();
+
+    // 4. Map lại cấu trúc dữ liệu chính xác dựa trên mảng 'raw'
+    // TypeORM khi xuất dữ liệu raw sẽ tự động nối tên alias và tên cột bằng dấu gạch dưới (_)
+    const formattedData = raw.map((row) => {
+      // Tìm thực thể variant tương ứng để lấy mảng salesAttributes đã tự động parse thành Object
+      const variantEntity = entities.find((e) => e.id === row.variant_id);
+
+      return {
+        id: row.cp_id || row.variant_id,
+        createdAt: row.cp_createdAt || row.variant_createdAt,
+        productVariant: {
+          id: row.variant_id,
+          product: row.product_id
+            ? {
+                id: row.product_id,
+                name: row.product_name,
+                thumbnail: row.product_thumbnail,
+              }
+            : null,
+          sku: row.variant_sku,
+          price: row.variant_price ? parseFloat(row.variant_price) : 0,
+          salesAttributes: variantEntity?.salesAttributes || [],
+        },
+        promotion: row.promotion_id
+          ? {
+              id: row.promotion_id,
+              name: row.promotion_name,
+            }
+          : null,
+        customDiscount: row.cp_customDiscount ? parseFloat(row.cp_customDiscount) : null,
+        priority: row.cp_priority ? parseInt(row.cp_priority, 10) : null,
+      };
+    });
+
+    // 5. Trả về đúng format đầu ra giống findOptions
+    return {
+      data: formattedData,
       totalData: total,
       page,
       totalPage: Math.ceil(total / limit),
@@ -182,5 +345,25 @@ export class CategoryPromotionService {
       throw new NotFoundException(`Category Promotion not found`);
     }
     return await this.categoryPromotionRepository.remove(categoryPromotion);
+  }
+
+  async signUrl(data: CategoryPromotionEntity[]): Promise<CategoryPromotionEntity[]> {
+    return await Promise.all(
+      data.map(async (cp) => {
+        const imageKey = cp.promotion.image?.key;
+        const imageUrl = await this.cloudinaryService.generateUrl(imageKey);
+
+        return {
+          ...cp,
+          promotion: {
+            ...cp.promotion,
+            image: {
+              ...cp.promotion.image,
+              url: imageUrl,
+            },
+          },
+        } as CategoryPromotionEntity;
+      }),
+    );
   }
 }

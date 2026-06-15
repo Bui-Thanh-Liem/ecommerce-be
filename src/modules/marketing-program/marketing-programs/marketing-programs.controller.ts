@@ -8,6 +8,7 @@ import { Serializer } from '@/interceptors/serializer.interceptor';
 import { MktProgramDto } from './dto/mkt-program.dto';
 import { MktProgramMetadataDto } from './dto/metadata-mkt-program.dto';
 import { MktProgramQueryDto } from './dto/query-mkt-program.dto';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('marketing-programs')
 @Serializer(MktProgramDto)
@@ -27,6 +28,7 @@ export class MarketingProgramsController {
     return await this.marketingProgramsService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Permissions(permissionsSeed.mktProgram.read.code)
   @Serializer(MktProgramMetadataDto)

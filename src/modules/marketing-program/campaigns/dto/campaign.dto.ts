@@ -3,6 +3,7 @@ import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { Expose, Type } from 'class-transformer';
 import { MktProgramDto } from '../../marketing-programs/dto/mkt-program.dto';
+import { PromotionDto } from '../../promotions/dto/promotion.dto';
 
 export class CampaignDto extends SerializerDto {
   @Expose()
@@ -20,6 +21,10 @@ export class CampaignDto extends SerializerDto {
   @Expose()
   @Type(() => ResponseImageDto)
   mainImage: ResponseImageDto;
+
+  @Expose()
+  @Type(() => PromotionDto)
+  promotions: PromotionDto[];
 
   @Expose()
   @Type(() => ResponseImageDto)

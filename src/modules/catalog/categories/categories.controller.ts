@@ -36,6 +36,7 @@ export class CategoriesController {
     return await this.categoriesService.findOptions(query);
   }
 
+  @Public()
   @Get('tree')
   @Permissions(permissionsSeed.category.read.code)
   async getTreeData(@Query() query: CategoryQueryDto) {

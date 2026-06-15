@@ -25,6 +25,10 @@ docker exec -it ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB_NAME}
 # Export database từ container ra host
 docker exec ${CONTAINER_NAME} pg_dump -U ${DB_USER} ${DB_NAME} > ${BACKUP_FILE}
 
+# Export database từ container ra host (cách khác)
+sudo bash -c 'docker exec -i ${CONTAINER_NAME} mysqldump -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ./${BACKUP_FILE}'
+sudo docker exec -it ${CONTAINER_NAME} sh -c 'mysqldump -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > /tmp/${BACKUP_FILE}'
+
 # Export database vào file trong container
 docker exec ${CONTAINER_NAME} pg_dump -U ${DB_USER} ${DB_NAME} -f /tmp/${BACKUP_FILE}
 

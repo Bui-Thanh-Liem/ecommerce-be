@@ -112,6 +112,7 @@ export class ProductsService {
         'product.weight',
         'product.length',
         'product.width',
+        'product.thumbnail',
         'product.isFeatured',
         'product.allowReview',
         'product.height',
@@ -142,26 +143,7 @@ export class ProductsService {
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
     // Chuyển đổi URL ảnh nếu có
-    const dataWithUrls = data.map((product) => {
-      const flattenedImages = product?.productImages?.flat() || [];
-
-      const updatedImages = flattenedImages.map((img) => {
-        const publicId = img?.image?.key || '';
-        const url = publicId ? this.cloudinaryService.generateUrl(publicId) : '';
-
-        return {
-          ...img,
-          image: {
-            ...img.image,
-            url,
-          },
-        } as ProductImageEntity;
-      });
-
-      product.productImages = updatedImages;
-
-      return product;
-    });
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -361,5 +343,30 @@ export class ProductsService {
   private async removeImagesForError(keys?: string[]) {
     if (!keys || keys.length === 0) return;
     return await this.cloudinaryService.deleteMultipleImages(keys);
+  }
+
+  private async signUrl(products: ProductEntity[]): Promise<ProductEntity[]> {
+    return await Promise.all(
+      products.map(async (product) => {
+        const flattenedImages = product?.productImages?.flat() || [];
+
+        const updatedImages = flattenedImages.map(async (img) => {
+          const publicId = img?.image?.key || '';
+          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+
+          return {
+            ...img,
+            image: {
+              ...img.image,
+              url,
+            },
+          } as ProductImageEntity;
+        });
+
+        product.productImages = await Promise.all(updatedImages);
+
+        return product;
+      }),
+    );
   }
 }

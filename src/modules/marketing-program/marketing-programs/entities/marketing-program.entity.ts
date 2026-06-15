@@ -16,8 +16,8 @@ export class MarketingProgramEntity extends BaseEntity implements IMarketingProg
   @Column({ length: 255, nullable: true })
   desc?: string;
 
-  @Column({ type: 'json' })
-  mainImage: IImage;
+  @Column({ type: 'json', nullable: true })
+  mainImage?: IImage | null;
 
   @Column({ type: 'enum', enum: MarketingProgramStatus, default: MarketingProgramStatus.DRAFT })
   status: MarketingProgramStatus;

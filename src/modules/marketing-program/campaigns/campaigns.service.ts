@@ -138,6 +138,8 @@ export class CampaignsService {
         'campaign.endDate',
         'campaign.createdAt',
 
+        // Trường hợp ít promotions, nếu nhiều không join và select,
+        // Mà để FE gọi API riêng lấy campaign theo campaignId
         'promotions.id',
         'promotions.name',
 

@@ -8,6 +8,7 @@ import { ProductPromotionMetadataDto } from './dto/metadata-product-promotion.dt
 import { ProductPromotionQueryDto } from './dto/query-product-promotion.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('product-promotions')
 @Serializer(ProductPromotionDto)
@@ -25,6 +26,14 @@ export class ProductPromotionsController {
   @Serializer(ProductPromotionMetadataDto)
   findAll(@Query() query: ProductPromotionQueryDto) {
     return this.productPromotionsService.findAll(query);
+  }
+
+  @Public()
+  @Get('options')
+  @Permissions(permissionsSeed.promotionProduct.read.code)
+  @Serializer(ProductPromotionMetadataDto)
+  findOptions(@Query() query: ProductPromotionQueryDto) {
+    return this.productPromotionsService.findOptions(query);
   }
 
   @Get(':id')

@@ -7,7 +7,7 @@ export interface IMarketingProgram extends IBase {
   // Thông tin cơ bản
   name: string;
   slug: string;
-  mainImage: IImage;
+  mainImage?: IImage | null;
   desc?: string;
 
   // Thời gian

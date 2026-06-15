@@ -21,6 +21,7 @@ import { CampaignsService } from '../campaigns/campaigns.service';
 import { MktProgramQueryDto } from './dto/query-mkt-program.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
+import { IImage } from '@/shared/interfaces/common/image.interface';
 
 @Injectable()
 export class MarketingProgramsService {
@@ -105,6 +106,8 @@ export class MarketingProgramsService {
         'mktProgram.endDate',
         'mktProgram.createdAt',
 
+        // Trường hợp ít campaign, nếu nhiều không join và select,
+        // Mà để FE gọi API riêng lấy campaign theo mktProgramId
         'campaigns.id',
         'campaigns.name',
       ])
@@ -161,12 +164,12 @@ export class MarketingProgramsService {
       relations: ['campaigns'],
     });
 
-    const mainImageKey = campaign?.mainImage?.key;
+    const mainImageKey = campaign?.mainImage?.key || '';
     if (mainImageKey) {
-      campaign.mainImage = {
-        ...campaign.mainImage,
+      campaign!.mainImage = {
+        ...campaign?.mainImage,
         url: await this.cloudinaryService.generateUrl(mainImageKey),
-      };
+      } as IImage;
     }
 
     return campaign;
@@ -222,12 +225,14 @@ export class MarketingProgramsService {
       const updatedMarketingProgram = this.mktProgramRepo.merge(oldMarketingProgram, {
         ...rest,
         ...(name && { name, slug }),
-        ...(startDate && { startDate }),
         ...(endDate && { endDate }),
+        ...(startDate && { startDate }),
         ...(campaignIds && { campaigns: campaignIds.map((cId) => ({ id: cId })) }),
       });
 
-      if (mainImage !== undefined) updatedMarketingProgram.mainImage = mainImage;
+      if (mainImage !== undefined) {
+        updatedMarketingProgram.mainImage = mainImage;
+      }
 
       // Lưu vào DB qua transaction manager
       await queryRunner.manager.save(MarketingProgramEntity, updatedMarketingProgram);
@@ -259,7 +264,7 @@ export class MarketingProgramsService {
       const oldMainImageKey = oldMarketingProgram.mainImage?.key;
 
       // Xóa mainImage cũ
-      if (mainImage !== undefined && oldMainImageKey) {
+      if ((mainImage !== undefined && oldMainImageKey) || mainImage === null) {
         await this.cloudinaryQueue.add(
           'delete-image',
           { publicId: oldMainImageKey },
@@ -304,7 +309,7 @@ export class MarketingProgramsService {
   private async signUrl(data: MarketingProgramEntity[]): Promise<MarketingProgramEntity[]> {
     return await Promise.all(
       data.map(async (item) => {
-        const mainImageUrl = await this.cloudinaryService.generateUrl(item.mainImage?.key);
+        const mainImageUrl = await this.cloudinaryService.generateUrl(item.mainImage?.key || '');
         return {
           ...item,
           mainImage: {

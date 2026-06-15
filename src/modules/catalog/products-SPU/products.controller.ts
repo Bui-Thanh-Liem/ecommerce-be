@@ -8,6 +8,7 @@ import { ProductQueryDto } from './dto/query-product.dto';
 import { ProductMetadataDto } from './dto/metadata-product.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('products')
 @Serializer(ProductSPUDto)
@@ -27,6 +28,7 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Permissions(permissionsSeed.product.read.code)
   @Serializer(ProductMetadataDto)
