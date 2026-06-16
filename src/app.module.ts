@@ -30,7 +30,7 @@ import { MoMoModule } from './modules/payments/momo/momo.module';
 import { VnPayModule } from './modules/payments/vnpay/vnpay.module';
 import { ZaloPayModule } from './modules/payments/zalopay/zalopay.module';
 import { RatingModule } from './modules/customer/rating/rating.module';
-import { ProductNavbarModule } from './modules/catalog/product-navbar/product-navbar.module';
+import { MenuModule } from './modules/store-front/menu/menu.module';
 import { CustomerProductsModule } from './modules/customer/customer-products/customer-products.module';
 import { PromotionsModule } from './modules/marketing-program/promotions/promotions.module';
 import { CartsModule } from './modules/customer/carts/carts.module';
@@ -55,10 +55,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { NotificationModule } from './common/notification/notification.module';
 import { CustomerTokensModule } from './modules/customer/customer-tokens/customer-tokens.module';
 import { TaskModule } from './common/tasks/task.module';
-import { MainBannerModule } from './modules/catalog/main-banner/main-banner.module';
+import { MainBannerModule } from './modules/store-front/main-banner/main-banner.module';
 import { MarketingProgramsModule } from './modules/marketing-program/marketing-programs/marketing-programs.module';
 import { MetricsModule } from './common/metrics/metrics.module';
 import { HttpMetricsInterceptor } from './interceptors/http-metrics.interceptor';
+import { TopBannersModule } from './modules/store-front/top-banners/top-banners.module';
+import { StoreFrontConfigsModule } from './modules/store-front/store-front-configs/store-front-configs.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -119,7 +121,7 @@ const isProd = process.env.NODE_ENV === 'production';
     VnPayModule,
     ZaloPayModule,
     RatingModule,
-    ProductNavbarModule,
+    MenuModule,
     CustomerProductsModule,
     PromotionsModule,
     CampaignModule,
@@ -133,6 +135,8 @@ const isProd = process.env.NODE_ENV === 'production';
     CustomerTokensModule,
     MainBannerModule,
     MarketingProgramsModule,
+    TopBannersModule,
+    StoreFrontConfigsModule,
   ],
   controllers: [AppController],
   providers: [

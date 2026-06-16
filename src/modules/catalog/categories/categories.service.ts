@@ -27,9 +27,9 @@ export class CategoriesService {
     private readonly cloudinaryQueue: Queue,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(dto: CreateCategoryDto) {
     try {
-      const { name, parent: parentId, ...rest } = createCategoryDto;
+      const { name, parent: parentId, ...rest } = dto;
       const slug = stringToSlug(name);
 
       // Kiểm tra tên category đã tồn tại chưa
@@ -55,7 +55,8 @@ export class CategoriesService {
       });
       return this.categoryRepo.save(category);
     } catch (error) {
-      await this.removeImageForError(createCategoryDto.image?.key);
+      const publicIds = [dto.image.key, dto.imageInPage.key];
+      await this.removeImageForError(publicIds);
       this.logger.error(`Failed to create category`, error);
       throw error;
     }
@@ -247,8 +248,8 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const { name, parent: parentId, image, ...rest } = updateCategoryDto;
+  async update(id: string, dto: UpdateCategoryDto) {
+    const { name, parent: parentId, image, imageInPage, ...rest } = dto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -262,7 +263,7 @@ export class CategoriesService {
     // Lấy dữ liệu cũ để check tồn tại và giữ lại thông tin ảnh cũ
     const oldCategory = await this.categoryRepo.findOne({
       where: { id },
-      select: { id: true, name: true, slug: true, image: true },
+      select: { id: true, name: true, slug: true, image: true, imageInPage: true },
     });
     if (!oldCategory) {
       throw new NotFoundException(`Category with ID ${id} not found`);
@@ -285,6 +286,7 @@ export class CategoriesService {
 
     // Ghi nhận key ảnh cũ phục vụ việc xóa sau khi commit thành công
     const oldImageKey = oldCategory.image?.key;
+    const oldImageInPageKey = oldCategory.imageInPage?.key;
 
     // ==========================================
     // 2. TRANSACTION (Chỉ bọc các hành động ghi - WRITE)
@@ -305,6 +307,10 @@ export class CategoriesService {
         updatedCategory.image = image;
       }
 
+      if (imageInPage !== undefined) {
+        updatedCategory.imageInPage = imageInPage;
+      }
+
       // Lưu vào DB qua transaction manager
       await queryRunner.manager.save(CategoryEntity, updatedCategory);
 
@@ -314,9 +320,16 @@ export class CategoriesService {
       await queryRunner.rollbackTransaction();
 
       // Nếu DB lỗi, dọn dẹp ảnh MỚI vừa được truyền lên từ Dto để tránh rác Cloudinary
+      const imageKeysToCleanup: string[] = [];
       if (image?.key) {
-        await this.removeImageForError(image.key).catch((err) =>
-          this.logger.error(`Failed to cleanup new category image on error`, err),
+        imageKeysToCleanup.push(image.key);
+      }
+      if (imageInPage?.key) {
+        imageKeysToCleanup.push(imageInPage.key);
+      }
+      if (imageKeysToCleanup.length > 0) {
+        await this.removeImageForError(imageKeysToCleanup).catch((err) =>
+          this.logger.error(`Failed to cleanup new category images on error`, err),
         );
       }
 
@@ -332,11 +345,21 @@ export class CategoriesService {
     try {
       // Chỉ xóa ảnh cũ nếu có truyền ảnh mới lên, ảnh cũ có tồn tại và hai key khác nhau
       // Tránh xóa ảnh cũ nếu người dùng chỉ cập nhật tên mà không thay đổi ảnh
-      if ((image !== undefined && oldImageKey && image?.key !== oldImageKey) || image === null) {
-        await this.cloudinaryQueue.add(
-          'delete-image',
-          { publicId: oldImageKey },
-          { jobId: `delete-${oldImageKey}-${Date.now()}` },
+
+      const oldImageKeysToDelete: string[] = [];
+      if ((image !== undefined && oldImageKey && image?.key !== oldImageKey) || (image === null && oldImageKey)) {
+        oldImageKeysToDelete.push(oldImageKey);
+      }
+      if (
+        (imageInPage !== undefined && oldImageInPageKey && imageInPage?.key !== oldImageInPageKey) ||
+        (imageInPage === null && oldImageInPageKey)
+      ) {
+        oldImageKeysToDelete.push(oldImageInPageKey);
+      }
+
+      if (oldImageKeysToDelete.length > 0) {
+        await this.removeImageForError(oldImageKeysToDelete).catch((err) =>
+          this.logger.error(`Failed to delete category images from Cloudinary after DB deletion`, err),
         );
       }
     } catch (cloudError) {
@@ -354,11 +377,17 @@ export class CategoriesService {
     await this.categoryRepo.remove(category);
 
     // 2. DB đã sạch sẽ rồi, xóa ảnh
+    const publicIds: string[] = [];
     if (category.image && category.image.key) {
-      await this.cloudinaryQueue.add(
-        'delete-image',
-        { publicId: category.image.key },
-        { jobId: `delete-${category.image.key}-${Date.now()}` },
+      publicIds.push(category.image.key);
+    }
+    if (category.imageInPage && category.imageInPage.key) {
+      publicIds.push(category.imageInPage.key);
+    }
+
+    if (publicIds.length > 0) {
+      await this.removeImageForError(publicIds).catch((err) =>
+        this.logger.error(`Failed to delete category images from Cloudinary after DB deletion`, err),
       );
     }
 
@@ -379,8 +408,12 @@ export class CategoriesService {
       .toLocaleUpperCase(); // Loại bỏ dấu => chỉ còn chữ cái
   }
 
-  private async removeImageForError(key?: string) {
-    if (!key) return;
-    return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
+  private async removeImageForError(keys?: string[]) {
+    if (!keys || keys.length === 0) return;
+    return await this.cloudinaryQueue.add(
+      'delete-multiple-images',
+      { publicIds: keys },
+      { jobId: `delete-bulk-${Date.now()}` },
+    );
   }
 }

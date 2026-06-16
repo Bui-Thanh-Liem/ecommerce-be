@@ -26,6 +26,12 @@ export class CreateCategoryDto {
   image: ImageDto;
 
   @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ImageDto)
+  imageInPage: ImageDto;
+
+  @IsOptional()
   @IsString()
   @MaxLength(200)
   desc?: string;

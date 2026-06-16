@@ -1,23 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductNavbarDto } from './dto/create-product-navbar.dto';
+import { CreateMenuDto } from './dto/create-menu.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductNavbarEntity } from './entities/product-navbar.entity';
-import { Not, Repository } from 'typeorm';
+import { MenuEntity } from './entities/menu.entity';
+import { IsNull, Not, Repository } from 'typeorm';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { ProductNavbarQueryDto } from './dto/query-product-navbar.dto';
-import { UpdateProductNavbarDto } from './dto/update-product-navbar.dto';
+import { MenuQueryDto } from './dto/query-menu.dto';
+import { UpdateMenuDto } from './dto/update-menu.dto';
 
 @Injectable()
-export class ProductNavbarService {
+export class MenuService {
   constructor(
-    @InjectRepository(ProductNavbarEntity)
-    private navbarRepository: Repository<ProductNavbarEntity>,
+    @InjectRepository(MenuEntity)
+    private navbarRepository: Repository<MenuEntity>,
   ) {}
 
-  async create(createProductNavbarDto: CreateProductNavbarDto) {
-    const slug = stringToSlug(createProductNavbarDto.name);
+  async create(createMenuDto: CreateMenuDto) {
+    const slug = stringToSlug(createMenuDto.name);
     const existingNavbar = await this.navbarRepository.exists({ where: { slug } });
     if (existingNavbar) {
       throw new NotFoundException('A navbar with the same name already exists');
@@ -25,13 +25,13 @@ export class ProductNavbarService {
 
     //
     const navbar = this.navbarRepository.create({
-      ...createProductNavbarDto,
+      ...createMenuDto,
       slug,
     });
     return this.navbarRepository.save(navbar);
   }
 
-  async findAll(query: ProductNavbarQueryDto): Promise<IMetadata<ProductNavbarEntity>> {
+  async findAll(query: MenuQueryDto): Promise<IMetadata<MenuEntity>> {
     const { page, limit } = query;
 
     //
@@ -58,7 +58,7 @@ export class ProductNavbarService {
     };
   }
 
-  async findOptions(query: ProductNavbarQueryDto): Promise<IMetadata<ProductNavbarEntity>> {
+  async findOptions(query: MenuQueryDto): Promise<IMetadata<MenuEntity>> {
     const { page, limit } = query;
 
     //
@@ -89,9 +89,8 @@ export class ProductNavbarService {
     return await this.navbarRepository.findOne({ where: { id } });
   }
 
-  async update(id: string, updateProductNavbarDto: UpdateProductNavbarDto) {
-    const { name } = updateProductNavbarDto;
-    console.log('updateProductNavbarDto :::', updateProductNavbarDto);
+  async update(id: string, updateMenuDto: UpdateMenuDto) {
+    const { name } = updateMenuDto;
 
     let slug: string | undefined = undefined;
     if (name) {
@@ -103,13 +102,28 @@ export class ProductNavbarService {
     }
     const navbar = await this.navbarRepository.preload({
       id,
-      ...updateProductNavbarDto,
+      ...updateMenuDto,
       slug,
     });
     if (!navbar) {
       throw new NotFoundException('Navbar not found');
     }
     return await this.navbarRepository.save(navbar);
+  }
+
+  async findForConfig() {
+    const navbar = await this.navbarRepository.find({
+      where: { name: Not(IsNull()) },
+      order: { createdAt: 'DESC' },
+      select: { id: true, name: true, link: true },
+      take: 10,
+    });
+
+    if (!navbar || navbar.length === 0) {
+      throw new NotFoundException('No navbar found for config');
+    }
+
+    return navbar;
   }
 
   async remove(id: string) {

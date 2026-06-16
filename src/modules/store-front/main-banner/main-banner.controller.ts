@@ -17,39 +17,39 @@ export class MainBannerController {
 
   @Post()
   @Permissions(permissionsSeed.mainBanner.create.code)
-  create(@Body() createMainBannerDto: CreateMainBannerDto) {
-    return this.mainBannerService.create(createMainBannerDto);
+  async create(@Body() createMainBannerDto: CreateMainBannerDto) {
+    return await this.mainBannerService.create(createMainBannerDto);
   }
 
   @Get()
   @Permissions(permissionsSeed.mainBanner.read.code)
   @Serializer(MainBannerMetadataDto)
-  findAll(@Query() query: MainBannerQueryDto) {
-    return this.mainBannerService.findAll(query);
+  async findAll(@Query() query: MainBannerQueryDto) {
+    return await this.mainBannerService.findAll(query);
   }
 
   @Public()
   @Get('options')
   @Serializer(MainBannerMetadataDto)
-  findOptions() {
-    return this.mainBannerService.findAll({ page: 1, limit: 10 });
+  async findOptions(@Query() query: MainBannerQueryDto) {
+    return await this.mainBannerService.findOptions(query);
   }
 
   @Get(':id')
   @Permissions(permissionsSeed.mainBanner.read.code)
-  findOne(@Param('id') id: string) {
-    return this.mainBannerService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.mainBannerService.findOne(id);
   }
 
   @Patch(':id')
   @Permissions(permissionsSeed.mainBanner.update.code)
-  update(@Param('id') id: string, @Body() updateMainBannerDto: UpdateMainBannerDto) {
-    return this.mainBannerService.update(id, updateMainBannerDto);
+  async update(@Param('id') id: string, @Body() updateMainBannerDto: UpdateMainBannerDto) {
+    return await this.mainBannerService.update(id, updateMainBannerDto);
   }
 
   @Delete(':id')
   @Permissions(permissionsSeed.mainBanner.delete.code)
-  remove(@Param('id') id: string) {
-    return this.mainBannerService.remove(id);
+  async remove(@Param('id') id: string) {
+    return await this.mainBannerService.remove(id);
   }
 }

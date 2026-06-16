@@ -19,8 +19,11 @@ export class MainBannerService {
   constructor(
     @InjectRepository(MainBannerEntity)
     private mainBannerRepo: Repository<MainBannerEntity>,
+
     private readonly cloudinaryService: CloudinaryService,
+
     private dataSource: DataSource,
+
     @InjectQueue('cloudinary')
     private readonly cloudinaryQueue: Queue,
   ) {}
@@ -77,14 +80,45 @@ export class MainBannerService {
     const [data, total] = await queryBuilder.getManyAndCount();
 
     // Chuyển đổi URL ảnh nếu có
-    const dataWithUrls = await Promise.all(
-      data.map(async (category) => {
-        if (category.image && category.image.key) {
-          category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
-        }
-        return category;
-      }),
-    );
+    const dataWithUrls = await this.signUrl(data);
+
+    return {
+      data: dataWithUrls,
+      totalData: total,
+      page,
+      totalPage: Math.ceil(total / limit),
+    };
+  }
+
+  async findOptions(query: MainBannerQueryDto): Promise<IMetadata<MainBannerEntity>> {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    //
+    const queryBuilder = this.mainBannerRepo
+      .createQueryBuilder('mainBanner')
+
+      // Select các trường cụ thể (tương đương với select của bạn)
+      .select([
+        'mainBanner.id',
+        'mainBanner.title',
+        'mainBanner.slug',
+        'mainBanner.desc',
+        'mainBanner.image',
+        'mainBanner.isActive',
+        'mainBanner.createdAt',
+      ]);
+
+    // Phân trang và sắp xếp
+    queryBuilder.orderBy('mainBanner.createdAt', 'DESC').skip(skip).take(take);
+
+    //
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    // Chuyển đổi URL ảnh nếu có
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -119,7 +153,7 @@ export class MainBannerService {
       select: { id: true, title: true, slug: true, image: true },
     });
     if (!oldMainBanner) {
-      throw new NotFoundException(`Main banner with ID ${id} not found`);
+      throw new NotFoundException('Main banner not found');
     }
 
     // Nếu có đổi title, cần check trùng slug với các main banner khác (trừ chính nó)
@@ -209,6 +243,17 @@ export class MainBannerService {
     }
 
     return true;
+  }
+
+  async signUrl(banners: MainBannerEntity[]): Promise<MainBannerEntity[]> {
+    return await Promise.all(
+      banners.map(async (banner) => {
+        if (banner.image && banner.image.key) {
+          banner.image.url = await this.cloudinaryService.generateUrl(banner.image.key);
+        }
+        return banner;
+      }),
+    );
   }
 
   private async removeImageForError(key?: string) {

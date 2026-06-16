@@ -553,4 +553,30 @@ export const permissionsSeed = {
       code: '088',
     },
   },
+  topBanner: {
+    create: {
+      keyGroup: 'Top banner',
+      name: 'create:topBanners',
+      desc: 'Tạo top banner',
+      code: '089',
+    },
+    read: {
+      keyGroup: 'Top banner',
+      name: 'read:topBanners',
+      desc: 'Xem top banner',
+      code: '090',
+    },
+    update: {
+      keyGroup: 'Top banner',
+      name: 'update:topBanners',
+      desc: 'Cập nhật top banner',
+      code: '091',
+    },
+    delete: {
+      keyGroup: 'Top banner',
+      name: 'delete:topBanners',
+      desc: 'Xóa top banner',
+      code: '092',
+    },
+  },
 };

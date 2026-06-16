@@ -1,7 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateProductNavbarDto {
+export class CreateMenuDto {
   @IsString()
   @Trim()
   @IsNotEmpty()

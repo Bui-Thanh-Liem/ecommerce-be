@@ -1,0 +1,32 @@
+import { BaseEntity } from '@/shared/entities/base.entity';
+import { type IImage } from '@/shared/interfaces/common/image.interface';
+import { ITopBanner } from '@/shared/interfaces/models/store-front/top-banner.interface';
+import { Column, Entity } from 'typeorm';
+
+@Entity('top_banners')
+export class TopBannerEntity extends BaseEntity implements ITopBanner {
+  @Column({ length: 50 })
+  title: string;
+
+  @Column({ length: 100, unique: true })
+  slug: string;
+
+  @Column({ length: 100, nullable: true })
+  desc?: string;
+
+  @Column({ type: 'json' })
+  image: IImage;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  logInsert(): void {
+    this.logger.debug(`Đã chèn thành công TopBanner có title: ${this.title}`);
+  }
+  logUpdate(): void {
+    this.logger.debug(`Đã cập nhật thành công TopBanner có title: ${this.title}`);
+  }
+  logRemove(): void {
+    this.logger.debug(`Đã xóa thành công TopBanner có title: ${this.title}`);
+  }
+}

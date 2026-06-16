@@ -20,6 +20,9 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @Column({ type: 'json', nullable: true })
   image: IImage | null;
 
+  @Column({ type: 'json', nullable: true })
+  imageInPage: IImage | null;
+
   @Column({ type: 'varchar', length: 20 })
   code: string;
 

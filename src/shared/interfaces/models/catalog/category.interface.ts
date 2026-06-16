@@ -10,6 +10,7 @@ export interface ICategory extends IBase {
   minPrice?: number;
   desc?: string | null;
   image?: IImage | null;
+  imageInPage?: IImage | null;
   parent?: ICategory | null;
   children?: ICategory[] | null;
 
