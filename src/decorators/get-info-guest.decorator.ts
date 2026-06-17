@@ -7,7 +7,7 @@ export const GetInfoGuest = createParamDecorator((data: any, ctx: ExecutionConte
   const request = ctx.switchToHttp().getRequest<Request>();
   const session = (request.cookies['e_session'] || '') as string;
   const personal = (request.cookies['e_personal'] || '') as string;
-  const jsonString = decodeURIComponent(personal);
+  const jsonString = decodeURIComponent(personal) || '{}';
   const personalObj = JSON.parse(jsonString) as ILocationSelection;
   return { session, personal: personalObj };
 });

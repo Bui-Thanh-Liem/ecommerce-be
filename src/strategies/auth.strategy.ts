@@ -37,7 +37,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: IJwtPayload): Promise<StaffEntity> {
-    this.logger.debug('#2. JwtAuthStrategy - validate called');
+    this.logger.debug('#2. JwtAuthStrategy - validate called with payload:', JSON.stringify(payload));
 
     // 1. Check database xem staff còn tồn tại hay không
     const staff = await this.staffService.findOne(payload?.staffId);

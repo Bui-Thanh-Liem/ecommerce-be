@@ -4,4 +4,6 @@ export interface IJwtPayload {
   type: TokenType;
   staffId?: string;
   customerId?: string;
+  iat?: number;
+  exp?: number;
 }

@@ -8,6 +8,7 @@ import { Serializer } from '@/interceptors/serializer.interceptor';
 import { TopBannerMetadataDto } from './dto/metadata-top-banner.dto';
 import { TopBannerQueryDto } from './dto/query-top-banner.dto';
 import { TopBannerDto } from './dto/top-banner.dto';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('top-banners')
 @Serializer(TopBannerDto)
@@ -27,6 +28,7 @@ export class TopBannersController {
     return await this.topBannersService.findAll(query);
   }
 
+  @Public()
   @Get('options')
   @Permissions(permissionsSeed.topBanner.read.code)
   @Serializer(TopBannerMetadataDto)

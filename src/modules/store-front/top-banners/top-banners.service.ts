@@ -3,7 +3,7 @@ import { CreateTopBannerDto } from './dto/create-top-banner.dto';
 import { UpdateTopBannerDto } from './dto/update-top-banner.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TopBannerEntity } from './entities/top-banner.entity';
-import { DataSource, IsNull, Not, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -243,22 +243,6 @@ export class TopBannersService {
     }
 
     return true;
-  }
-
-  async findForConfig() {
-    const banner = await this.topBannerRepo.findOne({
-      where: { image: Not(IsNull()) },
-      order: { createdAt: 'DESC' },
-      select: { id: true, title: true, image: true },
-    });
-
-    if (!banner) {
-      throw new NotFoundException('No top banner found for config');
-    }
-
-    const signedBanners = await this.signUrl([banner]);
-
-    return signedBanners[0];
   }
 
   async signUrl(banners: TopBannerEntity[]): Promise<TopBannerEntity[]> {

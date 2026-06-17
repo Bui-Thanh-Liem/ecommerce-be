@@ -71,7 +71,7 @@ export class CustomerTokensService {
   }: {
     customerId: string;
   }): Promise<{ access: string; refresh: string }> {
-    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '7d';
+    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '30d';
 
     // Tạo access token và refresh token
     const accessToken = this.generateToken({

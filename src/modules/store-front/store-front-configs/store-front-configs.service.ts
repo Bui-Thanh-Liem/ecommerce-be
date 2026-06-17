@@ -6,17 +6,12 @@ import { StoreFrontConfigEntity } from './entities/store-front-config.entity';
 import { Repository } from 'typeorm';
 import { IConfigHome } from '@/shared/interfaces/models/store-front/store-front-config.interface';
 import { DETAIL_HOME_CONFIG_KEYS } from '@/shared/constants/home-config-keys.constant';
-import { TopBannersService } from '../top-banners/top-banners.service';
-import { MenuService } from '../menu/menu.service';
 
 @Injectable()
 export class StoreFrontConfigsService implements OnModuleInit {
   constructor(
     @InjectRepository(StoreFrontConfigEntity)
     private readonly repo: Repository<StoreFrontConfigEntity>,
-
-    private readonly topBannersService: TopBannersService,
-    private readonly menuService: MenuService,
   ) {}
 
   async onModuleInit() {
@@ -55,20 +50,16 @@ export class StoreFrontConfigsService implements OnModuleInit {
   }
 
   async initializeConfig() {
-    const [existingConfigs, topBanner, menu] = await Promise.all([
-      this.repo.exists(),
-      this.topBannersService.findForConfig(),
-      this.menuService.findForConfig(),
-    ]);
+    const existingConfigs = await this.repo.exists();
 
     //
     if (!existingConfigs) {
       const homeConfig: IConfigHome = {
         order: DETAIL_HOME_CONFIG_KEYS,
         config: {
-          topBanner: topBanner,
+          topBanner: {},
           header: '',
-          menu: menu,
+          menu: [],
           mainBanner: [],
           listCategories: [],
           historyProducts: [],

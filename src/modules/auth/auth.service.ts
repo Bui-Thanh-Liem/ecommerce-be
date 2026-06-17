@@ -4,6 +4,7 @@ import { StaffTokensService } from '../management/staff-tokens/staff-tokens.serv
 import { TokenType } from '@/shared/enums/token-type.enum';
 import { StaffsService } from '../management/staffs/staffs.service';
 import { StaffEntity } from '../management/staffs/entities/staff.entity';
+import { IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -33,12 +34,19 @@ export class AuthService {
     //
 
     // Generate JWT access token
-    const { access } = await this.staffTokensService.updateAuthToken(staff.id);
+    const { access, refresh } = await this.staffTokensService.updateAuthToken(staff.id);
 
     // Return staff data and token
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...staffData } = staff;
-    return { staff: staffData, token: access };
+
+    //
+    return { staff: staffData, token: access, refreshToken: refresh };
+  }
+
+  //
+  async refreshToken(refreshToken: string, jwtPayload: IJwtPayload) {
+    return await this.staffTokensService.refreshAuthToken(refreshToken, jwtPayload);
   }
 
   // Sign out a staff by revoking the token

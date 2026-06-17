@@ -66,8 +66,24 @@ export class StaffTokensService {
   }
 
   //
+  async refreshAuthToken(refreshToken: string, jwtPayload: IJwtPayload) {
+    // Tìm token hiện tại của staff
+    const existingToken = await this.staffTokenRepo.findOne({
+      where: { token: refreshToken, type: TokenType.REFRESH },
+    });
+
+    // Nếu không tìm thấy token hoặc token đã bị thu hồi, không cho phép tạo token mới
+    if (!existingToken || existingToken.isRevoked) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+
+    // Tạo token mới
+    return await this.generateAuthTokenPair({ staffId: existingToken.staff.id });
+  }
+
+  //
   private async generateAuthTokenPair({ staffId }: { staffId: string }): Promise<{ access: string; refresh: string }> {
-    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '7d';
+    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '30d';
 
     // Tạo access token và refresh token
     const accessToken = this.generateToken({

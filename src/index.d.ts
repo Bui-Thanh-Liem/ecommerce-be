@@ -1,6 +1,6 @@
-import 'multer';
-import { IStaff } from './shared/interfaces/models/staff.interface';
-import { ICustomer } from './shared/interfaces/models/customer.interface';
+import { IJwtPayload } from './shared/interfaces/common/jwt-payload.interface';
+import { ICustomer } from './shared/interfaces/models/customer/customer.interface';
+import { IStaff } from './shared/interfaces/models/management/staff.interface';
 
 declare global {
   namespace Express {
@@ -11,6 +11,7 @@ declare global {
       cookies?: {
         token?: string | null;
       };
+      payload?: IJwtPayload;
     }
   }
 }
