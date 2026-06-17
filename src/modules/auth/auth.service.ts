@@ -41,7 +41,7 @@ export class AuthService {
     const { password, ...staffData } = staff;
 
     //
-    return { staff: staffData, token: access, refreshToken: refresh };
+    return { staff: staffData, accessToken: access, refreshToken: refresh };
   }
 
   //

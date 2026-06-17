@@ -156,6 +156,9 @@ const isProd = process.env.NODE_ENV === 'production';
         transformOptions: {
           enableImplicitConversion: true, // Cho phép chuyển đổi ngầm định, ví dụ: '1' thành true nếu dùng @IsInt()
         },
+
+        // Tùy chọn 4: Bật tính năng bỏ qua các thuộc tính có giá trị undefined (thường dùng cho PATCH)
+        skipUndefinedProperties: true,
       }),
     },
     {

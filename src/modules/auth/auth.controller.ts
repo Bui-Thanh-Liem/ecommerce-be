@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { CurrentStaff } from '../../decorators/current-staff.decorator';
 import { AuthService } from './auth.service';
@@ -16,6 +16,13 @@ import { type IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interfa
 @Controller('auth')
 @Serializer(AuthDto)
 export class AuthController {
+  private readonly defaultConfig: CookieOptions = {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  };
+
   constructor(private readonly authService: AuthService) {}
 
   @Public()
@@ -28,16 +35,11 @@ export class AuthController {
     // eslint-disable-next-line max-len
     @Res({ passthrough: true }) res: Response, // nếu không có passthrough, thì phải dùng res.json() để trả về response, còn có thì vẫn trả về object bình thường và Nest sẽ tự chuyển thành response (có interceptor)
   ) {
-    const { staff, token, refreshToken } = await this.authService.signIn(currentStaff);
-
-    const isProduction = process.env.NODE_ENV === 'production';
-    const securePart = isProduction ? '; Secure' : '';
+    const { staff, accessToken, refreshToken } = await this.authService.signIn(currentStaff);
 
     //
-    res.setHeader('Set-Cookie', [
-      `e_refresh_token=${refreshToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}${securePart}`,
-      `e_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${15 * 60}${securePart}`,
-    ]);
+    res.cookie('e_token', accessToken, { ...this.defaultConfig, maxAge: 15 * 60 * 1000 }); // 15 phút
+    res.cookie('e_refresh_token', refreshToken, { ...this.defaultConfig, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 30 ngày
 
     return { staff };
   }
@@ -53,28 +55,22 @@ export class AuthController {
   ) {
     const refreshToken = request.cookies['e_refresh_token'] as string;
 
+    //
     const { access, refresh } = await this.authService.refreshToken(refreshToken, jwtPayload);
 
-    // Set access token in cookie
-    res.cookie('e_token', access, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    //
+    const refreshMaxAge = Math.floor(jwtPayload.exp! - Date.now() / 1000) * 1000; // ms
+    res.cookie('e_token', access, { ...this.defaultConfig, maxAge: 15 * 60 * 1000 }); // 15 phút
+    res.cookie('e_refresh_token', refresh, { ...this.defaultConfig, maxAge: refreshMaxAge });
 
-    // Set refresh token in cookie
-    res.cookie('e_refresh_token', refresh, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    return true;
   }
 
+  @Public()
   @Post('signout')
-  async signOut(@Res({ passthrough: true }) res: Response, @CurrentStaff() currentStaff: StaffEntity) {
-    await this.authService.signOut(currentStaff?.id);
+  @UseGuards(RefreshTokenAuthGuard)
+  async signOut(@Res({ passthrough: true }) res: Response, @GetJwtPayload() jwtPayload: IJwtPayload) {
+    await this.authService.signOut(jwtPayload.staffId!);
     res.clearCookie('e_token');
     res.clearCookie('e_refresh_token');
     return true;

@@ -34,7 +34,7 @@ export class StaffTokensService {
   }: {
     secretKey: string;
     payload: IJwtPayload;
-    expiresIn: StringValue;
+    expiresIn: StringValue | number;
   }): string {
     return sign(payload, secretKey, { expiresIn });
   }
@@ -67,6 +67,19 @@ export class StaffTokensService {
 
   //
   async refreshAuthToken(refreshToken: string, jwtPayload: IJwtPayload) {
+    //
+    const existingTokenUsed = await this.staffTokenRepo.findOne({
+      where: { usedToken: refreshToken, type: TokenType.REFRESH },
+      relations: ['staff'],
+      select: { staff: { id: true } },
+    });
+    if (existingTokenUsed) {
+      // Nếu token đã được sử dụng để đổi lấy access token mới, thì xóa token đó đi và không cho phép tạo token mới nữa
+      // Cho staff đăng nhập lại ở mọi nơi nếu phát hiện token bị lạm dụng
+      await this.delete(existingTokenUsed.staff.id, TokenType.REFRESH);
+      throw new BadRequestException('Refresh token has already been used');
+    }
+
     // Tìm token hiện tại của staff
     const existingToken = await this.staffTokenRepo.findOne({
       where: { token: refreshToken, type: TokenType.REFRESH },
@@ -78,7 +91,28 @@ export class StaffTokensService {
     }
 
     // Tạo token mới
-    return await this.generateAuthTokenPair({ staffId: existingToken.staff.id });
+    const access = this.generateToken({
+      payload: { staffId: jwtPayload.staffId, type: TokenType.ACCESS },
+      secretKey: this.configService.get<string>('JWT_ACCESS_SECRET') || 'key-secret',
+      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN') || '15m',
+    });
+
+    // Tính thời gian hết hạn của refresh token mới dựa trên exp của token cũ (nếu có) hoặc dựa trên cấu hình mặc định
+    const exp = Math.floor(jwtPayload.exp! - Date.now() / 1000);
+    const refresh = this.generateToken({
+      payload: { staffId: jwtPayload.staffId, type: TokenType.REFRESH },
+      secretKey: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh-key-secret',
+      expiresIn: exp,
+    });
+
+    // Cập nhật token mới vào database, đánh dấu token cũ đã dùng
+    await this.staffTokenRepo.save({
+      ...existingToken,
+      usedToken: refreshToken, // đánh dấu token cũ đã dùng
+      token: refresh, // lưu token mới
+    });
+
+    return { access, refresh };
   }
 
   //

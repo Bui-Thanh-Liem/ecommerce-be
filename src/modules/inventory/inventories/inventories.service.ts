@@ -11,7 +11,6 @@ import { InventoryQueryDto } from './dto/query-inventory.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
-import { ProductImageEntity } from '../../catalog/product-images/entities/product-image.entity';
 
 @Injectable()
 export class InventoriesService {
@@ -108,21 +107,7 @@ export class InventoriesService {
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
-    const dataWithUrls = data.map((item) => {
-      const images = item.productVariant?.productImages;
-
-      if (images) {
-        item.productVariant.productImages = images.flat().map((img) => ({
-          ...img,
-          image: {
-            ...img?.image,
-            url: img?.image?.key ? this.cloudinaryService.generateUrl(img.image.key) : '',
-          },
-        })) as ProductImageEntity[];
-      }
-
-      return item;
-    });
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -248,5 +233,27 @@ export class InventoriesService {
       throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
     return this.inventoryRepo.remove(inventory);
+  }
+
+  async signUrl(data: InventoryEntity[]): Promise<InventoryEntity[]> {
+    return await Promise.all(
+      data.map(async (item) => {
+        const images = item.productVariant?.productImages;
+
+        if (images) {
+          item.productVariant.productImages = await Promise.all(
+            images.flat().map(async (img) => {
+              if (img.image?.key) {
+                img.image.url = await this.cloudinaryService.generateUrl(img.image.key);
+              }
+
+              return img;
+            }),
+          );
+        }
+
+        return item;
+      }),
+    );
   }
 }

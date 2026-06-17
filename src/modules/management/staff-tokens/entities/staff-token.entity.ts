@@ -17,6 +17,9 @@ export class StaffTokenEntity extends BaseEntity implements IStaffToken {
   @Column({ type: 'text' })
   token: string;
 
+  @Column({ type: 'text', nullable: true })
+  usedToken: string;
+
   @Column({ type: 'timestamp' })
   expiresAt: Date;
 

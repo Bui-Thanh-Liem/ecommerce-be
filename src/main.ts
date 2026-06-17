@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppLogger } from './logger/app.logger';
+import compression from 'compression';
+import { json, urlencoded } from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   //
@@ -22,13 +25,39 @@ async function bootstrap() {
   // Add global prefix
   app.setGlobalPrefix('api/v1', { exclude: ['metrics'] });
 
+  // Compression middleware để nén response, giảm dung lượng truyền tải, cải thiện tốc độ tải trang
+  app.use(compression());
+
   // Add cors
   app.enableCors({
+    origin: '*',
     credentials: true,
     allowedHeaders: ['Content-Type', 'x-api-key'],
   });
 
-  // Cookies
+  //
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: [`'self'`],
+          // Cho phép Swagger tải các script inline cần thiết
+          scriptSrc: [`'self'`, `'unsafe-inline'`, `cdn.jsdelivr.net`],
+          styleSrc: [`'self'`, `'unsafe-inline'`, `cdn.jsdelivr.net`],
+          imgSrc: [`'self'`, `data:`, `validator.swagger.io`],
+        },
+      },
+    }),
+  );
+
+  // Body parser với giới hạn 10mb (cho phép BE nhận các request có body (JSON) dưới 10MB)
+  app.use(json({ limit: '10mb' }));
+
+  // Body parser cho các request có Content-Type là application/x-www-form-urlencoded với giới hạn 10mb
+  // Bên thứ ba thanh toán (ví dụ: VNPay) thường gửi dữ liệu dưới dạng x-www-form-urlencoded
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  // Cookie parser middleware để đọc cookie từ request
   app.use(cookieParser());
 
   // Cấu hình Swagger

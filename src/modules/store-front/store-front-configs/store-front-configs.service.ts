@@ -37,7 +37,7 @@ export class StoreFrontConfigsService implements OnModuleInit {
     //
     const newHomeConfig: IConfigHome = {
       ...storeFrontConfig.homeConfig,
-      order: [...storeFrontConfig.homeConfig.order, ...(dto.homeConfig?.order || [])],
+      order: dto.homeConfig?.order || storeFrontConfig.homeConfig.order,
       config: {
         ...storeFrontConfig.homeConfig.config,
         ...dto.homeConfig?.config,
@@ -74,9 +74,7 @@ export class StoreFrontConfigsService implements OnModuleInit {
       };
 
       //
-      const defaultConfig = this.repo.create({
-        homeConfig,
-      });
+      const defaultConfig = this.repo.create({ homeConfig });
 
       //
       await this.repo.save(defaultConfig);
