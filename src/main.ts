@@ -80,10 +80,10 @@ async function bootstrap() {
     // Cho Swagger UI biết là cần gì
     // Cấu hình hiện tại (Cookie) thì trình duyệt đã tự động gửi rồi.
     .addCookieAuth(
-      'token',
+      'e_token',
       {
         in: 'cookie',
-        name: 'token',
+        name: 'e_token',
         type: 'apiKey',
         description: 'Authentication token stored in cookie',
       },

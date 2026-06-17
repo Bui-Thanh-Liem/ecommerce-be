@@ -38,7 +38,7 @@ export class AuthController {
     const { staff, accessToken, refreshToken } = await this.authService.signIn(currentStaff);
 
     //
-    res.cookie('e_token', accessToken, { ...this.defaultConfig, maxAge: 15 * 60 * 1000 }); // 15 phút
+    res.cookie('e_token', accessToken, { ...this.defaultConfig }); // 15 phút
     res.cookie('e_refresh_token', refreshToken, { ...this.defaultConfig, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 30 ngày
 
     return { staff };
@@ -60,7 +60,7 @@ export class AuthController {
 
     //
     const refreshMaxAge = Math.floor(jwtPayload.exp! - Date.now() / 1000) * 1000; // ms
-    res.cookie('e_token', access, { ...this.defaultConfig, maxAge: 15 * 60 * 1000 }); // 15 phút
+    res.cookie('e_token', access, { ...this.defaultConfig }); // 15 phút
     res.cookie('e_refresh_token', refresh, { ...this.defaultConfig, maxAge: refreshMaxAge });
 
     return true;

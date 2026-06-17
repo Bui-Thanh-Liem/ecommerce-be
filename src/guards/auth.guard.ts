@@ -22,13 +22,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err, staff, info, context: ExecutionContext) {
+  handleRequest(err, staff, info: any, context: ExecutionContext) {
     this.logger.debug('#3. JwtAuthGuard - handleRequest called');
     const request = context.switchToHttp().getRequest<Request>();
 
     // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized
     if (err || !staff) {
       this.logger.error(info || 'Unauthorized');
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (info?.name === 'TokenExpiredError' && info?.message === 'jwt expired') {
+        throw new UnauthorizedException('TokenExpiredError');
+      }
+
+      //
       throw new UnauthorizedException();
     }
 
