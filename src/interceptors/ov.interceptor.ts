@@ -14,14 +14,14 @@ export class OvInterceptor implements NestInterceptor {
     const method = req?.method ?? 'UNKNOWN';
     const url = req?.originalUrl ?? req?.url ?? 'UNKNOWN';
 
-    this.logger.debug(`req.start method=${method} url=${url}`);
+    this.logger.debug(`[req.start] method=${method} url=${url}`);
 
     return next.handle().pipe(
       finalize(() => {
         const durationMs = Date.now() - startAt;
         const statusCode = res?.statusCode ?? 500;
         const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'log';
-        const message = `req.done method=${method} url=${url} status=${statusCode} duration_ms=${durationMs}`;
+        const message = `[req.done] method=${method} url=${url} status=${statusCode} duration_ms=${durationMs}`;
 
         this.logger[level](message);
       }),

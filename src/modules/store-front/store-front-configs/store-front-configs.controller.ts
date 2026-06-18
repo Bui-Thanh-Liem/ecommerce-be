@@ -4,6 +4,7 @@ import { CreateStoreFrontConfigDto } from './dto/create-store-front-config.dto';
 import { UpdateStoreFrontConfigDto } from './dto/update-store-front-config.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { StoreFrontConfigDto } from './dto/store-front-config.dto';
+import { RemoveUndefinedPipe } from '@/pipes/remove-undefined.pipe';
 
 @Controller('store-front-configs')
 @Serializer(StoreFrontConfigDto)
@@ -21,7 +22,7 @@ export class StoreFrontConfigsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateStoreFrontConfigDto) {
+  async update(@Param('id') id: string, @Body(new RemoveUndefinedPipe()) dto: UpdateStoreFrontConfigDto) {
     return await this.storeFrontConfigsService.update(id, dto);
   }
 }

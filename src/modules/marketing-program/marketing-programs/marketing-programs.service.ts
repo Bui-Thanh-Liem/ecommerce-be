@@ -138,7 +138,7 @@ export class MarketingProgramsService {
     //
     const queryBuilder = this.mktProgramRepo
       .createQueryBuilder('mktProgram')
-      .select(['mktProgram.id', 'mktProgram.name', 'mktProgram.mainImage'])
+      .select(['mktProgram.id', 'mktProgram.name', 'mktProgram.mainImage', 'mktProgram.slug'])
       .skip(skip)
       .take(take)
       .orderBy('mktProgram.createdAt', 'DESC');
