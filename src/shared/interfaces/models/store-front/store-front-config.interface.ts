@@ -27,7 +27,7 @@ export interface IDetailHomeConfig {
     mktPrograms: Pick<IMarketingProgram, 'id' | 'slug' | 'name' | 'mainImage'>[];
   };
   marketingProgram02: {
-    campaign: Pick<ICampaign, 'id' | 'slug' | 'name' | 'mainImage'>[];
+    campaigns: Pick<ICampaign, 'id' | 'slug' | 'name' | 'mainImage'>[];
   };
   marketingProgram03: {
     title: string;

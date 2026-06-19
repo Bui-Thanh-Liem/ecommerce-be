@@ -5,14 +5,21 @@ import { TopBannerDto } from '../../top-banners/dto/top-banner.dto';
 import { MainBannerDto } from '../../main-banner/dto/main-banner.dto';
 import { CategoryDto } from '@/modules/catalog/categories/dto/category.dto';
 import { MktProgramDto } from '@/modules/marketing-program/marketing-programs/dto/mkt-program.dto';
+import { CampaignDto } from '@/modules/marketing-program/campaigns/dto/campaign.dto';
 
-class MktSessionMultiCampaignsDto {
+class MktSessionMultiProgramsDto {
   @Expose()
   title: string;
 
   @Expose()
   @Type(() => MktProgramDto)
   mktPrograms: MktProgramDto[];
+}
+
+class MktSessionMultiCampaignsDto {
+  @Expose()
+  @Type(() => CampaignDto)
+  campaigns: CampaignDto[];
 }
 
 // --- 1. DTO EXPOSE CHO DETAIL HOME CONFIG ---
@@ -37,12 +44,16 @@ export class DetailHomeConfigResponseDto {
   listCategories: CategoryDto[];
 
   @Expose()
-  @Type(() => MktSessionMultiCampaignsDto)
-  marketingProgram01: MktSessionMultiCampaignsDto;
+  @Type(() => MktSessionMultiProgramsDto)
+  marketingProgram01: MktSessionMultiProgramsDto;
 
   @Expose()
   @Type(() => MktSessionMultiCampaignsDto)
   marketingProgram02: MktSessionMultiCampaignsDto;
+
+  @Expose()
+  @Type(() => MktSessionMultiProgramsDto)
+  marketingProgram03: MktSessionMultiProgramsDto;
 }
 
 // --- 2. DTO EXPOSE CHO CONFIG HOME ---

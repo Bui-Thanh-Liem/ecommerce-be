@@ -99,7 +99,7 @@ class MktSessionProgram02Dto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CampaignDto)
-  campaign: CampaignDto[];
+  campaigns: CampaignDto[];
 }
 
 // Dùng cho marketingProgram04 và marketingProgram05 (Đã sửa từ Record sang CampaignDto)

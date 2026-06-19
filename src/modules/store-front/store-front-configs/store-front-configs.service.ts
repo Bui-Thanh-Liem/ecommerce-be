@@ -26,9 +26,7 @@ export class StoreFrontConfigsService implements OnModuleInit {
   }
 
   async findConfig() {
-    const config = await this.repo.findOne({ where: { id: Not(IsNull()) } });
-    console.log('Found config:', config?.homeConfig?.config.marketingProgram01.mktPrograms);
-    return config;
+    return await this.repo.findOne({ where: { id: Not(IsNull()) } });
   }
 
   async update(id: string, dto: UpdateStoreFrontConfigDto) {
@@ -79,7 +77,7 @@ export class StoreFrontConfigsService implements OnModuleInit {
           listCategories: [],
           historyProducts: '',
           marketingProgram01: { title: '', mktPrograms: [] },
-          marketingProgram02: { campaign: [] },
+          marketingProgram02: { campaigns: [] },
           marketingProgram03: { title: '', mktPrograms: [] },
           suggestForYou: '',
           marketingProgram04: { title: '', campaign: null },
