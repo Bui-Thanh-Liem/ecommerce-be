@@ -71,19 +71,19 @@ export class StoreFrontConfigsService implements OnModuleInit {
         order: DETAIL_HOME_CONFIG_KEYS,
         config: {
           topBanner: null,
-          header: '',
+          header: 'The title is not dynamically updated content.',
           menu: [],
           mainBanner: [],
           listCategories: [],
-          historyProducts: '',
+          historyProducts: 'The history products content is not dynamically updated.',
           marketingProgram01: { title: '', mktPrograms: [] },
           marketingProgram02: { campaigns: [] },
           marketingProgram03: { title: '', mktPrograms: [] },
-          suggestForYou: '',
+          suggestForYou: 'The suggest for you content is not dynamically updated.',
           marketingProgram04: { title: '', campaign: null },
           marketingProgram05: { title: '', campaign: null },
           marketingProgram06: { title: '', campaigns: [] },
-          topic: { title: '', topics: [] },
+          popularSearch: { title: '', searches: [] },
         },
       };
 

@@ -1,7 +1,17 @@
 import { DETAIL_HOME_CONFIG_KEYS } from '@/shared/constants/home-config-keys.constant';
 import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsObject, IsString, ValidateNested, IsIn, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsString,
+  ValidateNested,
+  IsIn,
+  IsOptional,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 // --- 1. HỢP PHẦN CƠ BẢN (BASE COMPONENTS) ---
 class MktProgramDto {
@@ -38,6 +48,7 @@ class TopBannerItemDto {
   @IsNotEmpty()
   title: string;
 
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => ImageDto)
@@ -64,20 +75,35 @@ class MenuItemDto {
   link: string;
 }
 
+class PopularSearchItemDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  text: string;
+}
+
 class CategoryItemDto extends TopBannerItemDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsNumber()
+  @Min(0)
+  minPrice: number;
 }
 
-class TopicDto {
+class PopularSearchDto {
   @IsString()
   @IsNotEmpty()
   title: string;
 
   @IsArray()
-  @IsString({ each: true })
-  topics: string[];
+  @ValidateNested({ each: true })
+  @Type(() => PopularSearchItemDto)
+  searches: PopularSearchItemDto[];
 }
 
 // --- 2. CÁC SUB-CLASS ĐÃ ĐƯỢC ĐỒNG BỘ THEO INTERFACE ---
@@ -203,8 +229,8 @@ export class DetailHomeConfigDto {
   @IsOptional()
   @IsObject()
   @ValidateNested()
-  @Type(() => TopicDto)
-  topic: TopicDto;
+  @Type(() => PopularSearchDto)
+  popularSearch: PopularSearchDto;
 }
 
 // --- 4. CLASS MAP TRỰC TIẾP VỚI INTERFACE IConfigHome ---

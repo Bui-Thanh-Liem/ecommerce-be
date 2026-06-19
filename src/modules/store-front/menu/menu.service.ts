@@ -33,8 +33,6 @@ export class MenuService {
 
   async findAll(query: MenuQueryDto): Promise<IMetadata<MenuEntity>> {
     const { page, limit } = query;
-
-    //
     const { take, skip } = calculatePagination(page, limit);
 
     const queryBuilder = this.navbarRepository
@@ -44,9 +42,9 @@ export class MenuService {
       .select(['navbar.id', 'navbar.name', 'navbar.slug', 'navbar.desc', 'navbar.link', 'navbar.isActive'])
 
       // Phân trang và sắp xếp
+      .orderBy('navbar.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .orderBy('navbar.createdAt', 'DESC'); // Nên có orderBy khi phân trang
+      .take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
@@ -71,7 +69,7 @@ export class MenuService {
       .select(['navbar.id', 'navbar.name', 'navbar.link'])
 
       // Phân trang và sắp xếp
-      .orderBy('navbar.createdAt', 'DESC') // Nên có orderBy khi phân trang
+      .orderBy('navbar.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 

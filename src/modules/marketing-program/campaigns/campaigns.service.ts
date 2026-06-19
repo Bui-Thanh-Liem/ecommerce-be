@@ -179,7 +179,14 @@ export class CampaignsService {
     //
     const queryBuilder = this.campaignRepository
       .createQueryBuilder('campaign')
-      .select(['campaign.id', 'campaign.name', 'campaign.mainImage', 'campaign.startDate', 'campaign.endDate']);
+      .select([
+        'campaign.id',
+        'campaign.name',
+        'campaign.slug',
+        'campaign.mainImage',
+        'campaign.startDate',
+        'campaign.endDate',
+      ]);
 
     //
     if (filters?.marketingProgram) {

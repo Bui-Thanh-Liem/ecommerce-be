@@ -6,6 +6,7 @@ import { MainBannerDto } from '../../main-banner/dto/main-banner.dto';
 import { CategoryDto } from '@/modules/catalog/categories/dto/category.dto';
 import { MktProgramDto } from '@/modules/marketing-program/marketing-programs/dto/mkt-program.dto';
 import { CampaignDto } from '@/modules/marketing-program/campaigns/dto/campaign.dto';
+import { PopularSearchDto } from '../../popular-search/dto/popular-search.dto';
 
 class MktSessionMultiProgramsDto {
   @Expose()
@@ -18,8 +19,29 @@ class MktSessionMultiProgramsDto {
 
 class MktSessionMultiCampaignsDto {
   @Expose()
+  title: string;
+
+  @Expose()
   @Type(() => CampaignDto)
   campaigns: CampaignDto[];
+}
+
+class MktSessionSingleCampaignDto {
+  @Expose()
+  title: string;
+
+  @Expose()
+  @Type(() => CampaignDto)
+  campaign: CampaignDto;
+}
+
+class MktSessionMultiPopularSearchesDto {
+  @Expose()
+  title: string;
+
+  @Expose()
+  @Type(() => PopularSearchDto)
+  searches: PopularSearchDto[];
 }
 
 // --- 1. DTO EXPOSE CHO DETAIL HOME CONFIG ---
@@ -44,6 +66,9 @@ export class DetailHomeConfigResponseDto {
   listCategories: CategoryDto[];
 
   @Expose()
+  historyProducts: string;
+
+  @Expose()
   @Type(() => MktSessionMultiProgramsDto)
   marketingProgram01: MktSessionMultiProgramsDto;
 
@@ -54,6 +79,25 @@ export class DetailHomeConfigResponseDto {
   @Expose()
   @Type(() => MktSessionMultiProgramsDto)
   marketingProgram03: MktSessionMultiProgramsDto;
+
+  @Expose()
+  suggestForYou: string;
+
+  @Expose()
+  @Type(() => MktSessionSingleCampaignDto)
+  marketingProgram04: MktSessionSingleCampaignDto;
+
+  @Expose()
+  @Type(() => MktSessionSingleCampaignDto)
+  marketingProgram05: MktSessionSingleCampaignDto;
+
+  @Expose()
+  @Type(() => MktSessionMultiCampaignsDto)
+  marketingProgram06: MktSessionMultiCampaignsDto;
+
+  @Expose()
+  @Type(() => MktSessionMultiPopularSearchesDto)
+  popularSearch: MktSessionMultiPopularSearchesDto;
 }
 
 // --- 2. DTO EXPOSE CHO CONFIG HOME ---
