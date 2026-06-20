@@ -5,6 +5,7 @@ import { UpdateStoreFrontConfigDto } from './dto/update-store-front-config.dto';
 import { Serializer } from '@/interceptors/serializer.interceptor';
 import { StoreFrontConfigDto } from './dto/store-front-config.dto';
 import { RemoveUndefinedPipe } from '@/pipes/remove-undefined.pipe';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('store-front-configs')
 @Serializer(StoreFrontConfigDto)
@@ -16,6 +17,7 @@ export class StoreFrontConfigsController {
     return await this.storeFrontConfigsService.create(dto);
   }
 
+  @Public()
   @Get()
   async findConfig() {
     return await this.storeFrontConfigsService.findConfig();

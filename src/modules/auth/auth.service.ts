@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { StaffTokensService } from '../management/staff-tokens/staff-tokens.service';
 import { TokenType } from '@/shared/enums/token-type.enum';
@@ -8,6 +8,8 @@ import { IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger();
+
   constructor(
     private staffsService: StaffsService,
     private staffTokensService: StaffTokensService,
@@ -46,11 +48,16 @@ export class AuthService {
 
   //
   async refreshToken(refreshToken: string, jwtPayload: IJwtPayload) {
-    return await this.staffTokensService.refreshAuthToken(refreshToken, jwtPayload);
+    try {
+      return await this.staffTokensService.refreshAuthToken(refreshToken, jwtPayload);
+    } catch (error) {
+      this.logger.error('Refresh token fail :::', error);
+      return false;
+    }
   }
 
   // Sign out a staff by revoking the token
-  async signOut(userId: string) {
-    await this.staffTokensService.delete(userId, TokenType.REFRESH);
+  async signOut(staffId: string) {
+    await this.staffTokensService.delete(staffId, TokenType.REFRESH);
   }
 }

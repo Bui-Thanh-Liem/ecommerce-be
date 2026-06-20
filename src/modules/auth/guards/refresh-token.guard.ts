@@ -15,7 +15,7 @@ export class RefreshTokenAuthGuard extends AuthGuard('refresh-token') {
   }
 
   handleRequest(err, payload, info, context: ExecutionContext) {
-    const res = context.switchToHttp().getRequest<Response>();
+    const res = context.switchToHttp().getResponse<Response>();
     const req = context.switchToHttp().getRequest<Request>();
 
     // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized

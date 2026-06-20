@@ -56,21 +56,31 @@ export class AuthController {
     const refreshToken = request.cookies['e_refresh_token'] as string;
 
     //
-    const { access, refresh } = await this.authService.refreshToken(refreshToken, jwtPayload);
+    const tokens = await this.authService.refreshToken(refreshToken, jwtPayload);
+
+    //
+    if (!tokens) {
+      res.clearCookie('e_token');
+      res.clearCookie('e_refresh_token');
+      return false;
+    }
 
     //
     const refreshMaxAge = Math.floor(jwtPayload.exp! - Date.now() / 1000) * 1000; // ms
-    res.cookie('e_token', access, { ...this.defaultConfig }); // 15 phút
-    res.cookie('e_refresh_token', refresh, { ...this.defaultConfig, maxAge: refreshMaxAge });
+    res.cookie('e_token', tokens?.access, { ...this.defaultConfig }); // 15 phút
+    res.cookie('e_refresh_token', tokens?.refresh, { ...this.defaultConfig, maxAge: refreshMaxAge });
 
     return true;
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 1 yêu cầu mỗi 15 phút cho endpoint refresh-token
   @Post('signout')
   @UseGuards(RefreshTokenAuthGuard)
   async signOut(@Res({ passthrough: true }) res: Response, @GetJwtPayload() jwtPayload: IJwtPayload) {
-    await this.authService.signOut(jwtPayload.staffId!);
+    if (jwtPayload) {
+      await this.authService.signOut(jwtPayload.staffId!);
+    }
     res.clearCookie('e_token');
     res.clearCookie('e_refresh_token');
     return true;
