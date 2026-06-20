@@ -25,6 +25,7 @@ export interface IVariantAttribute {
 
 export interface IProductVariant extends IBase {
   product: IProduct;
+  slug: string; // Lấy từ product.slug + salesAttributes (vd: ip15-128gb-denlucbao)
   sku: string;
   barcode?: string; // Mã vạch quốc tế của hãng (EAN/UPC) trên vỏ hộp
 

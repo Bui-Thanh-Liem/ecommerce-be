@@ -11,6 +11,7 @@ import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductVariantEntity } from './entities/product-variant.entity';
+import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 
 @Injectable()
 export class ProductVariantsService {
@@ -30,21 +31,25 @@ export class ProductVariantsService {
       const { product: productId, productImages, ...rest } = createProductVariantDto;
 
       // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant
-      const spu = await this.productsService.findSPUById(productId);
-      if (!spu) throw new NotFoundException(`Product with id ${productId} not found`);
+      const { spu, slug } = await this.productsService.findSPUAndSlugById(productId);
+      if (!spu) throw new NotFoundException('Product not found');
 
-      // 2.  Tạo SKU dựa trên SPU và specifications
+      // 2. Tạo slug cho ProductVariant dựa trên SPU và salesAttributes
+      const variantSlug = this.generateVariantSlug(rest.salesAttributes ?? [], slug);
+
+      // 3.  Tạo SKU dựa trên SPU và specifications
       const salesAttributeSKU = rest.salesAttributes.filter((attr) => attr.isSKU);
       const sku = this.productCodeService.generateSKUCode(spu, salesAttributeSKU);
 
-      // 3. Kiểm tra SKU có bị trùng không
+      // 4. Kiểm tra SKU có bị trùng không
       const exitsSKU = await this.productVariantRepo.findOne({ where: { sku } });
-      if (exitsSKU) throw new NotFoundException(`Product variant with SKU ${sku} already exists`);
+      if (exitsSKU) throw new NotFoundException('Product variant already exists');
 
-      // 4. Tạo ProductVariant mới
+      // 5. Tạo ProductVariant mới
       const productVariant = this.productVariantRepo.create({
         ...rest,
         sku,
+        slug: variantSlug,
         product: { id: productId },
         productImages: productImages, // Thêm productImages vào đây để cascade lưu
       });
@@ -93,34 +98,13 @@ export class ProductVariantsService {
       ])
 
       // Phân trang và sắp xếp
+      .orderBy('productVariant.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .orderBy('productVariant.createdAt', 'DESC'); // Nên có orderBy khi phân trang
+      .take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
-    const dataWithUrls = await Promise.all(
-      data.map(async (product) => {
-        const flattenedImages = product?.productImages?.flat() || [];
-
-        const updatedImages = flattenedImages.map(async (img) => {
-          const publicId = img?.image?.key || '';
-          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
-
-          return {
-            ...img,
-            image: {
-              ...img.image,
-              url,
-            },
-          } as ProductImageEntity;
-        });
-
-        product.productImages = await Promise.all(updatedImages);
-
-        return product;
-      }),
-    );
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -148,35 +132,74 @@ export class ProductVariantsService {
         'productImages.id',
         'productImages.image',
       ])
+
+      .orderBy('pv.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .orderBy('pv.createdAt', 'DESC');
+      .take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
     //
-    const dataWithUrls = await Promise.all(
-      data.map(async (product) => {
-        const flattenedImages = product?.productImages?.flat() || [];
+    const dataWithUrls = await this.signUrl(data);
 
-        const updatedImages = flattenedImages.map(async (img) => {
-          const publicId = img?.image?.key || '';
-          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+    return {
+      data: dataWithUrls,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
 
-          return {
-            ...img,
-            image: {
-              ...img.image,
-              url,
-            },
-          } as ProductImageEntity;
-        });
+  async findAllByCampaign(campaignId: string, query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
 
-        product.productImages = await Promise.all(updatedImages);
+    const queryBuilder = this.productVariantRepo
+      .createQueryBuilder('pv')
+      .leftJoinAndSelect('pv.product', 'product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('pv.campaigns', 'campaigns')
+      .leftJoinAndSelect('pv.productImages', 'productImages')
 
-        return product;
-      }),
-    );
+      //
+      .where('campaigns.id = :campaignId', { campaignId })
+
+      //
+      .select([
+        'pv.id',
+        'pv.sku',
+        'pv.slug',
+        'pv.price',
+        'pv.createdAt',
+        'pv.soldCount',
+        'pv.conditions',
+        'pv.salesAttributes',
+        'pv.discountPercent',
+
+        //
+        'product.id',
+        'product.name',
+        'product.slug',
+        'product.basePrice',
+        'product.thumbnail',
+
+        'category.id',
+        'category.slug',
+
+        //
+        'productImages.id',
+        'productImages.image',
+      ])
+
+      //
+      .orderBy('pv.createdAt', 'DESC')
+      .skip(skip)
+      .take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    //
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -223,16 +246,23 @@ export class ProductVariantsService {
     const isChangingProduct = productId && productId !== oldVariant.product?.id;
 
     // Chạy song song các câu lệnh check độc lập ngoài transaction
-    const [fetchedSpu] = await Promise.all([
-      isChangingProduct ? this.productsService.findSPUById(productId) : Promise.resolve(finalSpu),
+    const [product] = await Promise.all([
+      isChangingProduct
+        ? this.productsService.findSPUAndSlugById(productId)
+        : Promise.resolve({ spu: finalSpu, slug: '' }),
     ]);
 
-    if (isChangingProduct && !fetchedSpu) {
-      throw new NotFoundException(`Product with ID ${productId} not found`);
+    //
+    const variantSlug = this.generateVariantSlug(salesAttributes ?? oldVariant.salesAttributes, product?.slug);
+
+    //
+    if (isChangingProduct && !product.spu) {
+      throw new NotFoundException('Product not found');
     }
 
+    //
     if (isChangingProduct) {
-      finalSpu = fetchedSpu;
+      finalSpu = product.spu;
     }
 
     // Logic tạo và check trùng SKU code mới nếu các thành phần cấu thành thay đổi
@@ -271,6 +301,7 @@ export class ProductVariantsService {
       const updatedVariant = this.productVariantRepo.merge(oldVariant, {
         ...rest,
         sku: newSkuCode,
+        slug: variantSlug,
         salesAttributes: salesAttributes !== undefined ? salesAttributes : undefined,
         product: productId ? { id: productId } : undefined,
       });
@@ -347,5 +378,40 @@ export class ProductVariantsService {
   private async removeImagesForError(keys?: string[]) {
     if (!keys || keys.length === 0) return;
     return await this.cloudinaryService.deleteMultipleImages(keys);
+  }
+
+  private async signUrl(data: ProductVariantEntity[]): Promise<ProductVariantEntity[]> {
+    return await Promise.all(
+      data.map(async (product) => {
+        const flattenedImages = product?.productImages?.flat() || [];
+
+        const updatedImages = flattenedImages.map(async (img) => {
+          const publicId = img?.image?.key || '';
+          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+
+          return {
+            ...img,
+            image: {
+              ...img.image,
+              url,
+            },
+          } as ProductImageEntity;
+        });
+
+        product.productImages = await Promise.all(updatedImages);
+
+        return product;
+      }),
+    );
+  }
+
+  private generateVariantSlug(salesAttributes: IVariantAttribute[], productSlug?: string): string {
+    if (!productSlug) throw new NotFoundException('Product slug is required to generate variant slug');
+
+    const slugParts = salesAttributes
+      .filter((attr) => attr.isSKU)
+      .map((attr) => attr.value.toLocaleLowerCase().replace(/\s+/g, '-'));
+
+    return `${productSlug}-${slugParts.join('-')}`;
   }
 }

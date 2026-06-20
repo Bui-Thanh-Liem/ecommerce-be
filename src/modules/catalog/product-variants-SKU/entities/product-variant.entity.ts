@@ -20,6 +20,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ unique: true })
   sku: string;
 
+  @Column({ unique: true })
+  slug: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   vat?: number;
 

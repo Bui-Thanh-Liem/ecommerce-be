@@ -11,6 +11,8 @@ import {
   IsOptional,
   IsNumber,
   Min,
+  ArrayMinSize,
+  ArrayMaxSize,
 } from 'class-validator';
 
 // --- 1. HỢP PHẦN CƠ BẢN (BASE COMPONENTS) ---
@@ -124,6 +126,7 @@ class MktSessionProgramDto {
 class MktSessionProgram02Dto {
   @IsArray()
   @ValidateNested({ each: true })
+  @ArrayMinSize(2, { message: 'At least 2 campaigns are required' })
   @Type(() => CampaignDto)
   campaigns: CampaignDto[];
 }
@@ -172,12 +175,16 @@ export class DetailHomeConfigDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(5, { message: 'Maximum of 5 main banners are allowed' })
+  @ArrayMinSize(1, { message: 'At least 1 main banner is required' })
   @ValidateNested({ each: true })
   @Type(() => MainBannerItemDto)
   mainBanner: MainBannerItemDto[];
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(15, { message: 'Maximum of 15 categories are allowed' })
+  @ArrayMinSize(1, { message: 'At least 1 category is required' })
   @ValidateNested({ each: true })
   @Type(() => CategoryItemDto)
   listCategories: CategoryItemDto[];

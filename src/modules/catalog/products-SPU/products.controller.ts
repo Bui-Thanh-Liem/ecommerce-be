@@ -42,6 +42,13 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+  @Public()
+  @Get('slug/:slug')
+  @Permissions(permissionsSeed.product.read.code)
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.productsService.findOneBySlug(slug);
+  }
+
   @Patch(':id')
   @Permissions(permissionsSeed.product.update.code)
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {

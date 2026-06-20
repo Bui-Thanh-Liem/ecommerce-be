@@ -25,6 +25,9 @@ export class ProductVariantSKUDto extends SerializerDto {
   sku: string;
 
   @Expose()
+  slug: string;
+
+  @Expose()
   barcode: string;
 
   @Expose()

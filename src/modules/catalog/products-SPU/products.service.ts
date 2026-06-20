@@ -179,13 +179,20 @@ export class ProductsService {
     return count === ids.length;
   }
 
-  async findSPUById(id: string) {
-    const product = await this.productRepo.findOne({ where: { id }, select: ['spu'] });
-    return product?.spu;
+  async findSPUAndSlugById(id: string) {
+    const product = await this.productRepo.findOne({ where: { id }, select: ['spu', 'slug'] });
+    return {
+      spu: product?.spu,
+      slug: product?.slug,
+    };
   }
 
   async findOne(id: string) {
     return await this.productRepo.findOne({ where: { id }, relations: ['category', 'brand'] });
+  }
+
+  async findOneBySlug(slug: string) {
+    return await this.productRepo.findOne({ where: { slug }, relations: ['category', 'brand'] });
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {

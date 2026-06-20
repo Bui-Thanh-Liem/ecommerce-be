@@ -155,7 +155,7 @@ export class CampaignsService {
       ])
 
       // Phân trang và sắp xếp
-      .orderBy('campaign.createdAt', 'DESC') // Nên có orderBy khi phân trang
+      .orderBy('campaign.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 

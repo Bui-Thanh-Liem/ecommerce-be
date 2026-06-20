@@ -8,6 +8,7 @@ import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
 import { ProductVariantMetadataDto } from './dto/metadata-product-variant.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('product-variants')
 @Serializer(ProductVariantSKUDto)
@@ -44,6 +45,14 @@ export class ProductVariantsController {
   @Permissions(permissionsSeed.productVariant.update.code)
   update(@Param('id') id: string, @Body() updateProductVariantDto: UpdateProductVariantDto) {
     return this.productVariantsService.update(id, updateProductVariantDto);
+  }
+
+  @Public()
+  @Get('campaign/:campaignId')
+  @Permissions(permissionsSeed.productVariant.read.code)
+  @Serializer(ProductVariantMetadataDto)
+  async findAllByCampaign(@Param('campaignId') campaignId: string, @Query() query: ProductVariantQueryDto) {
+    return await this.productVariantsService.findAllByCampaign(campaignId, query);
   }
 
   @Delete(':id')
