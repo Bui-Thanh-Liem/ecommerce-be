@@ -55,6 +55,13 @@ export class ProductVariantsController {
     return await this.productVariantsService.findAllByCampaign(campaignId, query);
   }
 
+  @Public()
+  @Get('slug/:slug')
+  @Permissions(permissionsSeed.productVariant.read.code)
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.productVariantsService.findOneBySlug(slug);
+  }
+
   @Delete(':id')
   @Permissions(permissionsSeed.productVariant.delete.code)
   remove(@Param('id') id: string) {

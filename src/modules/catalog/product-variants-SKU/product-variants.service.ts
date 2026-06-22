@@ -218,6 +218,16 @@ export class ProductVariantsService {
     return await this.productVariantRepo.findOne({ where: { id } });
   }
 
+  /**
+   *
+   * @param slug String
+   * @returns ProductVariantEntity
+   * @description Se duoc goi chung voi findOneBySlug cua product nen khong can join product tai day
+   */
+  async findOneBySlug(slug: string) {
+    return await this.productVariantRepo.findOne({ where: { slug }, relations: ['productImages'] });
+  }
+
   async update(id: string, updateProductVariantDto: UpdateProductVariantDto) {
     const { product: productId, salesAttributes, productImages, ...rest } = updateProductVariantDto;
 
@@ -238,7 +248,7 @@ export class ProductVariantsService {
       },
     });
     if (!oldVariant) {
-      throw new NotFoundException(`Product variant with ID ${id} not found`);
+      throw new NotFoundException('Product variant not found');
     }
 
     // Xác định SPU code phục vụ sinh SKU
@@ -281,7 +291,7 @@ export class ProductVariantsService {
           where: { id: Not(id), sku: newSkuCode },
         });
         if (isSkuDup) {
-          throw new ConflictException(`Product variant with SKU ${newSkuCode} already exists`);
+          throw new ConflictException('Product variant already exists');
         }
       }
     }
@@ -301,7 +311,7 @@ export class ProductVariantsService {
       const updatedVariant = this.productVariantRepo.merge(oldVariant, {
         ...rest,
         sku: newSkuCode,
-        slug: variantSlug,
+        slug: variantSlug || undefined,
         salesAttributes: salesAttributes !== undefined ? salesAttributes : undefined,
         product: productId ? { id: productId } : undefined,
       });
@@ -406,8 +416,7 @@ export class ProductVariantsService {
   }
 
   private generateVariantSlug(salesAttributes: IVariantAttribute[], productSlug?: string): string {
-    if (!productSlug) throw new NotFoundException('Product slug is required to generate variant slug');
-
+    if (!productSlug) return '';
     const slugParts = salesAttributes
       .filter((attr) => attr.isSKU)
       .map((attr) => attr.value.toLocaleLowerCase().replace(/\s+/g, '-'));

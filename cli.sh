@@ -37,6 +37,7 @@ docker cp ${CONTAINER_NAME}:/tmp/${BACKUP_FILE} ./${BACKUP_FILE}
 
 # Restore file backup.sql từ host vào database ${DB_NAME} trong container
 docker exec -i ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB_NAME} < ${BACKUP_FILE}
+docker exec -i postgres-local psql -U root -d shop_dev < ./backup.sql
 
 # Hoặc
 cat ${BACKUP_FILE} | docker exec -i ${CONTAINER_NAME} psql -U ${DB_USER} -d ${DB_NAME}
