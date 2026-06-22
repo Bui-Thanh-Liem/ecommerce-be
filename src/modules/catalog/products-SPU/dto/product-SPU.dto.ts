@@ -4,8 +4,15 @@ import { ProductImageDto } from '@/modules/catalog/product-images/dto/product-im
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { ISpecification, ISpecificationItem } from '@/shared/interfaces/models/catalog/product.interface';
 import { Expose, Type } from 'class-transformer';
+import { ProductVariantSKUDto } from '../../product-variants-SKU/dto/product-variant-SKU.dto';
 
-class SpecificationItemDto implements ISpecificationItem {
+export class SpecificationItemDto implements ISpecificationItem {
+  @Expose()
+  label: string;
+
+  @Expose()
+  desc: string;
+
   @Expose()
   key: string;
 
@@ -17,9 +24,6 @@ class SpecificationItemDto implements ISpecificationItem {
 
   @Expose()
   link?: string;
-
-  @Expose()
-  isSKU: boolean;
 
   @Expose()
   order: number;
@@ -81,6 +85,10 @@ export class ProductSPUDto extends SerializerDto {
   @Expose()
   @Type(() => SpecificationDto)
   specifications: SpecificationDto[];
+
+  @Expose()
+  @Type(() => ProductVariantSKUDto)
+  productVariants: ProductVariantSKUDto[];
 
   @Expose()
   spu: string;

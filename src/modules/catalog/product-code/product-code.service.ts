@@ -37,18 +37,14 @@ export class ProductCodeService {
 
     // 1. Lấy mã 'key' viết tắt của các thuộc tính, viết hoa và làm sạch
     const attrParts = salesAttributes.map((attr) => {
-      if (!attr.key) {
-        // Fallback nếu không có trường code thì tự convert slug từ value, nhưng khuyên dùng trường code riêng
-        return attr.value.toUpperCase().replace(/\s+/g, '');
-      }
-      return attr.key
-        .toUpperCase()
+      return attr.value
+        ?.toUpperCase()
         .trim()
         .replace(/[^A-Z0-9]/g, '');
     });
 
     // 2. Ghép lại thành một chuỗi mã thuộc tính duy nhất (Ví dụ: BLK128)
-    const attributesString = attrParts.join('');
+    const attributesString = attrParts.join('-');
 
     // 3. Trả về mã SKU hoàn chỉnh (Không cần SEQUENCE đuôi)
     return `${spuCode}-${attributesString}`;

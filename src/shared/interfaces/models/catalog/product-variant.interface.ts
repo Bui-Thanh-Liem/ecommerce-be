@@ -1,6 +1,6 @@
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IBase } from '../../common/base.interface';
-import { IProduct } from './product.interface';
+import { IProduct, ISpecificationItem } from './product.interface';
 import { IProductItem } from './product-item.interface';
 import { IRating } from '../customer/rating.interface';
 import { IPromotion } from '../mkt-program/promotion.interface';
@@ -16,10 +16,7 @@ import { ICampaign } from '../mkt-program/campaign.interface';
  * - Nhưng Sử dụng postgres (JSONB) thì các thuật toán nén đã tối ưu rất tốt
  * - Đổi lại thì sẽ đơn giản code hơn, trong khi vẫn đảm bảo hiệu năng tốt (không join nhiều, vẫn có index)
  **/
-export interface IVariantAttribute {
-  key: string; // vd: "color", "storage"
-  label: string; // vd: "Màu sắc", "Dung lượng"
-  value: string; // vd: "Đen lục bảo", "128GB"
+export interface IVariantAttribute extends ISpecificationItem {
   isSKU?: boolean; // Thuộc tính nào sẽ hiển thị ở SKU
 }
 

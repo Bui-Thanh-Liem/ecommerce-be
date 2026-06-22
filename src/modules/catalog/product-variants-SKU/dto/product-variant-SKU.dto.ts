@@ -1,19 +1,11 @@
 import { ProductImageDto } from '@/modules/catalog/product-images/dto/product-image.dto';
-import { ProductSPUDto } from '@/modules/catalog/products-SPU/dto/product-SPU.dto';
+import { ProductSPUDto, SpecificationItemDto } from '@/modules/catalog/products-SPU/dto/product-SPU.dto';
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
+import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 import { Expose, Type } from 'class-transformer';
 
-class SpecificationDto {
-  @Expose()
-  key: string;
-
-  @Expose()
-  label: string;
-
-  @Expose()
-  value: string;
-
+class SpecificationDto extends SpecificationItemDto implements IVariantAttribute {
   @Expose()
   isSKU: boolean;
 }

@@ -1,7 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { CreateProductImageDto } from '@/modules/catalog/product-images/dto/create-product-image.dto';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
-import { ISpecification } from '@/shared/interfaces/models/catalog/product.interface';
+import { ISpecification, ISpecificationItem } from '@/shared/interfaces/models/catalog/product.interface';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -22,7 +22,17 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class SpecificationItemDto {
+class SpecificationItemDto implements ISpecificationItem {
+  @IsNotEmpty()
+  @IsString()
+  @Trim()
+  label: string;
+
+  @IsOptional()
+  @IsString()
+  @Trim()
+  desc?: string;
+
   @IsNotEmpty()
   @IsString()
   @Trim()

@@ -7,8 +7,10 @@ import { IProductImage } from './product-image.interface';
 import { ICartItem } from '../customer/cart-item.interface';
 
 export interface ISpecificationItem {
-  key: string; // Thuộc tính, ví dụ: "Màu sắc"
-  value: any; // Giá trị của thuộc tính, có thể là string, number, boolean, ...
+  key: string; // vd: "color", "storage"
+  label: string; // vd: "Màu sắc", "Dung lượng"
+  value: string;
+  desc?: string; // Mô tả của thuộc tính (VD: "xanh da trời")
   isHighlight?: boolean; // Có phải là thuộc tính nổi bật hay không (để hiển thị nổi bật trên UI)
   order: number; // Độ ưu tiên hiển thị (số càng nhỏ thì hiển thị càng trước)
 }

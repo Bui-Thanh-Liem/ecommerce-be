@@ -15,23 +15,9 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+import { SpecificationItemDto } from '../../products-SPU/dto/product-SPU.dto';
 
-class VariantAttributeDto {
-  @IsNotEmpty()
-  @IsString()
-  @Trim()
-  key: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Trim()
-  label: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Trim()
-  value: string;
-
+class VariantAttributeDto extends SpecificationItemDto {
   @IsOptional()
   @IsBoolean()
   isSKU?: boolean;

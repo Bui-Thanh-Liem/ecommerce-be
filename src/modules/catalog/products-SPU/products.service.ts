@@ -192,7 +192,32 @@ export class ProductsService {
   }
 
   async findOneBySlug(slug: string) {
-    return await this.productRepo.findOne({ where: { slug }, relations: ['category', 'brand'] });
+    const queryBuilder = this.productRepo
+      .createQueryBuilder('product')
+
+      //
+      .where('product.slug = :slug', { slug })
+
+      //
+      .leftJoinAndSelect('product.productVariants', 'variant')
+
+      //
+      .select([
+        'product.id',
+        'product.name',
+        'product.desc',
+        'product.specifications',
+
+        'variant.id',
+        'variant.slug',
+        'variant.price',
+        'variant.discountPercent',
+        'variant.salesAttributes',
+      ]);
+
+    //
+
+    return await queryBuilder.getOne();
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
@@ -216,7 +241,7 @@ export class ProductsService {
       },
     });
     if (!oldProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+      throw new NotFoundException('Product not found');
     }
 
     const slug = name ? stringToSlug(name) : undefined;

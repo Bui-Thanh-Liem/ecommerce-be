@@ -12,6 +12,7 @@ import { ProductVariantQueryDto } from './dto/query-product-variant-SKU.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductVariantEntity } from './entities/product-variant.entity';
 import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
+import { stringToSlug } from '@/utils/string-to-slug.util';
 
 @Injectable()
 export class ProductVariantsService {
@@ -158,6 +159,7 @@ export class ProductVariantsService {
       .createQueryBuilder('pv')
       .leftJoinAndSelect('pv.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('category.parent', 'parentCategory')
       .leftJoinAndSelect('pv.campaigns', 'campaigns')
       .leftJoinAndSelect('pv.productImages', 'productImages')
 
@@ -185,6 +187,9 @@ export class ProductVariantsService {
 
         'category.id',
         'category.slug',
+
+        'parentCategory.id',
+        'parentCategory.slug',
 
         //
         'productImages.id',
@@ -228,8 +233,8 @@ export class ProductVariantsService {
     return await this.productVariantRepo.findOne({ where: { slug }, relations: ['productImages'] });
   }
 
-  async update(id: string, updateProductVariantDto: UpdateProductVariantDto) {
-    const { product: productId, salesAttributes, productImages, ...rest } = updateProductVariantDto;
+  async update(id: string, dto: UpdateProductVariantDto) {
+    const { product: productId, salesAttributes, productImages, ...rest } = dto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -257,9 +262,7 @@ export class ProductVariantsService {
 
     // Chạy song song các câu lệnh check độc lập ngoài transaction
     const [product] = await Promise.all([
-      isChangingProduct
-        ? this.productsService.findSPUAndSlugById(productId)
-        : Promise.resolve({ spu: finalSpu, slug: '' }),
+      productId ? this.productsService.findSPUAndSlugById(productId) : Promise.resolve({ spu: finalSpu, slug: '' }),
     ]);
 
     //
@@ -417,9 +420,7 @@ export class ProductVariantsService {
 
   private generateVariantSlug(salesAttributes: IVariantAttribute[], productSlug?: string): string {
     if (!productSlug) return '';
-    const slugParts = salesAttributes
-      .filter((attr) => attr.isSKU)
-      .map((attr) => attr.value.toLocaleLowerCase().replace(/\s+/g, '-'));
+    const slugParts = salesAttributes.filter((attr) => attr.isSKU).map((attr) => stringToSlug(attr.value));
 
     return `${productSlug}-${slugParts.join('-')}`;
   }
