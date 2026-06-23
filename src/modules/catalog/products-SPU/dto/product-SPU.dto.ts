@@ -76,6 +76,10 @@ export class ProductSPUDto extends SerializerDto {
   category: CategoryDto;
 
   @Expose()
+  @Type(() => CategoryDto)
+  secondaryCategories: CategoryDto[];
+
+  @Expose()
   brand: BrandDto;
 
   @Expose()

@@ -62,6 +62,7 @@ import { HttpMetricsInterceptor } from './interceptors/http-metrics.interceptor'
 import { TopBannersModule } from './modules/store-front/top-banners/top-banners.module';
 import { StoreFrontConfigsModule } from './modules/store-front/store-front-configs/store-front-configs.module';
 import { PopularSearchModule } from './modules/store-front/popular-search/popular-search.module';
+import { FiltersModule } from './modules/filters/filters.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -139,6 +140,7 @@ const isProd = process.env.NODE_ENV === 'production';
     TopBannersModule,
     StoreFrontConfigsModule,
     PopularSearchModule,
+    FiltersModule,
   ],
   controllers: [AppController],
   providers: [

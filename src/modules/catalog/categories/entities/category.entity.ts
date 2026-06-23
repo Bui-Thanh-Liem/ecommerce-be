@@ -4,7 +4,7 @@ import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';
 import { ICategory } from '@/shared/interfaces/models/catalog/category.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, TreeParent } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, TreeParent } from 'typeorm';
 
 @Entity('categories')
 export class CategoryEntity extends BaseEntity implements ICategory {
@@ -40,6 +40,9 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   //
   @OneToMany(() => ProductEntity, (product) => product.category)
   products?: ProductEntity[] | null;
+
+  @ManyToMany(() => ProductEntity, (product) => product.secondaryCategories)
+  secondaryProducts?: ProductEntity[] | null;
 
   @OneToMany(() => CategoryPromotionEntity, (categoryPromotion) => categoryPromotion.category, { nullable: true })
   categoryPromotions?: CategoryPromotionEntity[];

@@ -42,22 +42,33 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    const { category: categoryId, brand: brandId, name, model, productImages, ...rest } = createProductDto;
+    const {
+      category: categoryId,
+      secondaryCategories: secondaryCategoryIds,
+      brand: brandId,
+      name,
+      model,
+      productImages,
+      ...rest
+    } = createProductDto;
     try {
       const slug = stringToSlug(name);
 
       // 1. Kiểm tra trùng (Unique constraint check)
-      const [eS, eM, categoryCode, brandCode, thumb] = await Promise.all([
+      const [eS, eM, categoryCode, brandCode, thumb, secondaryCategoriesExist] = await Promise.all([
         this.productRepo.findOne({ where: { slug } }),
         this.productRepo.findOne({ where: { model } }),
         this.cateService.findCodeById(categoryId),
         this.brandService.findCodeById(brandId),
         productImages?.length > 0 ? this.cloudinaryService.generateUrl(productImages[0].image.key) : null,
+        secondaryCategoryIds.length > 0 ? this.cateService.exists(secondaryCategoryIds) : null,
       ]);
       if (eS) throw new ConflictException('Product with this name already exists');
       if (eM) throw new ConflictException('Product with this model already exists');
       if (!categoryCode) throw new NotFoundException('Category code not found');
       if (!brandCode) throw new NotFoundException('Brand code not found');
+      if (secondaryCategoryIds.length > 0 && !secondaryCategoriesExist)
+        throw new NotFoundException('One or more secondary categories not found');
 
       // 2. Sinh mã SPU
       const spu = this.productCodeService.generateSPUCode(categoryCode, brandCode, model);
@@ -77,6 +88,7 @@ export class ProductsService {
         brand: { id: brandId },
         thumbnail: thumb ?? undefined, // Lấy thumbnail từ productImages nếu có
         category: { id: categoryId },
+        secondaryCategories: secondaryCategoryIds.map((id) => ({ id })),
       });
       return await this.productRepo.save(product);
     } catch (error) {
@@ -99,6 +111,7 @@ export class ProductsService {
       // Join các quan hệ
       .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.secondaryCategories', 'secondaryCategories')
       .leftJoinAndSelect('product.productImages', 'productImages')
 
       // Select các trường cụ thể (tương đương với select của bạn)
@@ -129,6 +142,10 @@ export class ProductsService {
         'category.name',
         'category.slug',
         'category.code',
+        'secondaryCategories.id',
+        'secondaryCategories.name',
+        'secondaryCategories.slug',
+        'secondaryCategories.code',
         'productImages.id',
         'productImages.image',
         'productImages.sortOrder',
@@ -221,7 +238,15 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    const { category: categoryId, brand: brandId, name, model, productImages, ...rest } = updateProductDto;
+    const {
+      category: categoryId,
+      secondaryCategories: secondaryCategoryIds,
+      brand: brandId,
+      name,
+      model,
+      productImages,
+      ...rest
+    } = updateProductDto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
@@ -238,6 +263,7 @@ export class ProductsService {
         brand: { id: true, code: true },
         category: { id: true, code: true },
         productImages: { id: true, image: true },
+        secondaryCategories: { id: true, code: true },
       },
     });
     if (!oldProduct) {
@@ -247,21 +273,26 @@ export class ProductsService {
     const slug = name ? stringToSlug(name) : undefined;
 
     // Chạy song song các câu lệnh check độc lập ngoài transaction
-    const [eS, eM, cateCode, brandCode] = await Promise.all([
+    const hasSecondaryCategories = secondaryCategoryIds && secondaryCategoryIds.length > 0;
+    const [eS, eM, cateCode, brandCode, secondaryCategoriesExist] = await Promise.all([
       name ? this.productRepo.exists({ where: { slug, id: Not(id) } }) : null,
       model ? this.productRepo.exists({ where: { model, id: Not(id) } }) : null,
       categoryId ? this.cateService.findCodeById(categoryId) : null,
-      brandId ? this.brandService.findCodeById(brandId) : Promise.resolve(null),
+      brandId ? this.brandService.findCodeById(brandId) : null,
+      hasSecondaryCategories ? this.cateService.exists(secondaryCategoryIds) : null,
     ]);
 
     if (eS) throw new ConflictException('Product with this name already exists');
     if (eM) throw new ConflictException('Product with this model already exists');
     if (categoryId && !cateCode) throw new NotFoundException('Category code not found');
     if (brandId && !brandCode) throw new NotFoundException('Brand code not found');
+    if (hasSecondaryCategories && !secondaryCategoriesExist)
+      throw new NotFoundException('One or more secondary categories not found');
 
     // Kiểm tra và xử lý logic thay đổi SPU Code
     let newSpuCode: string | undefined = undefined;
-    const isChangingSpuComponents = categoryId || brandId || model;
+    const isChangingSpuComponents =
+      categoryId !== oldProduct.category?.id || brandId !== oldProduct.brand?.id || model !== oldProduct.model;
 
     if (isChangingSpuComponents) {
       // [GUARD CLAUSE]: Kiểm tra xem SPU này đã có dữ liệu phát sinh chưa
@@ -304,6 +335,7 @@ export class ProductsService {
         ...(model && { model }),
         ...(brandId && { brand: { id: brandId } }),
         ...(categoryId && { category: { id: categoryId } }),
+        ...(secondaryCategoryIds !== undefined && { secondaryCategories: secondaryCategoryIds.map((id) => ({ id })) }),
       });
 
       if (productImages !== undefined) {

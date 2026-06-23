@@ -77,6 +77,11 @@ export class CreateProductDto {
   @IsNotEmpty()
   category: string;
 
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  secondaryCategories: string[];
+
   @IsUUID('4')
   @IsNotEmpty()
   brand: string;

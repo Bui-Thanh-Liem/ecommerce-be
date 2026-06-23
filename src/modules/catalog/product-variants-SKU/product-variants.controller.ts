@@ -56,6 +56,14 @@ export class ProductVariantsController {
   }
 
   @Public()
+  @Get('category/slug/:categorySlug')
+  @Permissions(permissionsSeed.productVariant.read.code)
+  @Serializer(ProductVariantMetadataDto)
+  async findAllByCategorySlug(@Param('categorySlug') categorySlug: string, @Query() query: ProductVariantQueryDto) {
+    return await this.productVariantsService.findAllByCategorySlug(categorySlug, query);
+  }
+
+  @Public()
   @Get('slug/:slug')
   @Permissions(permissionsSeed.productVariant.read.code)
   findOneBySlug(@Param('slug') slug: string) {

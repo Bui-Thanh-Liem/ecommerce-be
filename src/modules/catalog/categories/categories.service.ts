@@ -127,9 +127,9 @@ export class CategoriesService {
         'category.minPrice',
         'category.createdAt',
       ])
+      .orderBy('category.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .orderBy('category.createdAt', 'DESC');
+      .take(take);
 
     if (filters?.name) {
       queryBuilder.andWhere('unaccent(category.name) ILIKE unaccent(:name)', {
@@ -157,7 +157,7 @@ export class CategoriesService {
     };
   }
 
-  async getTreeData(query: CategoryQueryDto) {
+  async findTreeData(query: CategoryQueryDto) {
     const { filters } = query;
     const parent = filters?.parent;
 

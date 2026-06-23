@@ -72,15 +72,8 @@ export class BrandsService {
     //
     const [data, total] = await queryBuilder.getManyAndCount();
 
-    // Chuyển đổi URL ảnh nếu có
-    const dataWithUrls = await Promise.all(
-      data.map(async (brand) => {
-        if (brand.image && brand.image.key) {
-          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
-        }
-        return brand;
-      }),
-    );
+    //
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -103,14 +96,7 @@ export class BrandsService {
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
-    const dataWithUrls = await Promise.all(
-      data.map(async (brand) => {
-        if (brand.image && brand.image.key) {
-          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
-        }
-        return brand;
-      }),
-    );
+    const dataWithUrls = await this.signUrl(data);
 
     return {
       data: dataWithUrls,
@@ -254,5 +240,16 @@ export class BrandsService {
   private async removeImageForError(key?: string) {
     if (!key) return;
     return await this.cloudinaryQueue.add('delete-image', { publicId: key }, { jobId: `delete-${key}-${Date.now()}` });
+  }
+
+  private async signUrl(data: BrandEntity[]): Promise<BrandEntity[]> {
+    return await Promise.all(
+      data.map(async (brand) => {
+        if (brand.image && brand.image.key) {
+          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+        }
+        return brand;
+      }),
+    );
   }
 }

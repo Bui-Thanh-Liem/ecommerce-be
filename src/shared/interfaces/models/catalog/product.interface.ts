@@ -30,6 +30,7 @@ export interface IProduct extends IBase {
   status: ProductStatus;
   discountPercent: number;
   category: ICategory;
+  secondaryCategories?: ICategory[];
   brand: IBrand;
   specifications: ISpecification[];
 

@@ -6,7 +6,7 @@ import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
 import { IProduct, ISpecification } from '@/shared/interfaces/models/catalog/product.interface';
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('products')
 export class ProductEntity extends BaseEntity implements IProduct {
@@ -36,6 +36,14 @@ export class ProductEntity extends BaseEntity implements IProduct {
 
   @ManyToOne(() => CategoryEntity, (category) => category.products, { onDelete: 'SET NULL' })
   category: CategoryEntity;
+
+  @ManyToMany(() => CategoryEntity, (category) => category.secondaryProducts, { onDelete: 'SET NULL', nullable: true })
+  @JoinTable({
+    name: 'product_secondary_categories',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  secondaryCategories?: CategoryEntity[];
 
   @ManyToOne(() => BrandEntity, (brand) => brand.products, { onDelete: 'SET NULL' })
   brand: BrandEntity;

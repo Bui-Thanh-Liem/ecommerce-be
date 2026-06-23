@@ -13,6 +13,7 @@ import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { ProductVariantEntity } from './entities/product-variant.entity';
 import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
+import { CategoryEntity } from '../categories/entities/category.entity';
 
 @Injectable()
 export class ProductVariantsService {
@@ -186,9 +187,11 @@ export class ProductVariantsService {
         'product.thumbnail',
 
         'category.id',
+        'category.name',
         'category.slug',
 
         'parentCategory.id',
+        'parentCategory.name',
         'parentCategory.slug',
 
         //
@@ -197,6 +200,81 @@ export class ProductVariantsService {
       ])
 
       //
+      .orderBy('pv.createdAt', 'DESC')
+      .skip(skip)
+      .take(take);
+
+    const [data, totalData] = await queryBuilder.getManyAndCount();
+
+    //
+    const dataWithUrls = await this.signUrl(data);
+
+    return {
+      data: dataWithUrls,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
+  }
+
+  async findAllByCategorySlug(
+    categorySlug: string,
+    query: ProductVariantQueryDto,
+  ): Promise<IMetadata<ProductVariantEntity>> {
+    const { page, limit } = query;
+    const { take, skip } = calculatePagination(page, limit);
+
+    const queryBuilder = this.productVariantRepo
+      .createQueryBuilder('pv')
+      .leftJoinAndSelect('pv.product', 'product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.secondaryCategories', 'sCategory')
+      .leftJoinAndSelect('category.parent', 'parentCategory')
+      .leftJoinAndSelect('pv.campaigns', 'campaigns')
+      .leftJoinAndSelect('pv.productImages', 'productImages')
+
+      // Dùng Subquery
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('c.id')
+          .from(CategoryEntity, 'c') // Entity Category
+          .leftJoin('c.parent', 'p') // Nếu cần tìm cả category con của slug này
+          .where('c.slug = :categorySlug OR p.slug = :categorySlug OR sCategory.slug = :categorySlug', { categorySlug })
+          .getQuery();
+
+        return 'category.id IN ' + subQuery;
+      })
+
+      .select([
+        'pv.id',
+        'pv.sku',
+        'pv.slug',
+        'pv.price',
+        'pv.createdAt',
+        'pv.soldCount',
+        'pv.conditions',
+        'pv.salesAttributes',
+        'pv.discountPercent',
+
+        'product.id',
+        'product.name',
+        'product.slug',
+        'product.basePrice',
+        'product.thumbnail',
+        'product.specifications',
+
+        'category.id',
+        'category.name',
+        'category.slug',
+
+        'parentCategory.id',
+        'parentCategory.name',
+        'parentCategory.slug',
+
+        'productImages.id',
+        'productImages.image',
+      ])
       .orderBy('pv.createdAt', 'DESC')
       .skip(skip)
       .take(take);

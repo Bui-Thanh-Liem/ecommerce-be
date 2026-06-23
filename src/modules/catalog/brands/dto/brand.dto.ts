@@ -7,6 +7,9 @@ export class BrandDto extends SerializerDto {
   name: string;
 
   @Expose()
+  slug: string;
+
+  @Expose()
   code: string;
 
   @Expose()

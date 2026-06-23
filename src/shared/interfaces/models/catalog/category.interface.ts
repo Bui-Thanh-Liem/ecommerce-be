@@ -16,5 +16,6 @@ export interface ICategory extends IBase {
 
   //
   products?: IProduct[] | null;
+  secondaryProducts?: IProduct[] | null;
   categoryPromotions?: ICategoryPromotion[] | null;
 }
