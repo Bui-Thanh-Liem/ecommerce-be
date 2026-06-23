@@ -1,6 +1,7 @@
+import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IMenu } from '@/shared/interfaces/models/store-front/menu.interface';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('menus')
 export class MenuEntity extends BaseEntity implements IMenu {
@@ -13,8 +14,8 @@ export class MenuEntity extends BaseEntity implements IMenu {
   @Column({ length: 100, unique: true })
   slug: string;
 
-  @Column({ length: 100 })
-  link: string;
+  @ManyToOne(() => CategoryEntity, (cate) => cate.menus)
+  category: CategoryEntity;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;

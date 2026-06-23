@@ -1,3 +1,4 @@
+import { CreateCategoryDto } from '@/modules/catalog/categories/dto/create-category.dto';
 import { DETAIL_HOME_CONFIG_KEYS } from '@/shared/constants/home-config-keys.constant';
 import { ImageDto } from '@/shared/dtos/req/image.dto';
 import { Type } from 'class-transformer';
@@ -13,6 +14,7 @@ import {
   Min,
   ArrayMinSize,
   ArrayMaxSize,
+  IsUUID,
 } from 'class-validator';
 
 // --- 1. HỢP PHẦN CƠ BẢN (BASE COMPONENTS) ---
@@ -64,17 +66,12 @@ class MenuItemDto {
   @IsNotEmpty()
   id: string;
 
-  @IsString()
   @IsNotEmpty()
-  slug: string;
+  category: any;
 
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  link: string;
 }
 
 class PopularSearchItemDto {

@@ -1,6 +1,7 @@
 import { IBase } from '../../common/base.interface';
 import { IImage } from '../../common/image.interface';
 import { ICategoryPromotion } from '../mkt-program/category-promotion.interface';
+import { IMenu } from '../store-front/menu.interface';
 import { IProduct } from './product.interface';
 
 export interface ICategory extends IBase {
@@ -16,6 +17,7 @@ export interface ICategory extends IBase {
 
   //
   products?: IProduct[] | null;
+  menus?: IMenu[] | null;
   secondaryProducts?: IProduct[] | null;
   categoryPromotions?: ICategoryPromotion[] | null;
 }

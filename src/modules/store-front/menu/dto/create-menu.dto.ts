@@ -1,5 +1,5 @@
 import { Trim } from '@/decorators/trim.decorator';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateMenuDto {
   @IsString()
@@ -14,11 +14,9 @@ export class CreateMenuDto {
   @MaxLength(100)
   desc: string;
 
-  @IsString()
-  @Trim()
   @IsNotEmpty()
-  @MaxLength(100)
-  link: string;
+  @IsUUID('4')
+  category: string;
 
   @IsOptional()
   @IsBoolean()

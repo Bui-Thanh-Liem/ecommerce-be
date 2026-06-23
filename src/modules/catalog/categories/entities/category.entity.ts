@@ -5,6 +5,7 @@ import { type IImage } from '@/shared/interfaces/common/image.interface';
 import { ICategory } from '@/shared/interfaces/models/catalog/category.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, TreeParent } from 'typeorm';
+import { MenuEntity } from '@/modules/store-front/menu/entities/menu.entity';
 
 @Entity('categories')
 export class CategoryEntity extends BaseEntity implements ICategory {
@@ -40,6 +41,9 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   //
   @OneToMany(() => ProductEntity, (product) => product.category)
   products?: ProductEntity[] | null;
+
+  @OneToMany(() => MenuEntity, (menu) => menu.category)
+  menus?: MenuEntity[] | null;
 
   @ManyToMany(() => ProductEntity, (product) => product.secondaryCategories)
   secondaryProducts?: ProductEntity[] | null;

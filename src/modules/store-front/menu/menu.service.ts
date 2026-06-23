@@ -8,41 +8,68 @@ import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { MenuQueryDto } from './dto/query-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
+import { CategoriesService } from '@/modules/catalog/categories/categories.service';
 
 @Injectable()
 export class MenuService {
   constructor(
     @InjectRepository(MenuEntity)
-    private navbarRepository: Repository<MenuEntity>,
+    private menuRepository: Repository<MenuEntity>,
+    private readonly categoryService: CategoriesService,
   ) {}
 
-  async create(createMenuDto: CreateMenuDto) {
-    const slug = stringToSlug(createMenuDto.name);
-    const existingNavbar = await this.navbarRepository.exists({ where: { slug } });
-    if (existingNavbar) {
-      throw new NotFoundException('A navbar with the same name already exists');
+  async create(dto: CreateMenuDto) {
+    const { name, category: categoryId } = dto;
+
+    //
+    const slug = stringToSlug(name);
+    const [existMenu, existCategory] = await Promise.all([
+      this.menuRepository.exists({ where: { slug } }),
+      this.categoryService.exists([categoryId]),
+    ]);
+
+    //
+    if (existMenu) {
+      throw new NotFoundException('A menu with the same name already exists');
+    }
+    if (!existCategory) {
+      throw new NotFoundException('Category not found');
     }
 
     //
-    const navbar = this.navbarRepository.create({
-      ...createMenuDto,
+    const menu = this.menuRepository.create({
+      ...dto,
+      category: { id: categoryId },
       slug,
     });
-    return this.navbarRepository.save(navbar);
+    return this.menuRepository.save(menu);
   }
 
   async findAll(query: MenuQueryDto): Promise<IMetadata<MenuEntity>> {
     const { page, limit } = query;
     const { take, skip } = calculatePagination(page, limit);
 
-    const queryBuilder = this.navbarRepository
-      .createQueryBuilder('navbar')
+    const queryBuilder = this.menuRepository
+      .createQueryBuilder('menu')
+
       // Join các quan hệ
+      .leftJoinAndSelect('menu.category', 'category')
+
       // Select các trường cụ thể
-      .select(['navbar.id', 'navbar.name', 'navbar.slug', 'navbar.desc', 'navbar.link', 'navbar.isActive'])
+      .select([
+        'menu.id',
+        'menu.name',
+        'menu.desc',
+        'menu.createdAt',
+        'menu.isActive',
+
+        'category.id',
+        'category.name',
+        'category.slug',
+      ])
 
       // Phân trang và sắp xếp
-      .orderBy('navbar.createdAt', 'DESC')
+      .orderBy('menu.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 
@@ -62,14 +89,17 @@ export class MenuService {
     //
     const { take, skip } = calculatePagination(page, limit);
 
-    const queryBuilder = this.navbarRepository
-      .createQueryBuilder('navbar')
+    const queryBuilder = this.menuRepository
+      .createQueryBuilder('menu')
+
       // Join các quan hệ
+      .leftJoinAndSelect('menu.category', 'category')
+
       // Select các trường cụ thể
-      .select(['navbar.id', 'navbar.name', 'navbar.link'])
+      .select(['menu.id', 'menu.name', 'menu.createdAt', 'category.id', 'category.name', 'category.slug'])
 
       // Phân trang và sắp xếp
-      .orderBy('navbar.createdAt', 'DESC')
+      .orderBy('menu.createdAt', 'DESC')
       .skip(skip)
       .take(take);
 
@@ -84,51 +114,53 @@ export class MenuService {
   }
 
   async findOne(id: string) {
-    return await this.navbarRepository.findOne({ where: { id } });
+    return await this.menuRepository.findOne({ where: { id }, relations: ['category'] });
   }
 
-  async update(id: string, updateMenuDto: UpdateMenuDto) {
-    const { name } = updateMenuDto;
+  async update(id: string, dto: UpdateMenuDto) {
+    const { name, category: categoryId } = dto;
 
-    let slug: string | undefined = undefined;
-    if (name) {
-      slug = stringToSlug(name);
-      const navbarExists = await this.navbarRepository.exists({ where: { slug, id: Not(id) } });
-      if (navbarExists) {
-        throw new NotFoundException('A navbar with the same name already exists');
-      }
-    }
-    const navbar = await this.navbarRepository.preload({
+    //
+    const slug: string | undefined = name ? stringToSlug(name) : undefined;
+    const [exist, existCate] = await Promise.all([
+      slug ? this.menuRepository.exists({ where: { slug, id: Not(id) } }) : null,
+      categoryId ? this.categoryService.exists([categoryId]) : null,
+    ]);
+
+    //
+    if (slug && exist) throw new NotFoundException('A menu with the same name already exists');
+    if (categoryId && !existCate) throw new NotFoundException('Not found category');
+
+    const menu = await this.menuRepository.preload({
       id,
-      ...updateMenuDto,
-      slug,
+      ...dto,
+      slug: slug,
+      category: { id: categoryId },
     });
-    if (!navbar) {
-      throw new NotFoundException('Navbar not found');
-    }
-    return await this.navbarRepository.save(navbar);
+    if (!menu) throw new NotFoundException('Menu not found');
+    return await this.menuRepository.save(menu);
   }
 
   async findForConfig() {
-    const navbar = await this.navbarRepository.find({
+    const menu = await this.menuRepository.find({
       where: { name: Not(IsNull()) },
       order: { createdAt: 'DESC' },
-      select: { id: true, name: true, link: true },
+      select: { id: true, name: true },
       take: 10,
     });
 
-    if (!navbar || navbar.length === 0) {
-      throw new NotFoundException('No navbar found for config');
+    if (!menu || menu.length === 0) {
+      throw new NotFoundException('No menu found for config');
     }
 
-    return navbar;
+    return menu;
   }
 
   async remove(id: string) {
-    const navbarExists = await this.navbarRepository.findOne({ where: { id } });
-    if (!navbarExists) {
-      throw new NotFoundException('Navbar not found');
+    const menuExists = await this.menuRepository.findOne({ where: { id } });
+    if (!menuExists) {
+      throw new NotFoundException('Menu not found');
     }
-    return await this.navbarRepository.remove(navbarExists);
+    return await this.menuRepository.remove(menuExists);
   }
 }
