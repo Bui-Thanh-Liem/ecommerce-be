@@ -38,7 +38,6 @@ export class CategoryEntity extends BaseEntity implements ICategory {
   @OneToMany(() => CategoryEntity, (category) => category.parent)
   children?: CategoryEntity[] | null;
 
-  //
   @OneToMany(() => ProductEntity, (product) => product.category)
   products?: ProductEntity[] | null;
 

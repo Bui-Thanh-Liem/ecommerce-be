@@ -2,6 +2,7 @@ import { ProductImageDto } from '@/modules/catalog/product-images/dto/product-im
 import { ProductSPUDto, SpecificationItemDto } from '@/modules/catalog/products-SPU/dto/product-SPU.dto';
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
+import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
 import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 import { Expose, Type } from 'class-transformer';
 
@@ -39,6 +40,9 @@ export class ProductVariantSKUDto extends SerializerDto {
 
   @Expose()
   conditions: ProductVariantCondition;
+
+  @Expose()
+  status: ProductVariantStatus;
 
   @Expose()
   @Type(() => SpecificationDto)

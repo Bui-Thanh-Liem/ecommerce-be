@@ -7,13 +7,10 @@ export class MenuDto extends SerializerDto {
   name: string;
 
   @Expose()
-  desc: string;
-
-  @Expose()
-  slug: string;
-
-  @Expose()
   category: CategoryDto;
+
+  @Expose()
+  categorySlug: string;
 
   @Expose()
   isActive: boolean;

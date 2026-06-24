@@ -16,6 +16,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { SpecificationItemDto } from '../../products-SPU/dto/product-SPU.dto';
+import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
 
 class VariantAttributeDto extends SpecificationItemDto {
   @IsOptional()
@@ -51,6 +52,9 @@ export class CreateProductVariantDto {
 
   @IsEnum(ProductVariantCondition)
   conditions: ProductVariantCondition;
+
+  @IsEnum(ProductVariantStatus)
+  status: ProductVariantStatus;
 
   @IsArray()
   @ArrayNotEmpty()

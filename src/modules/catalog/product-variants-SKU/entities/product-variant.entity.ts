@@ -11,6 +11,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneT
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { ProductPromotionEntity } from '@/modules/marketing-program/product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '@/modules/marketing-program/campaigns/entities/campaign.entity';
+import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -43,6 +44,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @Column({ type: 'enum', enum: ProductVariantCondition })
   conditions: ProductVariantCondition;
+
+  @Column({ type: 'enum', enum: ProductVariantStatus, default: ProductVariantStatus.NORMAL })
+  status: ProductVariantStatus;
 
   @Column({ type: 'jsonb', nullable: true })
   salesAttributes: IVariantAttribute[];

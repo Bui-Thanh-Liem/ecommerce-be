@@ -235,6 +235,11 @@ export class CategoriesService {
     return category?.code;
   }
 
+  async findSlugById(id: string) {
+    const category = await this.categoryRepo.findOne({ where: { id }, select: ['slug'] });
+    return category?.slug;
+  }
+
   async findOne(id: string) {
     const category = await this.categoryRepo.findOne({
       where: { id },

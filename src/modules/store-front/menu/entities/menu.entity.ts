@@ -1,24 +1,28 @@
 import { CategoryEntity } from '@/modules/catalog/categories/entities/category.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { IMenu } from '@/shared/interfaces/models/store-front/menu.interface';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity('menus')
 export class MenuEntity extends BaseEntity implements IMenu {
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @Column({ length: 50 })
   name: string;
 
-  @Column({ length: 100, nullable: true })
-  desc: string;
-
-  @Column({ length: 100, unique: true })
-  slug: string;
+  @Column({ nullable: true })
+  categorySlug: string;
 
   @ManyToOne(() => CategoryEntity, (cate) => cate.menus)
   category: CategoryEntity;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
+  @BeforeUpdate()
+  setCategorySlug() {
+    if (this.category) {
+      this.categorySlug = this.category.slug;
+    }
+  }
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Menu có name: ${this.name}`);

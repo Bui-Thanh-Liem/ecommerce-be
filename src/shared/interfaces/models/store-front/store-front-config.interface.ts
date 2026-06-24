@@ -18,7 +18,7 @@ export interface IConfigHome {
 
 type CampaignOption = Pick<ICampaign, 'id' | 'slug' | 'name' | 'mainImage'>;
 type MktProgramOption = Pick<IMarketingProgram, 'id' | 'slug' | 'name' | 'mainImage'>;
-type MenuOption = Pick<IMenu, 'id' | 'name' | 'category'>;
+type MenuOption = Pick<IMenu, 'id' | 'name' | 'categorySlug'>;
 type PopularSearchOption = Pick<IPopularSearch, 'id' | 'text'>;
 
 export interface IDetailHomeConfig {

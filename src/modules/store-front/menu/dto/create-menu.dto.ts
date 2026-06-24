@@ -8,12 +8,6 @@ export class CreateMenuDto {
   @MaxLength(50)
   name: string;
 
-  @IsString()
-  @Trim()
-  @IsNotEmpty()
-  @MaxLength(100)
-  desc: string;
-
   @IsNotEmpty()
   @IsUUID('4')
   category: string;

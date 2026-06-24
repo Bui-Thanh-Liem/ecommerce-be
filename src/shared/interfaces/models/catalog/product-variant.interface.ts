@@ -9,6 +9,7 @@ import { IInventory } from '../inventory/inventory.interface';
 import { IProductPromotion } from '../mkt-program/product-promotion.interface';
 import { ICartItem } from '../customer/cart-item.interface';
 import { ICampaign } from '../mkt-program/campaign.interface';
+import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
 
 /**
  * KHÔNG DÙNG BẢNG ATTRIBUTE TRUYỀN THỐNG:
@@ -33,6 +34,7 @@ export interface IProductVariant extends IBase {
   soldCount: number;
 
   conditions: ProductVariantCondition; // Hàng mới, Hàng trưng bày (xả kho), Hàng đổi trả
+  status: ProductVariantStatus; // Trạng thái nổi bật
   salesAttributes: IVariantAttribute[]; // JSONB lưu color, dung tích, công suất...
   productImages: IProductImage[];
 

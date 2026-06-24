@@ -14,6 +14,7 @@ import { ProductVariantEntity } from './entities/product-variant.entity';
 import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { CategoryEntity } from '../categories/entities/category.entity';
+import { SORT_OPTIONS } from '@/shared/constants/sort-option.constant';
 
 @Injectable()
 export class ProductVariantsService {
@@ -86,6 +87,7 @@ export class ProductVariantsService {
         'productVariant.price',
         'productVariant.costPrice',
         'productVariant.createdAt',
+        'productVariant.status',
         'productVariant.conditions',
         'productVariant.salesAttributes',
         'productVariant.discountPercent',
@@ -176,6 +178,7 @@ export class ProductVariantsService {
         'pv.createdAt',
         'pv.soldCount',
         'pv.conditions',
+        'pv.status',
         'pv.salesAttributes',
         'pv.discountPercent',
 
@@ -221,13 +224,32 @@ export class ProductVariantsService {
     categorySlug: string,
     query: ProductVariantQueryDto,
   ): Promise<IMetadata<ProductVariantEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
+    const { s, b } = filters || {};
     const { take, skip } = calculatePagination(page, limit);
+
+    // 1. Định nghĩa bảng ánh xạ giữa "Key Sort" và "Quy tắc Order"
+    const SORT_CONFIG: Record<(typeof SORT_OPTIONS)[number], Record<string, 'ASC' | 'DESC'>> = {
+      price_desc: { final_price: 'DESC' },
+      price_asc: { final_price: 'ASC' },
+      newest: { 'pv.createdAt': 'DESC' },
+      best_seller: { 'pv.soldCount': 'DESC' },
+      discount: { 'pv.discountPercent': 'DESC' },
+      standout: { 'pv.discountPercent': 'DESC', 'pv.soldCount': 'DESC' },
+      // Sau này có isFeatured chỉ cần sửa dòng trên thành:
+      // standout: { 'pv.isFeatured': 'DESC', 'pv.viewCount': 'DESC' }
+    };
+
+    const currentSort = (s as (typeof SORT_OPTIONS)[number]) || 'newest'; // Mặc định là "newest" nếu không có sort hoặc sort không hợp lệ
+
+    // 2. Áp dụng vào QueryBuilder một cách ngắn gọn
+    const sortRules = SORT_CONFIG[currentSort] || { 'pv.createdAt': 'DESC' };
 
     const queryBuilder = this.productVariantRepo
       .createQueryBuilder('pv')
       .leftJoinAndSelect('pv.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.brand', 'brand')
       .leftJoinAndSelect('product.secondaryCategories', 'sCategory')
       .leftJoinAndSelect('category.parent', 'parentCategory')
       .leftJoinAndSelect('pv.campaigns', 'campaigns')
@@ -244,40 +266,53 @@ export class ProductVariantsService {
           .getQuery();
 
         return 'category.id IN ' + subQuery;
-      })
+      });
 
-      .select([
-        'pv.id',
-        'pv.sku',
-        'pv.slug',
-        'pv.price',
-        'pv.createdAt',
-        'pv.soldCount',
-        'pv.conditions',
-        'pv.salesAttributes',
-        'pv.discountPercent',
+    //
+    if (b) {
+      queryBuilder.andWhere('brand.slug = :brandSlug', { brandSlug: b });
+    }
 
-        'product.id',
-        'product.name',
-        'product.slug',
-        'product.basePrice',
-        'product.thumbnail',
-        'product.specifications',
+    queryBuilder.select([
+      'pv.id',
+      'pv.sku',
+      'pv.slug',
+      'pv.price',
+      'pv.createdAt',
+      'pv.soldCount',
+      'pv.status',
+      'pv.conditions',
+      'pv.salesAttributes',
+      'pv.discountPercent',
 
-        'category.id',
-        'category.name',
-        'category.slug',
+      'product.id',
+      'product.name',
+      'product.slug',
+      'product.basePrice',
+      'product.thumbnail',
+      'product.specifications',
 
-        'parentCategory.id',
-        'parentCategory.name',
-        'parentCategory.slug',
+      'category.id',
+      'category.name',
+      'category.slug',
 
-        'productImages.id',
-        'productImages.image',
-      ])
-      .orderBy('pv.createdAt', 'DESC')
-      .skip(skip)
-      .take(take);
+      'parentCategory.id',
+      'parentCategory.name',
+      'parentCategory.slug',
+
+      'productImages.id',
+      'productImages.image',
+    ]);
+
+    // 1. Thêm select và đặt tên viết THƯỜNG HOÀN TOÀN (để tránh lỗi tự động convert của Postgres)
+    queryBuilder.addSelect('pv.price * (1 - COALESCE(pv.discountPercent, 0) / 100)', 'final_price');
+
+    // Chạy vòng lặp để addOrderBy (hỗ trợ cả các trường hợp có nhiều tiêu chí như standout)
+    Object.entries(sortRules).forEach(([column, direction]) => {
+      queryBuilder.addOrderBy(column, direction);
+    });
+
+    queryBuilder.skip(skip).take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 
