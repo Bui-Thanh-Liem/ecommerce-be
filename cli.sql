@@ -20,3 +20,6 @@ CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1;
 -- 
 CREATE EXTENSION IF NOT EXISTS unaccent;
 SELECT * FROM pg_extension;
+
+-- 
+CREATE INDEX idx_product_variant_sales_attributes_gin ON product_variant USING gin (sales_attributes);

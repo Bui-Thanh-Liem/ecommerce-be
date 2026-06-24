@@ -48,7 +48,7 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ type: 'enum', enum: ProductVariantStatus, default: ProductVariantStatus.NORMAL })
   status: ProductVariantStatus;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', name: 'sales_attributes', nullable: true })
   salesAttributes: IVariantAttribute[];
 
   // Quan hệ với các entity khác

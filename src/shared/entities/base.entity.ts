@@ -22,10 +22,10 @@ export abstract class BaseEntity implements IBase {
   @DeleteDateColumn({ type: 'timestamp' })
   deletedAt: Date | null;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
   updatedAt: Date;
 
   @VersionColumn()
