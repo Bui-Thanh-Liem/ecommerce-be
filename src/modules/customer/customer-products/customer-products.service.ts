@@ -9,6 +9,8 @@ import { CustomerEntity } from '../customers/entities/customer.entity';
 import { CustomerProductQueryDto } from './dto/query-customer-product.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IInfoGuest } from '@/shared/interfaces/common/info-guest';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { ProductImageEntity } from '@/modules/catalog/product-images/entities/product-image.entity';
 
 @Injectable()
 export class CustomerProductsService {
@@ -18,6 +20,7 @@ export class CustomerProductsService {
 
     private readonly customersService: CustomersService,
     private readonly variantsService: ProductVariantsService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create({
@@ -119,7 +122,7 @@ export class CustomerProductsService {
     const { take, skip } = calculatePagination(page, limit);
 
     const condition = (customer && { customer: { id: customer.id } }) || { session: guest?.session };
-    return await this.customerProductRepository.find({
+    const [data, totalData] = await this.customerProductRepository.findAndCount({
       where: { ...condition },
       relations: {
         customer: true,
@@ -138,10 +141,10 @@ export class CustomerProductsService {
         productVariant: {
           id: true,
           sku: true,
-
-          product: {
+          price: true,
+          productImages: {
             id: true,
-            name: true,
+            image: true,
           },
         },
       },
@@ -149,6 +152,15 @@ export class CustomerProductsService {
       skip,
       take,
     });
+
+    await this.sigUrl(data);
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async remove({ id, customer, guest }: { id: string; customer: CustomerEntity; guest: IInfoGuest }) {
@@ -161,5 +173,29 @@ export class CustomerProductsService {
 
     //
     return await this.customerProductRepository.remove(exists);
+  }
+
+  async sigUrl(items: CustomerProductEntity[]): Promise<CustomerProductEntity[]> {
+    return await Promise.all(
+      items.map(async (item) => {
+        const flattenedImages = item.productVariant?.productImages?.flat() || [];
+
+        const updatedImages = flattenedImages.map(async (image) => {
+          const url = image.image.key ? await this.cloudinaryService.generateUrl(image.image.key) : '';
+
+          return {
+            ...image,
+            image: {
+              ...image.image,
+              url,
+            },
+          } as ProductImageEntity;
+        });
+
+        item.productVariant.productImages = await Promise.all(updatedImages);
+
+        return item;
+      }),
+    );
   }
 }

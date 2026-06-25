@@ -22,12 +22,12 @@ export class CustomerProductEntity extends BaseEntity implements ICustomerProduc
   productVariant: ProductVariantEntity;
 
   logInsert(): void {
-    this.logger.debug(`Đã chèn thành công Customer có fullname: ${this.customer.fullname}`);
+    this.logger.debug(`Đã chèn thành công Customer có fullname: ${this.customer?.fullname}`);
   }
   logUpdate(): void {
-    this.logger.debug(`Đã cập nhật thành công Customer có fullname: ${this.customer.fullname}`);
+    this.logger.debug(`Đã cập nhật thành công Customer có fullname: ${this.customer?.fullname}`);
   }
   logRemove(): void {
-    this.logger.debug(`Đã xóa thành công Customer có fullname: ${this.customer.fullname}`);
+    this.logger.debug(`Đã xóa thành công Customer có fullname: ${this.customer?.fullname}`);
   }
 }

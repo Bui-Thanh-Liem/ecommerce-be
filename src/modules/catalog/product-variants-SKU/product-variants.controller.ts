@@ -9,11 +9,20 @@ import { ProductVariantMetadataDto } from './dto/metadata-product-variant.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
 import { Public } from '@/decorators/public.decorator';
+import { CustomerEntity } from '@/modules/customer/customers/entities/customer.entity';
+import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
+import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
+import { CurrentCustomer } from '@/decorators/current-customer.decorator';
+import { CustomerProductsService } from '@/modules/customer/customer-products/customer-products.service';
+import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
 
 @Controller('product-variants')
 @Serializer(ProductVariantSKUDto)
 export class ProductVariantsController {
-  constructor(private readonly productVariantsService: ProductVariantsService) {}
+  constructor(
+    private readonly productVariantsService: ProductVariantsService,
+    private customerProductService: CustomerProductsService,
+  ) {}
 
   @Post()
   @Permissions(permissionsSeed.productVariant.create.code)
@@ -77,8 +86,25 @@ export class ProductVariantsController {
   @Public()
   @Get('slug/:slug')
   @Permissions(permissionsSeed.productVariant.read.code)
-  findOneBySlug(@Param('slug') slug: string) {
-    return this.productVariantsService.findOneBySlug(slug);
+  async findOneBySlug(
+    @Param('slug') slug: string,
+    @GetInfoGuest() guest: IInfoGuest,
+    @CurrentCustomer() customer: CustomerEntity,
+  ) {
+    //
+    const variant = await this.productVariantsService.findOneBySlug(slug);
+
+    // REFLECTOR: Có thể đưa vào bull
+    if (variant) {
+      await this.customerProductService.create({
+        dto: { type: CustomerProductType.HISTORY, productVariant: variant.id },
+        guest,
+        customer,
+      });
+    }
+
+    //
+    return variant;
   }
 
   @Delete(':id')
