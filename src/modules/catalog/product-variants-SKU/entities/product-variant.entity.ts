@@ -51,6 +51,13 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   @Column({ type: 'jsonb', name: 'sales_attributes', nullable: true })
   salesAttributes: IVariantAttribute[];
 
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'sales_attributes_index',
+  })
+  salesAttributesIndex: Record<string, string>;
+
   // Quan hệ với các entity khác
   @OneToMany(() => InventoryEntity, (inventory) => inventory.productVariant, { nullable: true, onDelete: 'SET NULL' })
   inventories?: InventoryEntity[];
@@ -82,7 +89,7 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   //
   @BeforeInsert()
   @BeforeUpdate()
-  assignProductToImages(): void {
+  handle(): void {
     if (this.productImages?.length && this.product) {
       this.productImages.forEach((img, idx) => {
         img.productVariant = this; // Gán productVariant cho mỗi hình ảnh
@@ -90,6 +97,8 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
         img.isThumbnail = idx === 0; // Tự động đánh dấu hình ảnh đầu tiên là thumbnail
       });
     }
+
+    this.salesAttributesIndex = Object.fromEntries((this.salesAttributes ?? []).map((attr) => [attr.key, attr.value]));
   }
 
   logInsert(): void {

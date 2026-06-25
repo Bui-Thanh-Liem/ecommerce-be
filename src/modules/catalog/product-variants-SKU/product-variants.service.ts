@@ -225,8 +225,11 @@ export class ProductVariantsService {
     query: ProductVariantQueryDto,
   ): Promise<IMetadata<ProductVariantEntity>> {
     const { page, limit, filters } = query;
-    const { s, b } = filters || {};
+    const { s, b, fa } = filters || {};
+    const attr = (fa ? JSON.parse(fa) : {}) as Record<string, string>;
     const { take, skip } = calculatePagination(page, limit);
+    const categoryToUse = attr?.c || categorySlug;
+    const brandToUse = attr?.b || b;
 
     // 1. Định nghĩa bảng ánh xạ giữa "Key Sort" và "Quy tắc Order"
     const SORT_CONFIG: Record<(typeof SORT_OPTIONS)[number], Record<string, 'ASC' | 'DESC'>> = {
@@ -262,16 +265,29 @@ export class ProductVariantsService {
           .select('c.id')
           .from(CategoryEntity, 'c') // Entity Category
           .leftJoin('c.parent', 'p') // Nếu cần tìm cả category con của slug này
-          .where('c.slug = :categorySlug OR p.slug = :categorySlug OR sCategory.slug = :categorySlug', { categorySlug })
+          .where('c.slug = :categorySlug OR p.slug = :categorySlug OR sCategory.slug = :categorySlug', {
+            categorySlug: categoryToUse,
+          })
           .getQuery();
 
         return 'category.id IN ' + subQuery;
       });
 
     //
-    if (b) {
-      queryBuilder.andWhere('brand.slug = :brandSlug', { brandSlug: b });
+    if (brandToUse) {
+      queryBuilder.andWhere('brand.slug = :brandSlug', { brandSlug: brandToUse });
     }
+
+    //
+    Object.entries(attr).forEach(([key, value], index) => {
+      if (['b', 'c', 's'].includes(key)) return;
+
+      queryBuilder.andWhere(`pv.sales_attributes_index @> :filter${index}`, {
+        [`filter${index}`]: JSON.stringify({
+          [key]: value,
+        }),
+      });
+    });
 
     queryBuilder.select([
       'pv.id',
@@ -325,6 +341,59 @@ export class ProductVariantsService {
       page,
       totalPage: Math.ceil(totalData / limit),
     };
+  }
+
+  async countProductsByCategorySlug(categorySlug: string, query: ProductVariantQueryDto): Promise<{ count: number }> {
+    const { filters } = query;
+    const { fa } = filters || {};
+
+    const attr = (fa ? JSON.parse(fa) : {}) as Record<string, string>;
+
+    const categoryToUse = attr?.c || categorySlug;
+    const brandToUse = attr?.b || undefined;
+
+    const queryBuilder = this.productVariantRepo
+      .createQueryBuilder('pv')
+      .innerJoin('pv.product', 'product')
+      .innerJoin('product.category', 'category')
+      .leftJoin('product.secondaryCategories', 'sCategory')
+      .leftJoin('category.parent', 'parentCategory')
+
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('c.id')
+          .from(CategoryEntity, 'c')
+          .leftJoin('c.parent', 'p')
+          .where('c.slug = :categorySlug OR p.slug = :categorySlug OR sCategory.slug = :categorySlug', {
+            categorySlug: categoryToUse,
+          })
+          .getQuery();
+
+        return 'category.id IN ' + subQuery;
+      });
+
+    // Brand
+    if (brandToUse) {
+      queryBuilder.leftJoin('product.brand', 'brand').andWhere('brand.slug = :brandSlug', {
+        brandSlug: brandToUse,
+      });
+    }
+
+    // Sales Attributes
+    Object.entries(attr).forEach(([key, value], index) => {
+      if (['b', 'c', 's'].includes(key)) return;
+
+      queryBuilder.andWhere(`pv.sales_attributes_index @> :filter${index}`, {
+        [`filter${index}`]: JSON.stringify({
+          [key]: value,
+        }),
+      });
+    });
+
+    const count = await queryBuilder.getCount();
+
+    return { count };
   }
 
   async exists(ids: string[]) {

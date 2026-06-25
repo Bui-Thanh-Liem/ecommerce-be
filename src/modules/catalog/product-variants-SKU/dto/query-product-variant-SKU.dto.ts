@@ -13,7 +13,12 @@ class ProductVariantFilterDto {
   @Trim()
   @IsString()
   @IsIn(SORT_OPTIONS, { message: 'Sort invalid' })
-  s: (typeof SORT_OPTIONS)[number];
+  s: (typeof SORT_OPTIONS)[number]; // Sort option
+
+  @IsOptional()
+  @Trim()
+  @IsString()
+  fa?: string; // JSON string of { key: value } (key is attribute key, value is attribute value)
 }
 
 export class ProductVariantQueryDto extends createQueryDto(ProductVariantFilterDto) {}

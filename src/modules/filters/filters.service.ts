@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BrandEntity } from '../catalog/brands/entities/brand.entity';
@@ -138,21 +139,34 @@ export class FiltersService {
   async findAttributesByCategorySlug(categorySlug: string) {
     const rawResults = await this.dataSource.query<IFilterAttribute[]>(
       `
-      SELECT 
-          attr.key AS "key",
-          attr.label AS "label",
-          jsonb_agg(DISTINCT attr.value) AS "values"
-      FROM product_variants pv
-      INNER JOIN products p ON pv."productId" = p.id
-      INNER JOIN categories c ON p."categoryId" = c.id
-      -- Join thêm một lần nữa với bảng chính nó để lấy danh mục cha (nếu có)
-      LEFT JOIN categories parent ON c."parent" = parent.id
-      CROSS JOIN LATERAL jsonb_to_recordset(pv.sales_attributes) AS attr(key text, label text, value text)
-      -- Điều kiện: Khớp với slug của danh mục hiện tại HOẶC slug của danh mục cha
-      WHERE c.slug = $1 OR parent.slug = $1
-      GROUP BY attr.key, attr.label
-      ORDER BY attr.key;
-    `,
+        SELECT 
+            attr.key AS "key",
+            attr.label AS "label",
+            jsonb_agg(
+                DISTINCT jsonb_build_object(
+                    'value', attr.value,
+                    'desc', COALESCE(attr."desc", '')
+                )
+            ) AS "options"
+        FROM product_variants pv
+        INNER JOIN products p ON pv."productId" = p.id
+
+        -- 1. Join với danh mục chính (Mối quan hệ Many-to-One mặc định)
+        INNER JOIN categories c ON p."categoryId" = c.id
+        LEFT JOIN categories parent ON c."parent" = parent.id
+
+        -- 2. SỬA TẠI ĐÂY: Join thông qua bảng trung gian Many-to-Many của TypeORM
+        LEFT JOIN product_secondary_categories psc ON p.id = psc.product_id
+        LEFT JOIN categories sc ON psc.category_id = sc.id
+
+        -- Bóc tách dữ liệu JSONB
+        CROSS JOIN LATERAL jsonb_to_recordset(pv.sales_attributes) AS attr(key text, label text, value text, "desc" text)
+
+        -- Điều kiện lọc slug (Đã đổi INNER JOIN thành LEFT JOIN ở danh mục phụ để nếu sản phẩm không có danh mục phụ thì vẫn lấy được danh mục chính)
+        WHERE c.slug = $1 OR parent.slug = $1 OR sc.slug = $1
+        GROUP BY attr.key, attr.label
+        ORDER BY attr.key;
+        `,
       [categorySlug],
     );
 

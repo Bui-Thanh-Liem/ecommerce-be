@@ -64,6 +64,17 @@ export class ProductVariantsController {
   }
 
   @Public()
+  @Get('count/category/slug/:categorySlug')
+  @Permissions(permissionsSeed.productVariant.read.code)
+  @Serializer(ProductVariantSKUDto)
+  async countProductsByCategorySlug(
+    @Param('categorySlug') categorySlug: string,
+    @Query() query: ProductVariantQueryDto,
+  ) {
+    return await this.productVariantsService.countProductsByCategorySlug(categorySlug, query);
+  }
+
+  @Public()
   @Get('slug/:slug')
   @Permissions(permissionsSeed.productVariant.read.code)
   findOneBySlug(@Param('slug') slug: string) {

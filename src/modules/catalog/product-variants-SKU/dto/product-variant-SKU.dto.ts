@@ -51,4 +51,8 @@ export class ProductVariantSKUDto extends SerializerDto {
   @Expose()
   @Type(() => ProductImageDto)
   productImages: ProductImageDto[];
+
+  //
+  @Expose()
+  count: number;
 }

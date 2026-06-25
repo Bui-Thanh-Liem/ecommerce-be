@@ -1,5 +1,13 @@
 import { IFilterAttribute } from '@/shared/dtos/res/filter-attribute.dto';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+
+class FilterAttributeOptionDto {
+  @Expose()
+  value: string;
+
+  @Expose()
+  desc: string;
+}
 
 export class FilterAttributeDto implements IFilterAttribute {
   @Expose()
@@ -9,5 +17,6 @@ export class FilterAttributeDto implements IFilterAttribute {
   label: string;
 
   @Expose()
-  values: string[];
+  @Type(() => FilterAttributeOptionDto)
+  options: FilterAttributeOptionDto[];
 }

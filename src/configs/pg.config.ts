@@ -17,7 +17,7 @@ export const pgConfig: DataSourceOptions = {
   password: process.env.POSTGRES_PASSWORD || 'root',
   database: process.env.POSTGRES_DB || 'ecommerce',
   synchronize: !isProd,
-  // migrationsRun: !isProd,  // Tự động chạy migrations khi khởi động ứng dụng (chỉ nên dùng trong development)
+  migrationsRun: !isProd, // Tự động chạy migrations khi khởi động ứng dụng (chỉ nên dùng trong development)
   // logging: true,
   entities: [join(__dirname, '../**/**/**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '../**/*.migration{.ts,.js}')],
