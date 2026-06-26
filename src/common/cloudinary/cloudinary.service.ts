@@ -36,7 +36,7 @@ export class CloudinaryService {
         cloud_name: cloudinary.config().cloud_name,
       };
     } catch (error) {
-      console.log('Error generating signature:', error);
+      console.error('Error generating signature:', error);
       throw new InternalServerErrorException('Không thể tạo signature cho Cloudinary');
     }
   }

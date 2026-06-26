@@ -25,7 +25,7 @@ export interface IDetailHomeConfig {
   topBanner: Pick<ITopBanner, 'id' | 'slug' | 'title' | 'image'> | null;
   header: string; // Không có đối tượng cấu hình động cho header
   menu: MenuOption[];
-  mainBanner: Pick<IMainBanner, 'id' | 'slug' | 'title' | 'image'>[];
+  mainBanner: Pick<IMainBanner, 'id' | 'image' | 'campaignSlug'>[];
   listCategories: Pick<ICategory, 'id' | 'slug' | 'name' | 'image' | 'minPrice'>[];
   historyProducts: string; // Không có đối tượng cấu hình động cho historyProducts
   marketingProgram01: {

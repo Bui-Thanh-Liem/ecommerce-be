@@ -6,6 +6,8 @@ import { IPromotion } from '@/shared/interfaces/models/mkt-program/promotion.int
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { MarketingProgramEntity } from '../../marketing-programs/entities/marketing-program.entity';
 import { ICampaign } from '@/shared/interfaces/models/mkt-program/campaign.interface';
+import { IMainBanner } from '@/shared/interfaces/models/store-front/main-banner.interface';
+import { MainBannerEntity } from '@/modules/store-front/main-banner/entities/main-banner.entity';
 
 @Entity('campaigns')
 export class CampaignEntity extends BaseEntity implements ICampaign {
@@ -47,6 +49,9 @@ export class CampaignEntity extends BaseEntity implements ICampaign {
   // Relations
   @OneToMany(() => PromotionEntity, (promotion) => promotion.campaign)
   promotions: IPromotion[];
+
+  @OneToMany(() => MainBannerEntity, (mainBanner) => mainBanner.campaign)
+  mainBanners: IMainBanner[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Campaign có slug: ${this.name}`);

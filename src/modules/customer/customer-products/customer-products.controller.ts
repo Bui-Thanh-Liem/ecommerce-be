@@ -36,14 +36,15 @@ export class CustomerProductsController {
   }
 
   @Public()
-  @Get('options')
+  @Get('options/:type')
   @Serializer(CustomerProductMetadataDto)
   async findOptions(
+    @Param('type') type: string,
     @GetInfoGuest() guest: IInfoGuest,
     @Query() query: CustomerProductQueryDto,
     @CurrentCustomer() customer: CustomerEntity,
   ) {
-    return await this.customerProductsService.findOptions({ queries: query, customer, guest });
+    return await this.customerProductsService.findOptions({ queries: query, type, customer, guest });
   }
 
   @Delete(':id')

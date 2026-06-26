@@ -58,7 +58,11 @@ class TopBannerItemDto {
   image: ImageDto;
 }
 
-class MainBannerItemDto extends TopBannerItemDto {}
+class MainBannerItemDto extends TopBannerItemDto {
+  @IsString()
+  @IsNotEmpty()
+  campaignSlug: string;
+}
 
 class MenuItemDto {
   @IsString()

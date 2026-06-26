@@ -1,7 +1,7 @@
 import { Trim } from '@/decorators/trim.decorator';
 import { SORT_OPTIONS } from '@/shared/constants/sort-option.constant';
 import { createQueryDto } from '@/shared/dtos/req/query.dto';
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 
 class ProductVariantFilterDto {
   @IsOptional()
@@ -19,6 +19,11 @@ class ProductVariantFilterDto {
   @Trim()
   @IsString()
   fa?: string; // JSON string of { key: value } (key is attribute key, value is attribute value)
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  name?: string;
 }
 
 export class ProductVariantQueryDto extends createQueryDto(ProductVariantFilterDto) {}

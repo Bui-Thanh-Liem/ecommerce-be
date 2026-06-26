@@ -55,8 +55,6 @@ export class LocationRegionsService implements OnModuleInit {
       }
     }
 
-    console.log('Creating location region:', createLocationRegionDto);
-
     // Tạo mới region với parent nếu có
     const locationRegion = this.locationRegionRepo.create({
       ...createLocationRegionDto,

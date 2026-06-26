@@ -11,6 +11,7 @@ import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IInfoGuest } from '@/shared/interfaces/common/info-guest';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { ProductImageEntity } from '@/modules/catalog/product-images/entities/product-image.entity';
+import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
 
 @Injectable()
 export class CustomerProductsService {
@@ -61,6 +62,24 @@ export class CustomerProductsService {
       productVariant: { id: productVariantId },
     });
 
+    // REFACTOR: đưa vào bull
+    const suggestProducts = await this.variantsService.findVariantForSuggestById(productVariantId);
+    if (suggestProducts.length > 0 && rest.type === CustomerProductType.HISTORY) {
+      await Promise.all(
+        suggestProducts.map((id) =>
+          this.create({
+            dto: {
+              productVariant: id,
+              type: CustomerProductType.SUGGEST,
+            },
+            customer,
+            guest,
+          }),
+        ),
+      );
+    }
+
+    // 4. Lưu vào database
     return await this.customerProductRepository.save(customerProduct);
   }
 
@@ -110,24 +129,30 @@ export class CustomerProductsService {
   }
 
   async findOptions({
+    type,
+    guest,
     queries,
     customer,
-    guest,
   }: {
-    queries: CustomerProductQueryDto;
-    customer: CustomerEntity;
+    type: string;
     guest: IInfoGuest;
+    customer: CustomerEntity;
+    queries: CustomerProductQueryDto;
   }) {
     const { page, limit } = queries;
     const { take, skip } = calculatePagination(page, limit);
 
     const condition = (customer && { customer: { id: customer.id } }) || { session: guest?.session };
     const [data, totalData] = await this.customerProductRepository.findAndCount({
-      where: { ...condition },
+      where: { ...condition, type: type as CustomerProductType },
       relations: {
         customer: true,
         productVariant: {
-          product: true,
+          product: {
+            category: {
+              parent: true,
+            },
+          },
         },
       },
       select: {
@@ -141,10 +166,26 @@ export class CustomerProductsService {
         productVariant: {
           id: true,
           sku: true,
+          status: true,
           price: true,
-          productImages: {
+          slug: true,
+          discountPercent: true,
+          salesAttributes: true,
+          product: {
             id: true,
-            image: true,
+            name: true,
+            slug: true,
+            thumbnail: true,
+            category: {
+              id: true,
+              name: true,
+              slug: true,
+              parent: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
         },
       },

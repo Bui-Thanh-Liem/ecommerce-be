@@ -171,15 +171,20 @@ export class ProductsService {
   }
 
   async findOptions(query: ProductQueryDto): Promise<IMetadata<ProductEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const { take, skip } = calculatePagination(page, limit);
 
-    const queryBuilder = this.productRepo
-      .createQueryBuilder('product')
+    const queryBuilder = this.productRepo.createQueryBuilder('product');
+
+    if (filters?.name) {
+      queryBuilder.andWhere('unaccent(product.name) ILIKE unaccent(:name)', { name: `%${filters.name}%` });
+    }
+
+    queryBuilder
       .select(['product.id', 'product.name', 'product.slug', 'product.thumbnail'])
+      .orderBy('product.createdAt', 'DESC')
       .skip(skip)
-      .take(take)
-      .orderBy('product.createdAt', 'DESC');
+      .take(take);
 
     const [data, totalData] = await queryBuilder.getManyAndCount();
 

@@ -119,14 +119,20 @@ export class ProductVariantsService {
   }
 
   async findOptions(query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
     const { take, skip } = calculatePagination(page, limit);
 
     const queryBuilder = this.productVariantRepo
       .createQueryBuilder('pv')
       .leftJoinAndSelect('pv.product', 'product')
-      .leftJoinAndSelect('pv.productImages', 'productImages')
+      .leftJoinAndSelect('pv.productImages', 'productImages');
 
+    //
+    if (filters?.name) {
+      queryBuilder.andWhere('unaccent(product.name) ILIKE unaccent(:name)', { name: `%${filters.name}%` });
+    }
+
+    queryBuilder
       .select([
         'pv.id',
         'pv.sku',
@@ -218,6 +224,68 @@ export class ProductVariantsService {
       page,
       totalPage: Math.ceil(totalData / limit),
     };
+  }
+
+  /**
+   *
+   * @param id
+   * @returns
+   * @description cùng category, brand, >= 2 saleAttributes, price +-15%
+   */
+  async findVariantForSuggestById(id: string): Promise<string[]> {
+    const variant = await this.productVariantRepo.findOne({
+      where: { id },
+      relations: {
+        product: {
+          brand: true,
+          category: true,
+        },
+      },
+      select: {
+        id: true,
+        price: true,
+        salesAttributes: true,
+        product: {
+          id: true,
+          brand: { id: true },
+          category: { id: true },
+        },
+      },
+    });
+    if (!variant) return [];
+
+    const { product, price, salesAttributes } = variant;
+    const { category, brand } = product;
+
+    // Lấy các key của salesAttributes
+    const salesAttributeKeys = salesAttributes.map((attr) => attr.key);
+
+    // Tìm các biến thể sản phẩm khác cùng category, brand, có ít nhất 2 salesAttributes trùng và giá trong khoảng +-15%
+    const similarVariants = await this.productVariantRepo
+      .createQueryBuilder('pv')
+      .leftJoinAndSelect('pv.product', 'product')
+      .where('product.categoryId = :categoryId', { categoryId: category.id })
+      .andWhere('product.brandId = :brandId', { brandId: brand.id })
+      .andWhere('pv.id != :variantId', { variantId: id })
+      .andWhere('pv.price BETWEEN :minPrice AND :maxPrice', {
+        minPrice: price * 0.85,
+        maxPrice: price * 1.15,
+      })
+      .select(['pv.id', 'pv.salesAttributes'])
+      .take(3)
+      .getMany();
+
+    // Lọc các biến thể sản phẩm có ít nhất 2 salesAttributes trùng
+    const filteredVariants = similarVariants
+      .filter((v) => {
+        const matchingAttributes = v.salesAttributes.filter((attr) => salesAttributeKeys.includes(attr.key));
+        return matchingAttributes.length >= 2;
+      })
+      .map((v) => v.id);
+
+    if (filteredVariants.length === 0) return [];
+
+    return filteredVariants;
   }
 
   async findAllByCategorySlug(

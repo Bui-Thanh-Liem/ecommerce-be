@@ -94,7 +94,7 @@ export class ProductVariantsController {
     //
     const variant = await this.productVariantsService.findOneBySlug(slug);
 
-    // REFLECTOR: Có thể đưa vào bull
+    // REFACTOR: đưa vào bull
     if (variant) {
       await this.customerProductService.create({
         dto: { type: CustomerProductType.HISTORY, productVariant: variant.id },

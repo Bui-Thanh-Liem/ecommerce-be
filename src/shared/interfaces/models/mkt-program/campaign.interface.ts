@@ -1,6 +1,7 @@
 import { IBase } from '../../common/base.interface';
 import { IImage } from '../../common/image.interface';
 import { IProductVariant } from '../catalog/product-variant.interface';
+import { IMainBanner } from '../store-front/main-banner.interface';
 import { IMarketingProgram } from './marketing-program.interface';
 import { IPromotion } from './promotion.interface';
 
@@ -18,4 +19,5 @@ export interface ICampaign extends IBase {
 
   // Relations
   promotions: IPromotion[]; // Mảng chứa ID của các khuyến mãi liên quan đến chiến dịch này
+  mainBanners: IMainBanner[]; // Mảng chứa ID của các main banner liên quan đến chiến dịch này
 }

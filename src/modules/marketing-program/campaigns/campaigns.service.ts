@@ -229,6 +229,14 @@ export class CampaignsService {
     return campaign;
   }
 
+  async findSlugById(id: string): Promise<string | null> {
+    const campaign = await this.campaignRepository.findOne({
+      where: { id },
+      select: ['slug'],
+    });
+    return campaign?.slug || null;
+  }
+
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.campaignRepository.count({ where: { id: In(ids) } });
     return count === ids.length;

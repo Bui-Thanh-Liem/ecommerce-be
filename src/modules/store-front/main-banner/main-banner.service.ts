@@ -1,16 +1,16 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateMainBannerDto } from './dto/create-main-banner.dto';
 import { UpdateMainBannerDto } from './dto/update-main-banner.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Not, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { MainBannerEntity } from './entities/main-banner.entity';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { stringToSlug } from '@/utils/string-to-slug.util';
 import { MainBannerQueryDto } from './dto/query-main-banner.dto';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { CampaignsService } from '@/modules/marketing-program/campaigns/campaigns.service';
 
 @Injectable()
 export class MainBannerService {
@@ -22,6 +22,8 @@ export class MainBannerService {
 
     private readonly cloudinaryService: CloudinaryService,
 
+    private readonly campaignService: CampaignsService,
+
     private dataSource: DataSource,
 
     @InjectQueue('cloudinary')
@@ -30,20 +32,20 @@ export class MainBannerService {
 
   async create(createMainBannerDto: CreateMainBannerDto) {
     try {
-      const { title, ...rest } = createMainBannerDto;
-      const slug = stringToSlug(title);
+      const { campaign: campaignId, ...rest } = createMainBannerDto;
 
       // Kiểm tra tên main banner đã tồn tại chưa
-      const existingMainBanner = await this.mainBannerRepo.exists({ where: { slug } });
-      if (existingMainBanner) {
-        throw new ConflictException('Main banner with this title already exists');
+      const campaignSlug = await this.campaignService.findSlugById(campaignId);
+      if (!campaignSlug) {
+        throw new NotFoundException('Campaign not found');
       }
 
       const mainBanner = this.mainBannerRepo.create({
         ...rest,
-        slug,
-        title,
+        campaignSlug,
+        campaign: { id: campaignId },
       });
+
       return this.mainBannerRepo.save(mainBanner);
     } catch (error) {
       await this.removeImageForError(createMainBannerDto.image?.key);
@@ -61,16 +63,20 @@ export class MainBannerService {
     //
     const queryBuilder = this.mainBannerRepo
       .createQueryBuilder('mainBanner')
+      .leftJoinAndSelect('mainBanner.campaign', 'campaign')
 
       // Select các trường cụ thể (tương đương với select của bạn)
       .select([
         'mainBanner.id',
-        'mainBanner.title',
-        'mainBanner.slug',
         'mainBanner.desc',
         'mainBanner.image',
         'mainBanner.isActive',
         'mainBanner.createdAt',
+        'mainBanner.campaignSlug',
+
+        'campaign.id',
+        'campaign.name',
+        'campaign.slug',
       ]);
 
     // Phân trang và sắp xếp
@@ -99,16 +105,20 @@ export class MainBannerService {
     //
     const queryBuilder = this.mainBannerRepo
       .createQueryBuilder('mainBanner')
+      .leftJoinAndSelect('mainBanner.campaign', 'campaign')
 
       // Select các trường cụ thể (tương đương với select của bạn)
       .select([
         'mainBanner.id',
-        'mainBanner.title',
-        'mainBanner.slug',
         'mainBanner.desc',
         'mainBanner.image',
         'mainBanner.isActive',
         'mainBanner.createdAt',
+        'mainBanner.campaignSlug',
+
+        'campaign.id',
+        'campaign.name',
+        'campaign.slug',
       ]);
 
     // Phân trang và sắp xếp
@@ -141,29 +151,23 @@ export class MainBannerService {
   }
 
   async update(id: string, updateMainBannerDto: UpdateMainBannerDto) {
-    const { title, image, ...rest } = updateMainBannerDto;
+    const { campaign: campaignId, image, ...rest } = updateMainBannerDto;
 
     // ==========================================
     // 1. VALIDATION & READS (Ngoài Transaction để giải phóng DB nhanh)
     // ==========================================
 
     // Lấy dữ liệu cũ để check tồn tại và giữ lại thông tin ảnh cũ
-    const oldMainBanner = await this.mainBannerRepo.findOne({
-      where: { id },
-      select: { id: true, title: true, slug: true, image: true },
-    });
-    if (!oldMainBanner) {
-      throw new NotFoundException('Main banner not found');
-    }
+    const [oldMainBanner, campaignSlug] = await Promise.all([
+      this.mainBannerRepo.findOne({
+        where: { id },
+        select: { id: true, image: true },
+      }),
+      campaignId ? this.campaignService.findSlugById(campaignId) : null,
+    ]);
+    if (!oldMainBanner) throw new NotFoundException('Main banner not found');
 
-    // Nếu có đổi title, cần check trùng slug với các main banner khác (trừ chính nó)
-    const slug = title ? stringToSlug(title) : undefined;
-    if (slug && slug !== oldMainBanner.slug) {
-      const existingMainBanner = await this.mainBannerRepo.exists({ where: { slug, id: Not(id) } });
-      if (existingMainBanner) {
-        throw new ConflictException('Main banner with this title already exists');
-      }
-    }
+    if (campaignId && !campaignSlug) throw new NotFoundException('Campaign not found');
 
     // Ghi nhận key ảnh cũ phục vụ việc xóa sau khi commit thành công
     const oldImageKey = oldMainBanner.image?.key;
@@ -179,7 +183,8 @@ export class MainBannerService {
       // Merge dữ liệu mới vào thực thể cũ
       const updatedMainBanner = this.mainBannerRepo.merge(oldMainBanner, {
         ...rest,
-        ...(title && { title, slug }),
+        ...(campaignSlug ? { campaignSlug } : {}),
+        ...(campaignId ? { campaign: { id: campaignId } } : {}),
       });
 
       if (image !== undefined) {

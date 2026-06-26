@@ -1,4 +1,4 @@
 export enum CustomerProductType {
-  WISHLIST = 'wishlist', // Sản phẩm yêu thích
+  SUGGEST = 'suggest', // Sản phẩm gợi ý cho khách hàng
   HISTORY = 'history', // Sản phẩm đã xem
 }

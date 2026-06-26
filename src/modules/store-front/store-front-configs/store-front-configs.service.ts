@@ -30,8 +30,6 @@ export class StoreFrontConfigsService implements OnModuleInit {
   }
 
   async update(id: string, dto: UpdateStoreFrontConfigDto) {
-    console.log('Updating store front config:', dto.homeConfig?.config);
-
     // 1. Tìm entity từ DB
     const storeFrontConfig = await this.repo.findOneBy({ id });
     if (!storeFrontConfig) {
