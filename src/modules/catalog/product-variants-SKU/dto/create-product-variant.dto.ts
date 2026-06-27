@@ -18,7 +18,7 @@ import {
 import { SpecificationItemDto } from '../../products-SPU/dto/product-SPU.dto';
 import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
 
-class VariantAttributeDto extends SpecificationItemDto {
+export class VariantAttributeDto extends SpecificationItemDto {
   @IsOptional()
   @IsBoolean()
   isSKU?: boolean;

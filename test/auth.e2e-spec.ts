@@ -33,15 +33,11 @@ describe('AuthController (e2e)', () => {
     expect(cookie).toBeDefined();
 
     // Whoami
-    await request(app.getHttpServer())
-      .get('/users/whoami')
-      .set('Cookie', cookie!)
-      .expect(200)
-      .expect({
-        id: 1,
-        name: '',
-        email: _email,
-      });
+    await request(app.getHttpServer()).get('/users/whoami').set('Cookie', cookie!).expect(200).expect({
+      id: 1,
+      name: '',
+      email: _email,
+    });
   });
 
   // Case: Signin

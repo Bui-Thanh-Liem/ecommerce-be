@@ -10,6 +10,7 @@ import { IProductPromotion } from '../mkt-program/product-promotion.interface';
 import { ICartItem } from '../customer/cart-item.interface';
 import { ICampaign } from '../mkt-program/campaign.interface';
 import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
+import { IProductVariantEmbed } from '../../common/product-variant-embed.interface';
 
 /**
  * KHÔNG DÙNG BẢNG ATTRIBUTE TRUYỀN THỐNG:
@@ -39,6 +40,7 @@ export interface IProductVariant extends IBase {
   productImages: IProductImage[];
 
   // ======================================
+  productVariantEmbed?: IProductVariantEmbed;
   inventories?: IInventory[];
   productItems?: IProductItem[];
   rating?: IRating[];

@@ -63,6 +63,8 @@ import { TopBannersModule } from './modules/store-front/top-banners/top-banners.
 import { StoreFrontConfigsModule } from './modules/store-front/store-front-configs/store-front-configs.module';
 import { PopularSearchModule } from './modules/store-front/popular-search/popular-search.module';
 import { FiltersModule } from './modules/filters/filters.module';
+import { GeminiRagModule } from './common/gemini-rag/gemini-rag.module';
+import { ChatbotModule } from './modules/customer/chatbot/chatbot.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -141,6 +143,8 @@ const isProd = process.env.NODE_ENV === 'production';
     StoreFrontConfigsModule,
     PopularSearchModule,
     FiltersModule,
+    GeminiRagModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
   providers: [

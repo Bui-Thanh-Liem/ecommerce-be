@@ -13,15 +13,17 @@ import { CustomerEntity } from '@/modules/customer/customers/entities/customer.e
 import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
 import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
 import { CurrentCustomer } from '@/decorators/current-customer.decorator';
-import { CustomerProductsService } from '@/modules/customer/customer-products/customer-products.service';
 import { CustomerProductType } from '@/shared/enums/customer-product-type.enum';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Controller('product-variants')
 @Serializer(ProductVariantSKUDto)
 export class ProductVariantsController {
   constructor(
     private readonly productVariantsService: ProductVariantsService,
-    private customerProductService: CustomerProductsService,
+    @InjectQueue('customer-product')
+    private readonly customerProductQueue: Queue,
   ) {}
 
   @Post()
@@ -94,9 +96,9 @@ export class ProductVariantsController {
     //
     const variant = await this.productVariantsService.findOneBySlug(slug);
 
-    // REFACTOR: đưa vào bull
+    // Tạo sản phẩm đã xem (HISTORY) cho khách hàng hoặc guest
     if (variant) {
-      await this.customerProductService.create({
+      await this.customerProductQueue.add('create-suggest-product', {
         dto: { type: CustomerProductType.HISTORY, productVariant: variant.id },
         guest,
         customer,

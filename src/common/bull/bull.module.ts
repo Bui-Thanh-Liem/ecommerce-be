@@ -7,6 +7,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisOptions } from '@/configs/redis.config';
 import { CloudinaryProcessor } from './cloudinary.processor';
 import { AuditLogProcessor } from './audit-log.processor';
+import { CustomerProductProcessor } from './customer-product.processor';
+import { CustomerProductsModule } from '@/modules/customer/customer-products/customer-products.module';
+import { ProductVariantProcessor } from './product-variant.processor';
+import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/product-variants.module';
 
 @Global()
 @Module({
@@ -46,9 +50,44 @@ import { AuditLogProcessor } from './audit-log.processor';
       },
     }),
 
+    // Đăng ký queue 'audit-log' với các tùy chọn mặc định cho job
     BullModule.registerQueue({
       configKey: 'ecommerce-configuration',
       name: 'audit-log',
+
+      defaultJobOptions: {
+        removeOnComplete: false,
+        removeOnFail: false,
+
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    }),
+
+    // Đăng ký queue 'customer-product' với các tùy chọn mặc định cho job
+    BullModule.registerQueue({
+      configKey: 'ecommerce-configuration',
+      name: 'customer-product',
+
+      defaultJobOptions: {
+        removeOnComplete: false,
+        removeOnFail: false,
+
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    }),
+
+    // Đăng ký queue 'product-variant' với các tùy chọn mặc định cho job
+    BullModule.registerQueue({
+      configKey: 'ecommerce-configuration',
+      name: 'product-variant',
 
       defaultJobOptions: {
         removeOnComplete: false,
@@ -79,8 +118,24 @@ import { AuditLogProcessor } from './audit-log.processor';
       name: 'audit-log',
       adapter: BullMQAdapter,
     }),
+
+    // BOARD: Đăng ký Bull Board cho queue 'customer-product' để có thể quản lý qua giao diện web
+    BullBoardModule.forFeature({
+      name: 'customer-product',
+      adapter: BullMQAdapter,
+    }),
+
+    // BOARD: Đăng ký Bull Board cho queue 'product-variant' để có thể quản lý qua giao diện web
+    BullBoardModule.forFeature({
+      name: 'product-variant',
+      adapter: BullMQAdapter,
+    }),
+
+    //
+    CustomerProductsModule,
+    ProductVariantsModule,
   ],
-  providers: [CloudinaryProcessor, AuditLogProcessor],
+  providers: [CloudinaryProcessor, AuditLogProcessor, CustomerProductProcessor, ProductVariantProcessor],
   controllers: [],
   exports: [BullModule],
 })

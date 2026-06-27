@@ -62,7 +62,7 @@ export class CustomerProductsService {
       productVariant: { id: productVariantId },
     });
 
-    // REFACTOR: đưa vào bull
+    // 4. Nếu là type HISTORY thì tạo thêm các product variant SUGGEST dựa trên product variant HISTORY vừa tạo
     const suggestProducts = await this.variantsService.findVariantForSuggestById(productVariantId);
     if (suggestProducts.length > 0 && rest.type === CustomerProductType.HISTORY) {
       await Promise.all(
@@ -79,8 +79,10 @@ export class CustomerProductsService {
       );
     }
 
-    // 4. Lưu vào database
-    return await this.customerProductRepository.save(customerProduct);
+    // 5. Lưu vào database
+    await this.customerProductRepository.save(customerProduct);
+
+    return true;
   }
 
   async findAll({

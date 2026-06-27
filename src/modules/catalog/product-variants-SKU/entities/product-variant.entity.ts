@@ -7,11 +7,12 @@ import { RatingEntity } from '@/modules/customer/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductVariantCondition } from '@/shared/enums/product-variant-condition.enum';
 import { IProductVariant, IVariantAttribute } from '@/shared/interfaces/models/catalog/product-variant.interface';
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { ProductPromotionEntity } from '@/modules/marketing-program/product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '@/modules/marketing-program/campaigns/entities/campaign.entity';
 import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
+import { ProductVariantEmbedEntity } from '@/modules/catalog/product-variants-SKU/entities/product-variant-embed.entity';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -59,6 +60,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
   salesAttributesIndex: Record<string, string>;
 
   // Quan hệ với các entity khác
+  @OneToOne(() => ProductVariantEmbedEntity, (embed) => embed.productVariant, { nullable: true })
+  productVariantEmbed?: ProductVariantEmbedEntity;
+
   @OneToMany(() => InventoryEntity, (inventory) => inventory.productVariant, { nullable: true, onDelete: 'SET NULL' })
   inventories?: InventoryEntity[];
 
