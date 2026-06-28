@@ -1,7 +1,7 @@
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Not, Repository } from 'typeorm';
 import { ProductCodeService } from '../product-code/product-code.service';
@@ -15,11 +15,6 @@ import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-va
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { CategoryEntity } from '../categories/entities/category.entity';
 import { SORT_OPTIONS } from '@/shared/constants/sort-option.constant';
-import { GeminiRagService } from '@/common/gemini-rag/gemini-rag.service';
-import { ProductVariantEmbedEntity } from './entities/product-variant-embed.entity';
-import { GenerateProductEmbedDto } from '@/common/gemini-rag/dto/generate-product-embed.dto';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 
 @Injectable()
 export class ProductVariantsService {
@@ -29,17 +24,10 @@ export class ProductVariantsService {
     @InjectRepository(ProductVariantEntity)
     private productVariantRepo: Repository<ProductVariantEntity>,
 
-    @InjectRepository(ProductVariantEmbedEntity)
-    private productVariantEmbedRepo: Repository<ProductVariantEmbedEntity>,
-
     private productsService: ProductsService,
     private productCodeService: ProductCodeService,
     private dataSource: DataSource,
     private readonly cloudinaryService: CloudinaryService,
-    private readonly geminiRagService: GeminiRagService,
-
-    @InjectQueue('product-variant')
-    private readonly productVariantQueue: Queue,
   ) {}
 
   async create(createProductVariantDto: CreateProductVariantDto) {
@@ -47,7 +35,7 @@ export class ProductVariantsService {
       const { product: productId, productImages, ...rest } = createProductVariantDto;
 
       // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant
-      const { spu, slug, name } = await this.productsService.findSPUNameAndSlugById(productId);
+      const { spu, slug } = await this.productsService.findProductContextById(productId);
       if (!spu) throw new NotFoundException('Product not found');
 
       // 2. Tạo slug cho ProductVariant dựa trên SPU và salesAttributes
@@ -71,51 +59,10 @@ export class ProductVariantsService {
       });
       const savedProductVariant = await this.productVariantRepo.save(productVariant);
 
-      // 6. Tạo embedding cho ProductVariant mới
-      if (savedProductVariant) {
-        await this.productVariantQueue.add('create-product-embed', {
-          id: savedProductVariant.id,
-          dto: {
-            productName: name,
-            price: savedProductVariant.price,
-            salesAttributes: savedProductVariant.salesAttributes,
-          },
-        });
-      }
-
       return savedProductVariant;
     } catch (error) {
       await this.removeImagesForError(createProductVariantDto.productImages?.map((img) => img.image.url));
       this.logger.debug(`Failed to create brand`, error);
-      throw error;
-    }
-  }
-
-  /**
-   *
-   * @description Tạo embedding cho ProductVariant và lưu vào bảng ProductVariantEmbed
-   * @description Hàm này sẽ sử dụng ở bull, và this.create sẽ sử dụng từ bull
-   */
-  async createProductEmbed({ id, dataEmbed }: { id: string; dataEmbed: GenerateProductEmbedDto }) {
-    try {
-      //
-      const exist = await this.exists([id]);
-      if (!exist) throw new NotFoundException('Product variant not found');
-
-      //
-      const embed = await this.geminiRagService.generateProductEmbedding(dataEmbed);
-      if (!embed) throw new BadRequestException('Failed to generate embedding for product variant');
-
-      //
-      const dataToSave = this.productVariantEmbedRepo.create({
-        embedding: embed,
-        productVariantId: id,
-        productVariant: { id },
-        dataToEmbed: dataEmbed,
-      });
-      return await this.productVariantEmbedRepo.save(dataToSave);
-    } catch (error) {
-      this.logger.error(`Failed to create product embed for variant ${id}`, error);
       throw error;
     }
   }
@@ -172,35 +119,6 @@ export class ProductVariantsService {
       page,
       totalPage: Math.ceil(totalData / limit),
     };
-  }
-
-  async findSimilarProductEmbeddings(question: string, limit: number = 6): Promise<ProductVariantEntity[]> {
-    try {
-      if (!question?.trim()) return [];
-
-      const queryEmbedding = await this.geminiRagService.generateQuestionEmbedding(question);
-
-      const matchedEmbeddings = await this.productVariantEmbedRepo
-        .createQueryBuilder('embed')
-        .leftJoinAndSelect('embed.productVariant', 'pv')
-        .leftJoinAndSelect('pv.product', 'p')
-        .select(['embed.id', 'pv.id', 'pv.sku', 'pv.price', 'pv.salesAttributes', 'p.id', 'p.name', 'p.spu'])
-        .where('embed.deletedAt IS NULL')
-        .andWhere('pv.deletedAt IS NULL')
-        .andWhere('p.deletedAt IS NULL')
-        .orderBy('embed.embedding <=> :embedding', 'ASC')
-        .setParameter('embedding', `[${queryEmbedding.join(',')}]`)
-        // .setParameter('embedding', `${JSON.stringify(queryEmbedding)}`)
-        .limit(limit)
-        .getMany();
-
-      console.log('Matched Embeddings:', matchedEmbeddings);
-
-      return matchedEmbeddings.map((item) => item.productVariant);
-    } catch (error) {
-      console.error('RAG Pipeline error:', error);
-      throw error;
-    }
   }
 
   async findOptions(query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
@@ -598,8 +516,8 @@ export class ProductVariantsService {
     // Chạy song song các câu lệnh check độc lập ngoài transaction
     const [product] = await Promise.all([
       productId
-        ? this.productsService.findSPUNameAndSlugById(productId)
-        : Promise.resolve({ spu: finalSpu, slug: '', name: '' }),
+        ? this.productsService.findProductContextById(productId)
+        : Promise.resolve({ spu: finalSpu, slug: '', name: '', categoryName: '', brandName: '' }),
     ]);
 
     //
@@ -661,19 +579,7 @@ export class ProductVariantsService {
       }
 
       // Lưu vào DB qua transaction manager
-      const savedProductVariant = await queryRunner.manager.save(ProductVariantEntity, updatedVariant);
-
-      //
-      if (savedProductVariant) {
-        await this.productVariantQueue.add('create-product-embed', {
-          id: savedProductVariant.id,
-          dto: {
-            productName: product.name,
-            price: savedProductVariant.price,
-            salesAttributes: savedProductVariant.salesAttributes,
-          },
-        });
-      }
+      await queryRunner.manager.save(ProductVariantEntity, updatedVariant);
 
       // Chỉ commit khi DB hoàn tất
       await queryRunner.commitTransaction();

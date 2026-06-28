@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class GenerateQuestionEmbedDto {
-  @IsNotEmpty()
+export class AskQuestionDto {
   @IsString()
+  @IsNotEmpty()
   question: string;
 }

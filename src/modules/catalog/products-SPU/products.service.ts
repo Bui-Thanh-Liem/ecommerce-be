@@ -201,15 +201,32 @@ export class ProductsService {
     return count === ids.length;
   }
 
-  async findSPUNameAndSlugById(id: string) {
+  async findProductContextById(id: string) {
     const product = await this.productRepo.findOne({
       where: { id },
-      select: ['spu', 'slug', 'name', 'specifications'],
+      relations: ['category', 'brand'],
+      select: {
+        id: true,
+        spu: true,
+        name: true,
+        slug: true,
+        specifications: true,
+        category: {
+          id: true,
+          name: true,
+        },
+        brand: {
+          id: true,
+          name: true,
+        },
+      },
     });
     return {
       spu: product?.spu,
       slug: product?.slug,
       name: product?.name,
+      brandName: product?.category?.name,
+      categoryName: product?.category?.name,
       specifications: product?.specifications,
     };
   }

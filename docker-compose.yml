@@ -6,11 +6,12 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--enable-feature=remote-write-receiver' # Bắt buộc để k6 đẩy dữ liệu vào
-
     ports:
       - '9090:9090'
     extra_hosts:
       - 'host.docker.internal:host-gateway' # Thêm dòng này để Prometheus có thể truy cập NestJS chạy trên máy host
+    networks:
+      - app_network
 
   grafana:
     image: grafana/grafana:latest
@@ -20,3 +21,50 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin # Mật khẩu đăng nhập Grafana
     depends_on:
       - prometheus
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce
+    ports:
+      - '5432:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+
+  app_be:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/ecommerce
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app_network
+
+volumes:
+  pg_data:
+  redis_data:
+
+networks:
+  app_network:
+    driver: bridge
