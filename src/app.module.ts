@@ -64,6 +64,7 @@ import { StoreFrontConfigsModule } from './modules/store-front/store-front-confi
 import { PopularSearchModule } from './modules/store-front/popular-search/popular-search.module';
 import { FiltersModule } from './modules/filters/filters.module';
 import { RagModule } from './common/rag/rag.module';
+import vectorStoreConfig from './configs/vector-store.config';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -71,7 +72,7 @@ const isProd = process.env.NODE_ENV === 'production';
     // Cấu hình biến môi trường
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [pgConfig, s3ClientConfig, cloudinaryConfig, redisConfig],
+      load: [pgConfig, s3ClientConfig, cloudinaryConfig, redisConfig, vectorStoreConfig],
       envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
