@@ -1,15 +1,14 @@
 import { registerAs } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import dotenv from 'dotenv';
 import { join } from 'path';
-import { DataSourceOptions } from 'typeorm';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 
 //
 const isProd = process.env.NODE_ENV === 'production';
 dotenv.config({ path: isProd ? '.env' : '.env.dev' });
 
 //
-export const pgConfig: DataSourceOptions = {
+export const pgConfig: PostgresConnectionOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST || 'localhost',
   port: process.env.POSTGRES_PORT ? +process.env.POSTGRES_PORT : 5432,
@@ -25,4 +24,4 @@ export const pgConfig: DataSourceOptions = {
   poolSize: 10,
 };
 
-export default registerAs('postgres', (): TypeOrmModuleOptions => pgConfig);
+export default registerAs('postgres', () => pgConfig);

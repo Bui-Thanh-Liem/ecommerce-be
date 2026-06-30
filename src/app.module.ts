@@ -5,7 +5,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import pgConfig from './configs/pg.config';
-import s3ClientConfig from './configs/aws.config';
+import s3ClientConfig from './configs/s3.config';
 import { ErrorExceptionFilter } from './exception-filters/error-exception.filter';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
@@ -64,7 +64,8 @@ import { StoreFrontConfigsModule } from './modules/store-front/store-front-confi
 import { PopularSearchModule } from './modules/store-front/popular-search/popular-search.module';
 import { FiltersModule } from './modules/filters/filters.module';
 import { RagModule } from './common/rag/rag.module';
-import vectorStoreConfig from './configs/vector-store.config';
+import { AiModule } from './common/ai/ai.module';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -72,7 +73,7 @@ const isProd = process.env.NODE_ENV === 'production';
     // Cấu hình biến môi trường
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [pgConfig, s3ClientConfig, cloudinaryConfig, redisConfig, vectorStoreConfig],
+      load: [pgConfig, s3ClientConfig, cloudinaryConfig, redisConfig],
       envFilePath: isProd ? '.env' : '.env.dev',
     }),
 
@@ -81,7 +82,7 @@ const isProd = process.env.NODE_ENV === 'production';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService): TypeOrmModuleOptions => {
-        const pgConfig = config.get<TypeOrmModuleOptions>('postgres') || null;
+        const pgConfig = config.get<PostgresConnectionOptions>('postgres') || null;
 
         if (!pgConfig) throw new NotFoundException('Database name not found in environment variables');
 
@@ -101,6 +102,7 @@ const isProd = process.env.NODE_ENV === 'production';
     TaskModule,
     MetricsModule,
     RagModule,
+    AiModule,
 
     // Các module chức năng của ứng dụng
     AuthModule,

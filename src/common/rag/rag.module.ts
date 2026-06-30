@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RagService } from './rag.service';
 import { RagController } from './rag.controller';
-import { DocumentEntity } from './document.entity';
+import { DocumentEntity } from './entity/document.entity';
 import { QueryRouterService } from './query-router.service';
 import { HybridSearchService } from './hybrid-search.service';
 import { RbacService } from './rbac.service';
