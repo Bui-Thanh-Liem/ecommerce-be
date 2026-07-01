@@ -13,7 +13,7 @@ import { RbacService } from './rbac.service';
 import { HybridSearchService } from './hybrid-search.service';
 import { ReRankerService } from './reranker.service';
 import { ragConfig } from './rag.config';
-import { AiService } from '../ai/ai.service';
+import { AiService } from '../../common/ai/ai.service';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 

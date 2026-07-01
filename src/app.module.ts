@@ -63,7 +63,7 @@ import { TopBannersModule } from './modules/store-front/top-banners/top-banners.
 import { StoreFrontConfigsModule } from './modules/store-front/store-front-configs/store-front-configs.module';
 import { PopularSearchModule } from './modules/store-front/popular-search/popular-search.module';
 import { FiltersModule } from './modules/filters/filters.module';
-import { RagModule } from './common/rag/rag.module';
+import { RagModule } from './modules/rag/rag.module';
 import { AiModule } from './common/ai/ai.module';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 
