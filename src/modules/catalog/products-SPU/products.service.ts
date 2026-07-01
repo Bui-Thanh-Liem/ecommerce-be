@@ -208,6 +208,7 @@ export class ProductsService {
       select: {
         id: true,
         spu: true,
+        desc: true,
         name: true,
         slug: true,
         specifications: true,
@@ -222,12 +223,13 @@ export class ProductsService {
       },
     });
     return {
+      id: product?.id,
       spu: product?.spu,
       slug: product?.slug,
       name: product?.name,
-      brandName: product?.category?.name,
-      categoryName: product?.category?.name,
       specifications: product?.specifications,
+      brand: { id: product?.brand?.id, name: product?.brand?.name },
+      category: { id: product?.category?.id, name: product?.category?.name },
     };
   }
 

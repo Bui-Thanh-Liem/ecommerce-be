@@ -15,6 +15,11 @@ import { IVariantAttribute } from '@/shared/interfaces/models/catalog/product-va
 import { stringToSlug } from '@/utils/string-to-slug.util';
 import { CategoryEntity } from '../categories/entities/category.entity';
 import { SORT_OPTIONS } from '@/shared/constants/sort-option.constant';
+import { ProductVariantRagStatus } from '@/shared/enums/product-variant-rag-status.enum';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { type DocumentType } from '@/modules/chatbot/document/document.type';
+import { IngestVariantDto } from '@/modules/chatbot/rag/dto/ingest-variant.dto';
 
 @Injectable()
 export class ProductVariantsService {
@@ -23,6 +28,9 @@ export class ProductVariantsService {
   constructor(
     @InjectRepository(ProductVariantEntity)
     private productVariantRepo: Repository<ProductVariantEntity>,
+
+    @InjectQueue('rag')
+    private readonly ragQueue: Queue,
 
     private productsService: ProductsService,
     private productCodeService: ProductCodeService,
@@ -34,8 +42,8 @@ export class ProductVariantsService {
     try {
       const { product: productId, productImages, ...rest } = createProductVariantDto;
 
-      // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant
-      const { spu, slug } = await this.productsService.findProductContextById(productId);
+      // 1. Kiểm tra tồn tại của Product trước khi tạo ProductVariant và lấy các thông tin cần thiết
+      const { spu, slug, name, brand, category } = await this.productsService.findProductContextById(productId);
       if (!spu) throw new NotFoundException('Product not found');
 
       // 2. Tạo slug cho ProductVariant dựa trên SPU và salesAttributes
@@ -59,6 +67,23 @@ export class ProductVariantsService {
       });
       const savedProductVariant = await this.productVariantRepo.save(productVariant);
 
+      // 6. Đẩy job vào queue để nạp RAG
+      await this.ragQueue.add('ingest-variant', {
+        variant: {
+          id: savedProductVariant.id,
+          sku: savedProductVariant.sku,
+          price: savedProductVariant.price,
+          salesAttributes: savedProductVariant.salesAttributes,
+          product: {
+            id: productId,
+            name,
+            category,
+            brand,
+          },
+        } as IngestVariantDto,
+        type: 'public' as DocumentType,
+      });
+
       return savedProductVariant;
     } catch (error) {
       await this.removeImagesForError(createProductVariantDto.productImages?.map((img) => img.image.url));
@@ -69,8 +94,6 @@ export class ProductVariantsService {
 
   async findAll(query: ProductVariantQueryDto): Promise<IMetadata<ProductVariantEntity>> {
     const { page, limit } = query;
-
-    //
     const { take, skip } = calculatePagination(page, limit);
 
     //
@@ -514,22 +537,18 @@ export class ProductVariantsService {
     const isChangingProduct = productId && productId !== oldVariant.product?.id;
 
     // Chạy song song các câu lệnh check độc lập ngoài transaction
-    const [product] = await Promise.all([
-      productId
-        ? this.productsService.findProductContextById(productId)
-        : Promise.resolve({ spu: finalSpu, slug: '', name: '', categoryName: '', brandName: '' }),
-    ]);
+    const [product] = await Promise.all([productId ? this.productsService.findProductContextById(productId) : null]);
 
     //
     const variantSlug = this.generateVariantSlug(salesAttributes ?? oldVariant.salesAttributes, product?.slug);
 
     //
-    if (isChangingProduct && !product.spu) {
+    if (isChangingProduct && !product?.spu) {
       throw new NotFoundException('Product not found');
     }
 
     //
-    if (isChangingProduct) {
+    if (isChangingProduct && product?.spu) {
       finalSpu = product.spu;
     }
 
@@ -579,7 +598,19 @@ export class ProductVariantsService {
       }
 
       // Lưu vào DB qua transaction manager
-      await queryRunner.manager.save(ProductVariantEntity, updatedVariant);
+      const updated = await queryRunner.manager.save(ProductVariantEntity, updatedVariant);
+
+      // 6. Đẩy job vào queue để nạp RAG
+      await this.ragQueue.add('ingest-variant', {
+        variant: {
+          id: updated.id,
+          sku: updated.sku,
+          price: updated.price,
+          salesAttributes: updated.salesAttributes,
+          product: product,
+        } as IngestVariantDto,
+        type: 'public' as DocumentType,
+      });
 
       // Chỉ commit khi DB hoàn tất
       await queryRunner.commitTransaction();
@@ -615,6 +646,15 @@ export class ProductVariantsService {
     } catch (cloudError) {
       this.logger.warn(`Database updated but failed to delete some old variant images from Cloudinary`, cloudError);
     }
+  }
+
+  async changeRagStatus(id: string, newStatus: ProductVariantRagStatus) {
+    const variant = await this.productVariantRepo.findOne({ where: { id } });
+    if (!variant) {
+      throw new NotFoundException('Product variant not found');
+    }
+    variant.ragStatus = newStatus;
+    return await this.productVariantRepo.save(variant);
   }
 
   async remove(id: string) {

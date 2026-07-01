@@ -10,6 +10,8 @@ import { AuditLogProcessor } from './audit-log.processor';
 import { CustomerProductProcessor } from './customer-product.processor';
 import { CustomerProductsModule } from '@/modules/customer/customer-products/customer-products.module';
 import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/product-variants.module';
+import { RagModule } from '@/modules/chatbot/rag/rag.module';
+import { RagProcessor } from './rag.processor';
 
 @Global()
 @Module({
@@ -83,6 +85,23 @@ import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/pr
       },
     }),
 
+    // Đăng ký queue 'rag' với các tùy chọn mặc định cho job
+    BullModule.registerQueue({
+      configKey: 'ecommerce-configuration',
+      name: 'rag',
+
+      defaultJobOptions: {
+        removeOnComplete: false,
+        removeOnFail: false,
+
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    }),
+
     // BOARD: Cấu hình Bull Board để quản lý các queue của BullMQ
     BullBoardModule.forRoot({
       route: '/admin/queues',
@@ -107,11 +126,18 @@ import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/pr
       adapter: BullMQAdapter,
     }),
 
+    // BOARD: Đăng ký Bull Board cho queue 'rag' để có thể quản lý qua giao diện web
+    BullBoardModule.forFeature({
+      name: 'rag',
+      adapter: BullMQAdapter,
+    }),
+
     //
-    CustomerProductsModule,
+    RagModule,
     ProductVariantsModule,
+    CustomerProductsModule,
   ],
-  providers: [CloudinaryProcessor, AuditLogProcessor, CustomerProductProcessor],
+  providers: [CloudinaryProcessor, AuditLogProcessor, CustomerProductProcessor, RagProcessor],
   controllers: [],
   exports: [BullModule],
 })

@@ -12,6 +12,7 @@ import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item
 import { ProductPromotionEntity } from '@/modules/marketing-program/product-promotions/entities/product-promotion.entity';
 import { CampaignEntity } from '@/modules/marketing-program/campaigns/entities/campaign.entity';
 import { ProductVariantStatus } from '@/shared/enums/product-variant-status.enum';
+import { ProductVariantRagStatus } from '@/shared/enums/product-variant-rag-status.enum';
 
 @Entity('product_variants')
 export class ProductVariantEntity extends BaseEntity implements IProductVariant {
@@ -47,6 +48,9 @@ export class ProductVariantEntity extends BaseEntity implements IProductVariant 
 
   @Column({ type: 'enum', enum: ProductVariantStatus, default: ProductVariantStatus.NORMAL })
   status: ProductVariantStatus;
+
+  @Column({ type: 'enum', enum: ProductVariantRagStatus, default: ProductVariantRagStatus.NOT_INGESTED })
+  ragStatus: ProductVariantRagStatus;
 
   @Column({ type: 'jsonb', name: 'sales_attributes', nullable: true })
   salesAttributes: IVariantAttribute[];
