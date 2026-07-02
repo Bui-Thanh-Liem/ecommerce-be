@@ -1,8 +1,6 @@
-export type Role = 'customer' | 'staff' | 'subAdmin' | 'admin';
-
 export interface UserContext {
   userId: string;
-  role: Role;
+  type: DocumentType;
 }
 
 export interface RAGDocument {

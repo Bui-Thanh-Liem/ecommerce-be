@@ -17,12 +17,13 @@ export class HybridSearchService {
     }));
 
     // keyword fallback (simple example)
-    const keywordDocs: RAGDocument[] = await this.keywordSearch(question);
+    const keywordDocs: RAGDocument[] = this.keywordSearch(question);
 
     return [...vectorDocs, ...keywordDocs];
   }
 
-  async keywordSearch(question: string): Promise<RAGDocument[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  keywordSearch(question: string): RAGDocument[] {
     return []; // implement SQL full-text or ILIKE search
   }
 }

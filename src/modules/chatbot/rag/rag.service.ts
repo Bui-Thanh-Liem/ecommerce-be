@@ -21,6 +21,8 @@ import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/p
 import { ProductVariantRagStatus } from '@/shared/enums/product-variant-rag-status.enum';
 import { IngestVariantDto } from './dto/ingest-variant.dto';
 import { v5 as uuidv5 } from 'uuid';
+import { ChatHistoryService } from '../chat-history/chat-history.service';
+import { PromptService } from './prompt.service';
 
 /**
  * distanceStrategy: Chiến lược tính khoảng cách giữa các vector embedding. Có thể là:
@@ -53,6 +55,10 @@ export class RagService implements OnModuleInit {
     private documentService: DocumentService,
 
     private variantService: ProductVariantsService,
+
+    private readonly chatHistoryService: ChatHistoryService,
+
+    private readonly promptService: PromptService,
 
     private readonly router: QueryRouterService,
     private readonly rbac: RbacService,
@@ -163,7 +169,7 @@ export class RagService implements OnModuleInit {
    * -> tạo vector -> cập nhật ProductVariantEntity.ragStatus = true -> lưu vào Postgres.
    * Hàm này sẽ thực thi ở bull, rồi tại service ProductVariantsService sẽ addQueue
    */
-  async ingestVariant(variant: IngestVariantDto, type: DocumentType) {
+  async ingestProductVariant(variant: IngestVariantDto, type: DocumentType) {
     const product = variant?.product;
 
     // 1. Cập nhật trạng thái
@@ -242,11 +248,10 @@ export class RagService implements OnModuleInit {
     conversationId: string,
   ): AsyncGenerator<string, void, unknown> {
     console.log('question :::', question);
-    console.log('conversationId :::', conversationId);
 
     try {
       const topK = 4;
-      const distanceThreshold = 0.5; // phải tuỳ theo model embed
+      const distanceThreshold = 0.8; // phải tuỳ theo model embed
       const isInternal = type === 'internal';
 
       // Đối với similaritySearchWithScore()
@@ -286,66 +291,8 @@ export class RagService implements OnModuleInit {
 
       const context = docs.map((doc, i) => `[Đoạn ${i + 1}] ${doc.pageContent}`).join('\n\n');
 
-      const publicPrompt = [
-        'Bạn là trợ lý AI hỗ trợ khách hàng của cửa hàng.',
-        '',
-        'TÍNH CÁCH:',
-        '- Thân thiện, lịch sự và nhiệt tình.',
-        '- Luôn chào hỏi tự nhiên khi phù hợp.',
-        '- Trả lời như một nhân viên tư vấn chuyên nghiệp.',
-        '- Ngôn ngữ gần gũi, dễ hiểu, tạo cảm giác vui vẻ và hiếu khách.',
-        '- Có thể sử dụng một vài emoji phù hợp (😊✨👍), nhưng không lạm dụng.',
-        '- Luôn thể hiện sự sẵn sàng hỗ trợ khách hàng.',
-        '',
-        'NGUYÊN TẮC TRẢ LỜI:',
-        '- Chỉ sử dụng thông tin trong phần "Ngữ cảnh".',
-        '- Không tự suy đoán hoặc bịa thêm thông tin.',
-        '- Nếu không tìm thấy thông tin trong ngữ cảnh, hãy trả lời lịch sự rằng bạn chưa có thông tin và mời khách hàng liên hệ nhân viên để được hỗ trợ thêm.',
-        '- Nếu câu hỏi chưa rõ, hãy hỏi lại khách hàng thay vì đoán ý.',
-        '',
-        'CÁCH TRÌNH BÀY:',
-        '- Trả lời ngắn gọn nhưng đầy đủ.',
-        '- Có thể dùng bullet nếu có nhiều ý.',
-        '- Không giải thích dài dòng.',
-        '- Kết thúc bằng một câu thể hiện sự sẵn sàng hỗ trợ tiếp nếu phù hợp.',
-        '',
-        'Ngữ cảnh:',
-        context,
-        '',
-        `Câu hỏi: ${question}`,
-        '',
-        'Trả lời:',
-      ].join('\n');
-
-      const internalPrompt = [
-        'Bạn là AI Assistant nội bộ của hệ thống E-commerce.',
-        '',
-        'VAI TRÒ:',
-        '- Hỗ trợ nhân viên kinh doanh, chăm sóc khách hàng và vận hành.',
-        '- Giải thích thông tin sản phẩm, SKU, thuộc tính, thương hiệu, danh mục và các thông tin liên quan.',
-        '- Trả lời chính xác, chuyên nghiệp và dễ hiểu.',
-        '',
-        'NGUYÊN TẮC:',
-        '- Chỉ sử dụng thông tin trong phần "Ngữ cảnh".',
-        '- Không suy đoán hoặc tự tạo thông tin.',
-        '- Nếu không tìm thấy thông tin trong ngữ cảnh, hãy trả lời: "Không tìm thấy thông tin trong dữ liệu hiện có."',
-        '- Nếu câu hỏi chưa rõ, hãy hỏi lại để làm rõ yêu cầu.',
-        '',
-        'CÁCH TRẢ LỜI:',
-        '- Trả lời trực tiếp vào câu hỏi.',
-        '- Ưu tiên ngắn gọn nhưng đầy đủ.',
-        '- Nếu có nhiều kết quả, hãy liệt kê bằng bullet.',
-        '- Nếu cần so sánh sản phẩm hoặc SKU, hãy trình bày theo bảng Markdown.',
-        '- Có thể phân tích ưu điểm, khác biệt và mối liên hệ giữa các dữ liệu trong ngữ cảnh.',
-        '- Không nhắc đến "ngữ cảnh", "RAG", "vector database" hoặc "tài liệu".',
-        '',
-        'Ngữ cảnh:',
-        context,
-        '',
-        `Câu hỏi: ${question}`,
-        '',
-        'Trả lời:',
-      ].join('\n');
+      const publicPrompt = this.promptService.generatePublicPrompt(context, question);
+      const internalPrompt = this.promptService.generateInternalPrompt(context, question);
 
       // 3. Tạo prompt template và stream dữ liệu từ LLM
       const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -355,9 +302,11 @@ export class RagService implements OnModuleInit {
       ]);
 
       // 4. Tạo chain và stream dữ liệu từ LLM
+      const history = await this.chatHistoryService.getRecentMessages(conversationId, 12); // Lấy 12 message gần nhất
+      console.log('history :::', history);
       const chain = promptTemplate.pipe(this.aiService.model);
       const stream = await chain.stream({
-        history: [],
+        history,
         input: question,
       });
 
@@ -370,11 +319,17 @@ export class RagService implements OnModuleInit {
       yield JSON.stringify({ type: 'start_answer' });
 
       //
+      let fullAnswer = '';
       for await (const chunk of stream) {
         const content = chunk.content as string;
         if (!content) continue; // không stream khi model reasoning
+        fullAnswer += content;
         yield JSON.stringify({ type: 'answer_chunk', content });
       }
+
+      //
+      await this.chatHistoryService.appendHuman(conversationId, question);
+      await this.chatHistoryService.appendAi(conversationId, fullAnswer);
 
       //
       yield JSON.stringify({ type: 'end' });

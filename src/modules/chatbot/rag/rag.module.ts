@@ -7,11 +7,13 @@ import { RbacService } from './rbac.service';
 import { ReRankerService } from './reranker.service';
 import { DocumentModule } from '../document/document.module';
 import { ProductVariantsModule } from '@/modules/catalog/product-variants-SKU/product-variants.module';
+import { ChatHistoryModule } from '../chat-history/chat-history.module';
+import { PromptService } from './prompt.service';
 
 @Module({
-  imports: [DocumentModule, ProductVariantsModule],
+  imports: [DocumentModule, ProductVariantsModule, ChatHistoryModule],
   controllers: [RagController],
-  providers: [RagService, QueryRouterService, HybridSearchService, RbacService, ReRankerService],
-  exports: [RagService, QueryRouterService, HybridSearchService, RbacService, ReRankerService],
+  providers: [RagService, QueryRouterService, HybridSearchService, RbacService, ReRankerService, PromptService],
+  exports: [RagService, QueryRouterService, HybridSearchService, RbacService, ReRankerService, PromptService],
 })
 export class RagModule {}

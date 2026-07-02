@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Role } from './role.type';
+import { DocumentType } from '../document/document.type';
 
-const customerRoutes = [
+const publicRoutes = [
   { keywords: ['bảo hành', 'đổi trả'], scopes: ['policy'] },
   { keywords: ['giá', 'laptop', 'điện thoại'], scopes: ['product'] },
 ];
 
-const staffRoutes = [
+const internalRoutes = [
   { keywords: ['sku'], scopes: ['inventory'] },
   { keywords: ['đơn hàng'], scopes: ['order'] },
 ];
 
 @Injectable()
 export class QueryRouterService {
-  route(question: string, role: Role): string[] {
+  route(question: string, type: DocumentType): string[] {
     const q = question.toLowerCase();
 
-    // CUSTOMER ROUTES
-    if (role === 'customer') {
-      for (const route of customerRoutes) {
+    // PUBLIC ROUTES
+    if (type === 'public') {
+      for (const route of publicRoutes) {
         if (route.keywords.some((kw) => q.includes(kw))) {
           return route.scopes;
         }
@@ -27,9 +27,9 @@ export class QueryRouterService {
       return ['faq', 'product'];
     }
 
-    // STAFF ROUTES
-    if (role === 'staff') {
-      for (const route of staffRoutes) {
+    // INTERNAL ROUTES
+    if (type === 'internal') {
+      for (const route of internalRoutes) {
         if (route.keywords.some((kw) => q.includes(kw))) {
           return route.scopes;
         }

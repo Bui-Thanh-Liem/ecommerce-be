@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { RAGDocument, Role } from './role.type';
+import { RAGDocument } from './role.type';
+import { DocumentType } from '../document/document.type';
 
 @Injectable()
 export class RbacService {
-  private permissions: Record<Role, string[]> = {
-    customer: ['product', 'faq', 'policy'],
-    staff: ['product', 'faq', 'policy', 'inventory', 'order'],
-    admin: ['*'],
-    subAdmin: ['*'],
+  private permissions: Record<DocumentType, string[]> = {
+    public: ['product', 'faq', 'policy'],
+    internal: ['*'],
   };
 
-  filter(docs: RAGDocument[], role: Role) {
+  filter(docs: RAGDocument[], role: DocumentType) {
     const allowed = this.permissions[role];
 
     if (allowed.includes('*')) return docs;

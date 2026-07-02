@@ -37,7 +37,7 @@ export class RagProcessor extends WorkerHost {
     this.logger.debug(`[JOB-${job.id}] Ingesting variant: ${data.variant.sku} with type: ${data.type}`);
 
     try {
-      const result = await this.ragService.ingestVariant(job.data.variant, job.data.type);
+      const result = await this.ragService.ingestProductVariant(job.data.variant, job.data.type);
 
       if (!result) {
         throw new Error('Unexpected response: result is null or undefined');

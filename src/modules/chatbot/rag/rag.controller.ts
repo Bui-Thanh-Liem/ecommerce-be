@@ -30,6 +30,11 @@ import { CustomerEntity } from '@/modules/customer/customers/entities/customer.e
 import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
 import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
 
+/**
+ * RAG: Retrieval-Augmented Generation
+ * Retrieval-Augmented (tìm kiếm tăng cường) -> tìm kiếm thông tin từ các nguồn dữ liệu đã được lưu trữ trong hệ thống.
+ * Generation (tạo ra câu trả lời) để tạo ra câu trả lời dựa trên dữ liệu đã được lưu trữ trong hệ thống.
+ */
 @Controller('rag')
 export class RagController {
   constructor(private readonly ragService: RagService) {}
@@ -66,8 +71,8 @@ export class RagController {
 
   @Post('ingest-variant/:type')
   @Serializer(ProductVariantSKUDto)
-  async ingestVariant(@Param('type') type: string, @Body() variant: IngestVariantDto) {
-    return await this.ragService.ingestVariant(variant, type as DocumentType);
+  async ingestProductVariant(@Param('type') type: string, @Body() variant: IngestVariantDto) {
+    return await this.ragService.ingestProductVariant(variant, type as DocumentType);
   }
 
   @Public()
@@ -80,6 +85,10 @@ export class RagController {
     @CurrentCustomer() customer: CustomerEntity,
   ): Observable<MessageEvent> {
     //
+    console.log('staff?.id', staff?.id);
+    console.log('customer?.id', customer?.id);
+    console.log('guest?.session', guest?.session);
+
     const conversationId = staff?.id || customer?.id || guest?.session;
     if (!conversationId) {
       throw new BadRequestException('No valid conversation ID found');
