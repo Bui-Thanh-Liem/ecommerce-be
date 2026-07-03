@@ -29,6 +29,7 @@ import { CurrentCustomer } from '@/decorators/current-customer.decorator';
 import { CustomerEntity } from '@/modules/customer/customers/entities/customer.entity';
 import { type IInfoGuest } from '@/shared/interfaces/common/info-guest';
 import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
+import { DocumentService } from '../document/document.service';
 
 /**
  * RAG: Retrieval-Augmented Generation
@@ -37,7 +38,10 @@ import { GetInfoGuest } from '@/decorators/get-info-guest.decorator';
  */
 @Controller('rag')
 export class RagController {
-  constructor(private readonly ragService: RagService) {}
+  constructor(
+    private readonly ragService: RagService,
+    private readonly documentService: DocumentService,
+  ) {}
 
   @Post('ingest-document/:type')
   @UseInterceptors(
@@ -51,19 +55,41 @@ export class RagController {
       }),
       limits: {
         fileSize: 10 * 1024 * 1024, // Giới hạn file upload tối đa 10MB
+        fieldNameSize: 50, // Giới hạn độ dài tên trường (field name) tối đa 50 ký tự
+      },
+      fileFilter: (req, file, cb) => {
+        const allowedMimeTypes = [
+          'application/pdf',
+          'text/plain',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/csv',
+        ];
+        const allowedExtensions = /\.(pdf|txt|docx|csv)$/i;
+        if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.test(file.originalname)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Only PDF, TXT, DOCX, or CSV formats are supported.'), false);
+        }
       },
     }),
   )
   @Serializer(DocumentDto)
-  async ingestDocument(@Param('type') type: string, @UploadedFile() file: Express.Multer.File) {
+  async ingestDocument(@Param('type') type: DocumentType, @UploadedFile() file: Express.Multer.File) {
     try {
       if (!['public', 'internal'].includes(type)) {
         throw new BadRequestException('Invalid document type');
       }
-      return await this.ragService.ingestDocument(file.path, file.originalname, type as DocumentType);
+
+      return await this.ragService.ingestDocument({
+        type,
+        filePath: file.path,
+        fileSize: file.size,
+        filename: file.filename, // Tên file đã được lưu trên server (có thể khác với tên gốc)
+        originalname: file.originalname,
+      });
     } catch (error) {
       if (file?.path) {
-        await this.ragService.removeFile(file.path);
+        await this.documentService.removeFile(file.path);
       }
       throw error;
     }

@@ -66,6 +66,7 @@ import { FiltersModule } from './modules/filters/filters.module';
 import { RagModule } from './modules/chatbot/rag/rag.module';
 import { AiModule } from './common/ai/ai.module';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
+import { DocumentModule } from './modules/chatbot/document/document.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -103,6 +104,9 @@ const isProd = process.env.NODE_ENV === 'production';
     MetricsModule,
     RagModule,
     AiModule,
+
+    // RAG
+    DocumentModule,
 
     // Các module chức năng của ứng dụng
     AuthModule,

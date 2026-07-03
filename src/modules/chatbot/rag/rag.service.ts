@@ -16,13 +16,13 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { type DocumentType } from '../document/document.type';
 import { DocumentService } from '../document/document.service';
-import { promises as fs } from 'fs';
 import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
 import { ProductVariantRagStatus } from '@/shared/enums/product-variant-rag-status.enum';
 import { IngestVariantDto } from './dto/ingest-variant.dto';
 import { v5 as uuidv5 } from 'uuid';
 import { ChatHistoryService } from '../chat-history/chat-history.service';
 import { PromptService } from './prompt.service';
+import { IngestDocumentDto } from '../document/dto/ingest.dto';
 
 /**
  * distanceStrategy: Chiến lược tính khoảng cách giữa các vector embedding. Có thể là:
@@ -110,9 +110,11 @@ export class RagService implements OnModuleInit {
    * Nạp file
    * -> trích xuất text -> chia nhỏ -> tạo vector -> Lưu metadata qua TypeORM -> lưu vào Postgres.
    */
-  async ingestDocument(filePath: string, sourceName: string, type: DocumentType) {
+  async ingestDocument(payload: IngestDocumentDto) {
+    const { type, originalname, filePath } = payload;
+
     // 1. Lưu thông tin metadata (tên file, trạng thái)
-    const docRecord = await this.documentService.create(sourceName, 'processing', type);
+    const docRecord = await this.documentService.create({ payload, status: 'processing' });
 
     try {
       // 2. Trích xuất text từ file
@@ -133,7 +135,7 @@ export class RagService implements OnModuleInit {
             pageContent: chunk.pageContent,
             metadata: {
               ...chunk.metadata,
-              source: sourceName,
+              ...payload,
               documentId: docRecord.id,
             },
           }),
@@ -159,7 +161,7 @@ export class RagService implements OnModuleInit {
     } catch (error) {
       docRecord.status = 'failed';
       await this.documentService.changeStatus(docRecord.id, { status: 'failed' }, type);
-      this.logger.error(`Lỗi khi nạp file ${sourceName}`, error as Error);
+      this.logger.error(`Lỗi khi nạp file ${originalname}`, error as Error);
       throw error;
     }
   }
@@ -431,7 +433,7 @@ export class RagService implements OnModuleInit {
       case 'txt':
         return new TextLoader(filePath);
       default: {
-        await this.removeFile(filePath); // Xóa file nếu không hỗ trợ
+        await this.documentService.removeFile(filePath); // Xóa file nếu không hỗ trợ
         throw new BadRequestException(`Unsupported file extension: ${extension}`);
       }
     }
@@ -440,11 +442,5 @@ export class RagService implements OnModuleInit {
   private buildDeterministicId(variantId: string | number, scope: 'internal' | 'public'): string {
     const RAG_ID_NAMESPACE = 'a3f1c2d4-5b6e-4f7a-8c9d-0e1f2a3b4c5d'; // UUID namespace for deterministic ID generation
     return uuidv5(`variant:${variantId}:${scope}`, RAG_ID_NAMESPACE);
-  }
-
-  async removeFile(filePath: string) {
-    await fs.unlink(filePath).catch(() => {
-      console.error('Error occurred while deleting file:', filePath);
-    });
   }
 }

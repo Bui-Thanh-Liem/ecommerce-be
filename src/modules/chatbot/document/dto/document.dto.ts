@@ -7,8 +7,17 @@ export class DocumentDto extends SerializerDto {
   filename: string;
 
   @Expose()
+  originalname: string;
+
+  @Expose()
+  filePath: string;
+
+  @Expose()
   status: DocumentStatus;
 
   @Expose()
   chunkCount: number;
+
+  @Expose()
+  fileSize: number;
 }
