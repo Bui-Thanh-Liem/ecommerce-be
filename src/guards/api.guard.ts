@@ -15,14 +15,12 @@ export class ApiGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
     const req = context.switchToHttp().getRequest<Request>();
     const apiKey = req.headers['x-api-key'] as string | undefined;
 
     // Cho phép truy cập mà không cần kiểm tra quyền
-    if (isPublic) {
-      return true;
-    }
+    const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
+    if (isPublic) return true;
 
     // Nếu không có API key, trả về lỗi Forbidden
     if (!apiKey) {

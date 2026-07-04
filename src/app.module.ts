@@ -67,6 +67,7 @@ import { RagModule } from './modules/chatbot/rag/rag.module';
 import { AiModule } from './common/ai/ai.module';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 import { DocumentModule } from './modules/chatbot/document/document.module';
+import { SepayModule } from './modules/payments/sepay/sepay.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -150,6 +151,7 @@ const isProd = process.env.NODE_ENV === 'production';
     StoreFrontConfigsModule,
     PopularSearchModule,
     FiltersModule,
+    SepayModule,
   ],
   controllers: [AppController],
   providers: [
@@ -186,10 +188,10 @@ const isProd = process.env.NODE_ENV === 'production';
       provide: APP_INTERCEPTOR,
       useClass: HttpMetricsInterceptor,
     },
-    {
-      provide: APP_GUARD,
-      useClass: ApiGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ApiGuard,
+    // },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
