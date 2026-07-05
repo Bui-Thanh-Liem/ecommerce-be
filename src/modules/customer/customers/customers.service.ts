@@ -15,6 +15,7 @@ import { CustomerTokensService } from '../customer-tokens/customer-tokens.servic
 import { CustomerQueryDto } from './dto/query-customer.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CacheService } from '@/common/cache/cache.service';
+import { OrderService } from '@/common/otp/otp.service';
 
 @Injectable()
 export class CustomersService {
@@ -24,6 +25,7 @@ export class CustomersService {
     @InjectRepository(CustomerEntity)
     private readonly customerRepo: Repository<CustomerEntity>,
     private customerTokensService: CustomerTokensService,
+    private readonly otpService: OrderService,
     private cacheService: CacheService,
   ) {}
 
@@ -33,7 +35,7 @@ export class CustomersService {
     //
     const existingCustomer = await this.customerRepo.exists({ where: { phone } });
     if (!existingCustomer) {
-      const newCustomer = this.customerRepo.create({ phone, address: [], fullname: 'New Customer' });
+      const newCustomer = this.customerRepo.create({ phone, address: [], fullname: 'bạn chưa cung cấp thông tin' });
       await this.customerRepo.save(newCustomer);
     }
 
@@ -42,18 +44,13 @@ export class CustomersService {
       // Gửi mã OTP qua SMS
       const otp = this.randomOtp();
       await this.cacheService.set(`otp:${phone}`, otp, 5 * 60 * 1000); // Lưu OTP trong cache với TTL 5 phút
-      this.logger.debug(`Sending OTP code ${otp} to phone number ${phone}`);
+      this.otpService.sendOtp(phone, otp);
 
       return { message: 'OTP code sent successfully' };
     } catch (error) {
       this.logger.error(`Failed to send OTP code to ${phone}: ${(error as Error)?.message}`);
       throw new BadRequestException('Send code failed');
     }
-  }
-
-  async verifyLoginOtp(customer: CustomerEntity) {
-    const { access } = await this.customerTokensService.updateAuthToken(customer.id);
-    return { customer, token: access };
   }
 
   async validateCustomer(phone: string, otp: string) {
@@ -71,6 +68,11 @@ export class CustomersService {
 
     //
     return customer;
+  }
+
+  async verifyLoginOtp(customer: CustomerEntity) {
+    const { access } = await this.customerTokensService.updateAuthToken(customer.id);
+    return { customer, token: access };
   }
 
   async findAll(queries: CustomerQueryDto) {

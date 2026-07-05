@@ -1,5 +1,4 @@
 import { InventoryEntity } from '@/modules/inventory/inventories/entities/inventory.entity';
-import { VoucherEntity } from '@/modules/payments/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { type IImage } from '@/shared/interfaces/common/image.interface';
 import { IStore } from '@/shared/interfaces/models/inventory/store.interface';
@@ -9,6 +8,7 @@ import { LocationRegionEntity } from '../../location-regions/entities/location-r
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
 import { RoleEntity } from '@/modules/management/roles/entities/role.entity';
 import { PromotionEntity } from '@/modules/marketing-program/promotions/entities/promotion.entity';
+import { VoucherEntity } from '@/modules/customer/vouchers/entities/voucher.entity';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity implements IStore {

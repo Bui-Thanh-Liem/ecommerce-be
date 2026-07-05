@@ -3,6 +3,7 @@ import { RatingEntity } from '@/modules/customer/rating/entities/rating.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICustomer } from '@/shared/interfaces/models/customer/customer.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { OrderEntity } from '../../orders/entities/order.entity';
 
 @Entity('customers')
 export class CustomerEntity extends BaseEntity implements ICustomer {
@@ -27,6 +28,9 @@ export class CustomerEntity extends BaseEntity implements ICustomer {
 
   @OneToMany(() => CartEntity, (cart) => cart.customer, { nullable: true })
   carts: CartEntity[];
+
+  @OneToMany(() => OrderEntity, (order) => order.customer, { nullable: true })
+  orders: OrderEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Customer có fullname: ${this.fullname}`);

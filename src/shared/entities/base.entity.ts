@@ -1,5 +1,4 @@
 import { Logger } from '@nestjs/common';
-import { Exclude } from 'class-transformer';
 import {
   AfterInsert,
   AfterRemove,
@@ -13,7 +12,6 @@ import {
 import { IBase } from '../interfaces/common/base.interface';
 
 export abstract class BaseEntity implements IBase {
-  @Exclude()
   protected readonly logger = new Logger(this.constructor.name);
 
   @PrimaryGeneratedColumn('uuid')

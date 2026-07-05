@@ -1,4 +1,4 @@
-export interface WebhookEvent {
+export interface IWebhookEvent {
   gateway: string; // Name Bank
   transactionDate: string; // Transaction date in ISO 8601 format
   accountNumber: string; // Account number

@@ -1,10 +1,10 @@
 import { CustomerEntity } from '@/modules/customer/customers/entities/customer.entity';
-import { VoucherEntity } from '@/modules/payments/vouchers/entities/voucher.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { CartStatus } from '@/shared/enums/cart-status.enum';
 import { ICart } from '@/shared/interfaces/models/customer/cart.interface';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { CartItemEntity } from '../../cart-items/entities/cart-item.entity';
+import { VoucherEntity } from '../../vouchers/entities/voucher.entity';
 
 @Entity('carts')
 export class CartEntity extends BaseEntity implements ICart {
@@ -21,13 +21,13 @@ export class CartEntity extends BaseEntity implements ICart {
   totalPrice: number;
 
   @ManyToMany(() => VoucherEntity, (voucher) => voucher.carts, { nullable: true })
-  @JoinTable({ name: 'cart_vouchers' }) // Bảng trung gian
+  @JoinTable({ name: 'cart_vouchers' })
   vouchers?: VoucherEntity[];
 
   @Column({ type: 'enum', enum: CartStatus, default: CartStatus.ACTIVE })
   status: CartStatus;
 
-  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart, { cascade: true })
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart, { cascade: true, orphanedRowAction: 'delete' })
   cartItems?: CartItemEntity[];
 
   logInsert(): void {

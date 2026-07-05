@@ -18,44 +18,49 @@ import { CustomerQueryDto } from './dto/query-customer.dto';
 import { CustomerVerifiedDto } from './dto/customer-verified.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('customers')
 @Serializer(CustomerDto)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
+  @Public()
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 5 yêu cầu mỗi phút cho endpoint login
   async login(@Body() loginCustomerDto: LoginCustomerDto) {
     return await this.customersService.login(loginCustomerDto);
   }
 
+  @Public()
   @Post('verify-login-otp')
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 5 yêu cầu mỗi phút cho endpoint verify OTP
   @UseGuards(LocalAuthGuard)
   @Serializer(CustomerVerifiedDto)
   async verifyLoginOtp(
-    @Body() verifyLoginOtpCustomerDto: VerifyLoginOtpCustomerDto, // Giữ lại cho ValidationPipe - Swagger
+    @Body() dto: VerifyLoginOtpCustomerDto, // Giữ lại cho ValidationPipe - Swagger
     @CurrentCustomer() currentCustomer: CustomerEntity,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { customer, token } = await this.customersService.verifyLoginOtp(currentCustomer);
 
     // Set token in cookie
-    res.cookie('token-customer', token, {
+    res.cookie('e_token_customer', token, {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     });
 
-    return { customer, token };
+    return { customer };
   }
 
+  @Public()
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   async googleLogin() {}
 
+  @Public()
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   googleCallback(@Req() req: Request, @CurrentStaff() currentStaff: StaffEntity) {

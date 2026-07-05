@@ -1,46 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req } from '@nestjs/common';
+import { Controller, Post, Res, Req, HttpCode, Body } from '@nestjs/common';
 import { SepayService } from './sepay.service';
-import { CreateSepayDto } from './dto/create-sepay.dto';
-import { UpdateSepayDto } from './dto/update-sepay.dto';
 import { Public } from '@/decorators/public.decorator';
 import { type Request, type Response } from 'express';
-import { WebhookEvent } from './event.interface';
+import { type IWebhookEvent } from './sepay.interface';
+import { CreateCheckoutDto } from './dto/create-checkout.dto';
 
 @Controller('sepay')
 export class SepayController {
   constructor(private readonly sepayService: SepayService) {}
 
-  @Post()
-  create(@Body() createSepayDto: CreateSepayDto) {
-    return this.sepayService.create(createSepayDto);
+  @Public()
+  @Post('create-checkout')
+  createCheckout(@Body() body: CreateCheckoutDto) {
+    return this.sepayService.createCheckout(body);
   }
 
-  @Get()
-  findAll() {
-    return this.sepayService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sepayService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSepayDto: UpdateSepayDto) {
-    return this.sepayService.update(+id, updateSepayDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sepayService.remove(+id);
-  }
+  // @Public()
+  // @Post('ipn')
+  // ipn(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Body() payload: IWebhookEvent) {
+  //   this.sepayService.ipn(req, res, payload);
+  //   return res.status(200).json({ success: true, message: 'IPN received' });
+  // }
 
   @Public()
+  @HttpCode(200)
   @Post('sepay-payment')
-  handleWebhookEvent(@Res() res: Response, @Req() req: Request) {
+  handleWebhookEvent(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Body() payload: IWebhookEvent) {
     const signature = (req.headers['x-sepay-signature'] || '') as string;
     const timestamp = (req.headers['x-sepay-timestamp'] || '') as string;
-    const payload = req.body as WebhookEvent;
 
     //
     this.sepayService.verifyWebhookSignature({
@@ -51,6 +38,7 @@ export class SepayController {
     });
 
     //
-    return this.sepayService.handleWebhookEvent(payload);
+    const result = this.sepayService.handleWebhookEvent(payload);
+    return { success: result };
   }
 }

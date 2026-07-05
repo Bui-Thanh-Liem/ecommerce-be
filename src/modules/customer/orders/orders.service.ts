@@ -1,11 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { OrderEntity } from './entities/order.entity';
+import { In, Repository } from 'typeorm';
+import { CustomersService } from '../customers/customers.service';
+import { OrderItemEntity } from '../order-items/entities/order-item.entity';
+import { OrderStatus } from '@/shared/enums/order-status.enum';
 
 @Injectable()
 export class OrdersService {
-  create(dto: CreateOrderDto) {
-    return 'This action adds a new order';
+  constructor(
+    @InjectRepository(OrderEntity)
+    private orderRepo: Repository<OrderEntity>,
+    private readonly customersService: CustomersService,
+  ) {}
+
+  async create(dto: CreateOrderDto) {
+    const { customer: customerId, orderItems, ...rest } = dto;
+
+    //
+    const customerExists = await this.customersService.exists([customerId]);
+    if (!customerExists) throw new NotFoundException('Customer not found');
+
+    //
+    const dataCreate = this.orderRepo.create({
+      ...rest,
+      customer: { id: customerId },
+      orderItems: orderItems as unknown as OrderItemEntity[],
+    });
+
+    return await this.orderRepo.save(dataCreate);
+  }
+
+  async changeStatus(id: string, status: OrderStatus) {
+    const order = await this.orderRepo.findOne({ where: { id } });
+    if (!order) throw new NotFoundException('Order not found');
+
+    order.status = status;
+    return await this.orderRepo.save(order);
+  }
+
+  async exists(ids: string[]): Promise<boolean> {
+    const count = await this.orderRepo.countBy({ id: In(ids) });
+    return count === ids.length;
   }
 
   findAll() {

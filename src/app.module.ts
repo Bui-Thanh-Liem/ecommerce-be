@@ -21,14 +21,10 @@ import { BrandsModule } from './modules/catalog/brands/brands.module';
 import { ProductVariantsModule } from './modules/catalog/product-variants-SKU/product-variants.module';
 import { ProductItemsModule } from './modules/catalog/product-items-SERIAL/product-items.module';
 import { ProductImagesModule } from './modules/catalog/product-images/product-images.module';
-import { VouchersModule } from './modules/payments/vouchers/vouchers.module';
 import { ApiGuard } from './guards/api.guard';
 import { S3Module } from './common/s3/s3.module';
 import { OrdersModule } from './modules/customer/orders/orders.module';
 import { OrderItemsModule } from './modules/customer/order-items/order-items.module';
-import { MoMoModule } from './modules/payments/momo/momo.module';
-import { VnPayModule } from './modules/payments/vnpay/vnpay.module';
-import { ZaloPayModule } from './modules/payments/zalopay/zalopay.module';
 import { RatingModule } from './modules/customer/rating/rating.module';
 import { MenuModule } from './modules/store-front/menu/menu.module';
 import { CustomerProductsModule } from './modules/customer/customer-products/customer-products.module';
@@ -68,6 +64,8 @@ import { AiModule } from './common/ai/ai.module';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 import { DocumentModule } from './modules/chatbot/document/document.module';
 import { SepayModule } from './modules/payments/sepay/sepay.module';
+import { VouchersModule } from './modules/customer/vouchers/vouchers.module';
+import { OtpModule } from './common/otp/otp.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -105,6 +103,7 @@ const isProd = process.env.NODE_ENV === 'production';
     MetricsModule,
     RagModule,
     AiModule,
+    OtpModule,
 
     // RAG
     DocumentModule,
@@ -129,9 +128,6 @@ const isProd = process.env.NODE_ENV === 'production';
     S3Module,
     OrdersModule,
     OrderItemsModule,
-    MoMoModule,
-    VnPayModule,
-    ZaloPayModule,
     RatingModule,
     MenuModule,
     CustomerProductsModule,
@@ -188,10 +184,10 @@ const isProd = process.env.NODE_ENV === 'production';
       provide: APP_INTERCEPTOR,
       useClass: HttpMetricsInterceptor,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ApiGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ApiGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
