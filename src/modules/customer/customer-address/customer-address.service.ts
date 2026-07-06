@@ -56,6 +56,7 @@ export class CustomerAddressService {
       select: {
         id: true,
         address: true,
+        createdAt: true,
         isDefault: true,
         customer: { id: true, fullname: true, phone: true },
         country: { id: true, name: true },
@@ -88,6 +89,7 @@ export class CustomerAddressService {
       select: {
         id: true,
         address: true,
+        createdAt: true,
         isDefault: true,
         customer: { id: true, fullname: true, phone: true },
         country: { id: true, name: true },
