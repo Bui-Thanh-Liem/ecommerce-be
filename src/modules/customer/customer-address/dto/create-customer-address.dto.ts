@@ -18,4 +18,10 @@ export class CreateCustomerAddressDto {
 
   @IsString()
   address: string;
+
+  @IsString()
+  recipientName: string;
+
+  @IsString()
+  recipientPhone: string;
 }

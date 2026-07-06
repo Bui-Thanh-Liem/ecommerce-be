@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CustomerAddressService } from './customer-address.service';
 import { CreateCustomerAddressDto } from './dto/create-customer-address.dto';
 import { UpdateCustomerAddressDto } from './dto/update-customer-address.dto';
+import { CustomerAddressQueryDto } from './dto/query-customer-address.dto';
+import { Customer } from '@/decorators/customer.decorator';
+import { CurrentCustomer } from '@/decorators/current-customer.decorator';
+import { CustomerEntity } from '../customers/entities/customer.entity';
 
 @Controller('customer-address')
 export class CustomerAddressController {
   constructor(private readonly customerAddressService: CustomerAddressService) {}
 
   @Post()
-  create(@Body() createCustomerAddressDto: CreateCustomerAddressDto) {
-    return this.customerAddressService.create(createCustomerAddressDto);
+  async create(@Body() createCustomerAddressDto: CreateCustomerAddressDto) {
+    return await this.customerAddressService.create(createCustomerAddressDto);
   }
 
   @Get()
-  findAll() {
-    return this.customerAddressService.findAll();
+  async findAll(@Query() query: CustomerAddressQueryDto) {
+    return await this.customerAddressService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customerAddressService.findOne(+id);
+  @Customer()
+  @Get('owned')
+  async findAllOwned(@Query() query: CustomerAddressQueryDto, @CurrentCustomer() customer: CustomerEntity) {
+    return await this.customerAddressService.findAllOwned(customer.id, query);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomerAddressDto: UpdateCustomerAddressDto) {
-    return this.customerAddressService.update(+id, updateCustomerAddressDto);
+  async update(@Param('id') id: string, @Body() updateCustomerAddressDto: UpdateCustomerAddressDto) {
+    return await this.customerAddressService.update(id, updateCustomerAddressDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customerAddressService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.customerAddressService.remove(id);
   }
 }

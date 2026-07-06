@@ -9,5 +9,7 @@ export interface ICustomerAddress extends IBase {
   district: ILocationRegion;
   ward: ILocationRegion;
   address: string;
+  recipientName: string;
+  recipientPhone: string;
   isDefault: boolean;
 }
