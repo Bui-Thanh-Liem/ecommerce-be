@@ -1,13 +1,6 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { LoginCustomerDto } from './dto/login-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerEntity } from './entities/customer.entity';
@@ -16,6 +9,7 @@ import { CustomerQueryDto } from './dto/query-customer.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CacheService } from '@/common/cache/cache.service';
 import { OrderService } from '@/common/otp/otp.service';
+import { TokenType } from '@/shared/enums/token-type.enum';
 
 @Injectable()
 export class CustomersService {
@@ -71,8 +65,13 @@ export class CustomersService {
   }
 
   async verifyLoginOtp(customer: CustomerEntity) {
-    const { access } = await this.customerTokensService.updateAuthToken(customer.id);
-    return { customer, token: access };
+    const { access, refresh } = await this.customerTokensService.updateAuthToken(customer.id);
+    return { customer, token: access, refreshToken: refresh };
+  }
+
+  // Sign out a customer by revoking the token
+  async signOut(customerId: string) {
+    await this.customerTokensService.delete(customerId, TokenType.REFRESH);
   }
 
   async findAll(queries: CustomerQueryDto) {
@@ -122,19 +121,14 @@ export class CustomersService {
   }
 
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    const { phone } = updateCustomerDto;
-
-    // Kiểm tra xem khách hàng cần cập nhật có tồn tại không
-    const existingCustomer = await this.customerRepo.exists({ where: { phone, id: Not(id) } });
-    if (existingCustomer) {
-      throw new ConflictException('Another customer with this phone number already exists');
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { phone, ...rest } = updateCustomerDto;
 
     // Tải khách hàng cần cập nhật và cập nhật thông tin
-    const customer = await this.customerRepo.preload({ id, ...updateCustomerDto });
-    if (!customer) {
-      throw new NotFoundException('Customer not found');
-    }
+    const customer = await this.customerRepo.preload({ id, ...rest });
+    if (!customer) throw new NotFoundException('Customer not found');
+
+    // Kiểm tra số điện thoại có bị trùng với khách hàng khác không
     return await this.customerRepo.save(customer);
   }
 

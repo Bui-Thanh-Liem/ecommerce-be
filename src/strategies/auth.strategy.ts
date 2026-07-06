@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -18,7 +18,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   ) {
     const secret = configService.get<string>('JWT_ACCESS_SECRET');
     if (!secret) {
-      throw new BadRequestException('JWT_ACCESS_SECRET is not defined in environment variables');
+      throw new InternalServerErrorException('JWT_ACCESS_SECRET is not defined');
     }
 
     super({

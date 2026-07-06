@@ -1,5 +1,6 @@
 import { IBase } from '../../common/base.interface';
 import { ICart } from './cart.interface';
+import { ICustomerAddress } from './customer-address.interface';
 import { IOrder } from './order.interface';
 import { IRating } from './rating.interface';
 
@@ -14,4 +15,5 @@ export interface ICustomer extends IBase {
   ratings?: IRating[];
   carts?: ICart[];
   orders?: IOrder[];
+  addresses?: ICustomerAddress[];
 }

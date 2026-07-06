@@ -5,11 +5,12 @@ import { CustomersService } from './customers.service';
 import { CustomerEntity } from './entities/customer.entity';
 import { CustomerTokensModule } from '../customer-tokens/customer-tokens.module';
 import { LocalStrategy } from './strategies/local.strategy';
+import { RefreshTokenCustomerStrategy } from './strategies/refresh-token.strategy';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CustomerEntity]), CustomerTokensModule],
   controllers: [CustomersController],
-  providers: [CustomersService, LocalStrategy],
+  providers: [CustomersService, LocalStrategy, RefreshTokenCustomerStrategy],
   exports: [CustomersService],
 })
 export class CustomersModule {}

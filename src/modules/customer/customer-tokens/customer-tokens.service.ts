@@ -71,17 +71,17 @@ export class CustomerTokensService {
   }: {
     customerId: string;
   }): Promise<{ access: string; refresh: string }> {
-    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN') || '30d';
+    const expiresInRefresh = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN_CUSTOMER') || '30d';
 
     // Tạo access token và refresh token
     const accessToken = this.generateToken({
       payload: { customerId, type: TokenType.ACCESS },
-      secretKey: this.configService.get<string>('JWT_ACCESS_SECRET') || 'key-secret',
-      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN') || '15m',
+      secretKey: this.configService.get<string>('JWT_ACCESS_SECRET_CUSTOMER') || 'key-secret',
+      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN_CUSTOMER') || '15m',
     });
     const refreshToken = this.generateToken({
       payload: { customerId, type: TokenType.REFRESH },
-      secretKey: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh-key-secret',
+      secretKey: this.configService.get<string>('JWT_REFRESH_SECRET_CUSTOMER') || 'refresh-key-secret',
       expiresIn: expiresInRefresh,
     });
 

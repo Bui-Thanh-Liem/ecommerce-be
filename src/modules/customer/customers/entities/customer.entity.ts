@@ -4,6 +4,7 @@ import { BaseEntity } from '@/shared/entities/base.entity';
 import { ICustomer } from '@/shared/interfaces/models/customer/customer.interface';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { OrderEntity } from '../../orders/entities/order.entity';
+import { CustomerAddressEntity } from '../../customer-address/entities/customer-address.entity';
 
 @Entity('customers')
 export class CustomerEntity extends BaseEntity implements ICustomer {
@@ -31,6 +32,9 @@ export class CustomerEntity extends BaseEntity implements ICustomer {
 
   @OneToMany(() => OrderEntity, (order) => order.customer, { nullable: true })
   orders: OrderEntity[];
+
+  @OneToMany(() => CustomerAddressEntity, (address) => address.customer, { nullable: true })
+  addresses: CustomerAddressEntity[];
 
   logInsert(): void {
     this.logger.debug(`Đã chèn thành công Customer có fullname: ${this.fullname}`);

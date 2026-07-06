@@ -4,12 +4,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator';
 import { Observable } from 'rxjs';
-import { IStaff } from '@/shared/interfaces/models/management/staff.interface';
 import { IS_CUSTOMER_KEY } from '@/decorators/customer.decorator';
+import { CustomerEntity } from '@/modules/customer/customers/entities/customer.entity';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(JwtAuthGuard.name);
+export class JwtAuthCustomerGuard extends AuthGuard('jwt-customer') {
+  private readonly logger = new Logger(JwtAuthCustomerGuard.name);
 
   constructor(private readonly reflector: Reflector) {
     super();
@@ -20,34 +20,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const isCustomer = this.reflector.get<boolean>(IS_CUSTOMER_KEY, context.getHandler());
 
     // Cho phép truy cập mà không cần token
-    // Nếu là route của customer thì return true, để JwtAuthCustomerGuard xử lý
-    if (isPublic || isCustomer) return true;
+    // Chỉ xử lý các route của customer
+    if (isPublic || !isCustomer) return true;
 
     //
-    this.logger.debug('#1. JwtAuthGuard - canActivate called');
+    this.logger.debug('#1. JwtAuthCustomerGuard - canActivate called');
     return super.canActivate(context);
   }
 
-  handleRequest(err, staff, info: any, context: ExecutionContext) {
-    this.logger.debug('#3. JwtAuthGuard - handleRequest called');
+  handleRequest(err, customer, info: any, context: ExecutionContext) {
+    this.logger.debug('#3. JwtAuthCustomerGuard - handleRequest called');
     const request = context.switchToHttp().getRequest<Request>();
 
-    // Nếu có lỗi hoặc không tìm thấy staff, trả về lỗi Unauthorized
-    if (err || !staff) {
+    // Nếu có lỗi hoặc không tìm thấy customer, trả về lỗi Unauthorized
+    if (err || !customer) {
       this.logger.error(info || 'Unauthorized');
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (info?.name === 'TokenExpiredError' && info?.message === 'jwt expired') {
-        throw new UnauthorizedException('TokenExpiredError');
+        throw new UnauthorizedException('TokenCustomerExpiredError');
       }
 
       //
       throw new UnauthorizedException();
     }
 
-    // Thay vì để mặc định gán vào req.user, ta gán vào req.staff
-    request.staff = staff as IStaff;
+    // Thay vì để mặc định gán vào req.user, ta gán vào req.customer
+    request.customer = customer as CustomerEntity;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return staff;
+    return customer;
   }
 }

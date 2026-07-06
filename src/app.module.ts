@@ -66,6 +66,9 @@ import { DocumentModule } from './modules/chatbot/document/document.module';
 import { SepayModule } from './modules/payments/sepay/sepay.module';
 import { VouchersModule } from './modules/customer/vouchers/vouchers.module';
 import { OtpModule } from './common/otp/otp.module';
+import { JwtAuthCustomerGuard } from './guards/auth-customer.guard';
+import { JwtAuthCustomerStrategy } from './strategies/auth-customer.strategy';
+import { CustomerAddressModule } from './modules/customer/customer-address/customer-address.module';
 
 const isProd = process.env.NODE_ENV === 'production';
 @Module({
@@ -148,11 +151,13 @@ const isProd = process.env.NODE_ENV === 'production';
     PopularSearchModule,
     FiltersModule,
     SepayModule,
+    CustomerAddressModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     JwtAuthStrategy,
+    JwtAuthCustomerStrategy,
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
@@ -191,6 +196,10 @@ const isProd = process.env.NODE_ENV === 'production';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthCustomerGuard,
     },
     {
       provide: APP_GUARD,

@@ -12,17 +12,28 @@ import { Throttle } from '@nestjs/throttler';
 import { LocalAuthGuard } from './guards/local.guard';
 import { CurrentCustomer } from '@/decorators/current-customer.decorator';
 import { CustomerEntity } from './entities/customer.entity';
-import { type Response } from 'express';
+import { CookieOptions, type Response } from 'express';
 import { CustomerMetadataDto } from './dto/metadata-customer.dto';
 import { CustomerQueryDto } from './dto/query-customer.dto';
 import { CustomerVerifiedDto } from './dto/customer-verified.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
 import { Public } from '@/decorators/public.decorator';
+import { RefreshTokenAuthCustomerGuard } from './guards/refresh-token.guard';
+import { GetJwtPayload } from '@/decorators/get-jwt-payload.decorator';
+import { type IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
+import { Customer } from '@/decorators/customer.decorator';
 
 @Controller('customers')
 @Serializer(CustomerDto)
 export class CustomersController {
+  private readonly defaultConfig: CookieOptions = {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  };
+
   constructor(private readonly customersService: CustomersService) {}
 
   @Public()
@@ -30,6 +41,19 @@ export class CustomersController {
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 5 yêu cầu mỗi phút cho endpoint login
   async login(@Body() loginCustomerDto: LoginCustomerDto) {
     return await this.customersService.login(loginCustomerDto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // Giới hạn 1 yêu cầu mỗi 15 phút cho endpoint refresh-token
+  @Post('signout')
+  @UseGuards(RefreshTokenAuthCustomerGuard)
+  async signOut(@Res({ passthrough: true }) res: Response, @GetJwtPayload() jwtPayload: IJwtPayload) {
+    if (jwtPayload) {
+      await this.customersService.signOut(jwtPayload.customerId!);
+    }
+    res.clearCookie('e_token_customer');
+    res.clearCookie('e_refresh_token_customer');
+    return true;
   }
 
   @Public()
@@ -42,15 +66,11 @@ export class CustomersController {
     @CurrentCustomer() currentCustomer: CustomerEntity,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { customer, token } = await this.customersService.verifyLoginOtp(currentCustomer);
+    const { customer, token, refreshToken } = await this.customersService.verifyLoginOtp(currentCustomer);
 
-    // Set token in cookie
-    res.cookie('e_token_customer', token, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    //
+    res.cookie('e_token_customer', token, { ...this.defaultConfig }); // 15 phút
+    res.cookie('e_refresh_token_customer', refreshToken, { ...this.defaultConfig, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 30 ngày
 
     return { customer };
   }
@@ -78,6 +98,12 @@ export class CustomersController {
   @Permissions(permissionsSeed.customer.read.code)
   async findOne(@Param('id') id: string) {
     return await this.customersService.findOne(id);
+  }
+
+  @Customer()
+  @Patch('/update-profile')
+  async updateProfile(@CurrentCustomer() customer: CustomerEntity, @Body() updateCustomerDto: UpdateCustomerDto) {
+    return await this.customersService.update(customer.id, updateCustomerDto);
   }
 
   @Patch(':id')

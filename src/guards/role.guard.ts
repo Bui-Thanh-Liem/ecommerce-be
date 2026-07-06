@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Permissions } from '@/decorators/permission.decorator';
 import { IS_PUBLIC_KEY } from '@/decorators/public.decorator';
 import { StaffEntity } from '@/modules/management/staffs/entities/staff.entity';
+import { IS_CUSTOMER_KEY } from '@/decorators/customer.decorator';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -19,9 +20,10 @@ export class RoleGuard implements CanActivate {
     const staff = req.staff as StaffEntity;
     const permissionCodeRequired = this.reflector.get<string>(Permissions, context.getHandler());
     const isPublic = this.reflector.get<boolean>(IS_PUBLIC_KEY, context.getHandler());
+    const isCustomer = this.reflector.get<boolean>(IS_CUSTOMER_KEY, context.getHandler());
 
     // Cho phép truy cập mà không cần kiểm tra quyền
-    if (isPublic || staff?.isSuperAdmin) return true;
+    if (isPublic || isCustomer || staff?.isSuperAdmin) return true;
 
     // Nếu có permissionsRequired, kiểm tra xem staff có quyền hay không
     const permissions = staff.roles.flatMap((role) => role.permissions);
