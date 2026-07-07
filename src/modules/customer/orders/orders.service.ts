@@ -7,6 +7,8 @@ import { In, Repository } from 'typeorm';
 import { CustomersService } from '../customers/customers.service';
 import { OrderItemEntity } from '../order-items/entities/order-item.entity';
 import { OrderStatus } from '@/shared/enums/order-status.enum';
+import { OrderQueryDto } from './dto/query-order.dto';
+import { calculatePagination } from '@/utils/pagination-calculator.util';
 
 @Injectable()
 export class OrdersService {
@@ -16,8 +18,8 @@ export class OrdersService {
     private readonly customersService: CustomersService,
   ) {}
 
-  async create(dto: CreateOrderDto) {
-    const { customer: customerId, orderItems, ...rest } = dto;
+  async create(customerId: string, dto: CreateOrderDto) {
+    const { orderItems, ...rest } = dto;
 
     //
     const customerExists = await this.customersService.exists([customerId]);
@@ -39,6 +41,60 @@ export class OrdersService {
 
     order.status = status;
     return await this.orderRepo.save(order);
+  }
+
+  async findAllOwned(customerId: string, query: OrderQueryDto) {
+    const { page, limit } = query;
+
+    //
+    const { take, skip } = calculatePagination(page, limit);
+
+    const builder = this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.customer', 'customer')
+      .leftJoinAndSelect('order.orderItems', 'orderItem')
+      .leftJoinAndSelect('orderItem.product', 'variant')
+      .leftJoinAndSelect('variant.product', 'product')
+
+      //
+      .select([
+        'order.id',
+        'order.totalAmount',
+        'order.paymentGateway',
+        'order.paymentMethod',
+        'order.status',
+        'order.invoiceNumber',
+        'order.shoppingAddress',
+        'order.createdAt',
+
+        'customer.id',
+        'customer.fullname',
+        'customer.phone',
+
+        'orderItem.id',
+        'orderItem.price',
+        'orderItem.quantity',
+
+        'variant.id',
+        'variant.sku',
+        'variant.price',
+
+        'product.id',
+        'product.spu',
+        'product.name',
+      ])
+      .where('customer.id = :customerId', { customerId })
+      .take(take)
+      .skip(skip);
+
+    const [data, totalData] = await builder.getManyAndCount();
+
+    return {
+      data,
+      totalData,
+      page,
+      totalPage: Math.ceil(totalData / limit),
+    };
   }
 
   async exists(ids: string[]): Promise<boolean> {

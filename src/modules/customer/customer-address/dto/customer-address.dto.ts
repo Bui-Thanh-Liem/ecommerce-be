@@ -11,13 +11,13 @@ export class CustomerAddressDto extends SerializerDto {
   country: LocationRegionDto;
 
   @Expose()
-  city: LocationRegionDto;
+  provinceCity: LocationRegionDto;
 
   @Expose()
-  district: LocationRegionDto;
+  districtTown: LocationRegionDto;
 
   @Expose()
-  ward: LocationRegionDto;
+  wardCommune: LocationRegionDto;
 
   @Expose()
   address: string;

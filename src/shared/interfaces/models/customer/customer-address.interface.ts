@@ -5,9 +5,9 @@ import { ICustomer } from './customer.interface';
 export interface ICustomerAddress extends IBase {
   customer: ICustomer;
   country: ILocationRegion;
-  city: ILocationRegion;
-  district: ILocationRegion;
-  ward: ILocationRegion;
+  provinceCity: ILocationRegion;
+  districtTown: ILocationRegion;
+  wardCommune: ILocationRegion;
   address: string;
   recipientName: string;
   recipientPhone: string;

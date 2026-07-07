@@ -13,13 +13,13 @@ export class CustomerAddressEntity extends BaseEntity implements ICustomerAddres
   country: LocationRegionEntity;
 
   @ManyToOne(() => LocationRegionEntity, { nullable: false })
-  city: LocationRegionEntity;
+  provinceCity: LocationRegionEntity;
 
   @ManyToOne(() => LocationRegionEntity, { nullable: false })
-  district: LocationRegionEntity;
+  districtTown: LocationRegionEntity;
 
   @ManyToOne(() => LocationRegionEntity, { nullable: false })
-  ward: LocationRegionEntity;
+  wardCommune: LocationRegionEntity;
 
   @Column()
   recipientName: string;

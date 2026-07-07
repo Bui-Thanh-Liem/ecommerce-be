@@ -1,20 +1,17 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsString, IsUUID } from 'class-validator';
 
 export class CreateCustomerAddressDto {
-  @IsUUID('4')
-  customer: string;
-
   @IsUUID('4')
   country: string;
 
   @IsUUID('4')
-  city: string;
+  provinceCity: string;
 
   @IsUUID('4')
-  district: string;
+  districtTown: string;
 
   @IsUUID('4')
-  ward: string;
+  wardCommune: string;
 
   @IsString()
   address: string;
@@ -24,4 +21,7 @@ export class CreateCustomerAddressDto {
 
   @IsString()
   recipientPhone: string;
+
+  @IsBoolean()
+  isDefault?: boolean;
 }

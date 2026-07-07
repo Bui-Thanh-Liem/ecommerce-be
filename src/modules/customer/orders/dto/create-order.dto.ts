@@ -1,24 +1,10 @@
 import { PaymentGateway } from '@/shared/enums/order-payment-gateway.enum';
 import { PaymentMethod } from '@/shared/enums/payment-method.enum';
 import { Type } from 'class-transformer';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsUUID,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, Min, ValidateNested } from 'class-validator';
 import { CreateOrderItemDto } from '../../order-items/dto/create-order-item.dto';
 
 export class CreateOrderDto {
-  @IsNotEmpty()
-  @IsUUID('4')
-  customer: string;
-
   @ArrayNotEmpty()
   @IsArray()
   @ValidateNested({ each: true })

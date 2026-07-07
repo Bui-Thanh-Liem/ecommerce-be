@@ -1,23 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Permissions } from '@/decorators/permission.decorator';
 import { permissionsSeed } from '@/modules/management/permissions/seeding';
+import { Customer } from '@/decorators/customer.decorator';
+import { CurrentCustomer } from '@/decorators/current-customer.decorator';
+import { CustomerEntity } from '../customers/entities/customer.entity';
+import { Serializer } from '@/interceptors/serializer.interceptor';
+import { OrderDto } from './dto/order.dto';
+import { OrderMetadataDto } from './dto/metadata-order.dto';
+import { OrderQueryDto } from './dto/query-order.dto';
 
 @Controller('orders')
+@Serializer(OrderDto)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Customer()
   @Post()
-  async create(@Body() createOrderDto: CreateOrderDto) {
-    return await this.ordersService.create(createOrderDto);
+  async create(@CurrentCustomer() customer: CustomerEntity, @Body() createOrderDto: CreateOrderDto) {
+    return await this.ordersService.create(customer.id, createOrderDto);
   }
 
-  @Get()
-  @Permissions(permissionsSeed.order.read.code)
-  findAll() {
-    return this.ordersService.findAll();
+  @Customer()
+  @Get('owned')
+  @Serializer(OrderMetadataDto)
+  findAllOwned(@CurrentCustomer() customer: CustomerEntity, @Query() query: OrderQueryDto) {
+    return this.ordersService.findAllOwned(customer.id, query);
   }
 
   @Get(':id')

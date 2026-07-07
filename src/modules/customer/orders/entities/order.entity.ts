@@ -41,7 +41,8 @@ export class OrderEntity extends BaseEntity implements IOrder {
     if (this.orderItems) {
       this.orderItems.forEach((item) => {
         item.order = this;
-        item.product = { id: item.product.id } as ProductVariantEntity;
+        const productId = typeof item.product === 'string' ? item.product : item.product?.id;
+        item.product = { id: productId } as ProductVariantEntity;
       });
     }
   }
