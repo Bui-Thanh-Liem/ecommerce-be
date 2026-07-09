@@ -1,17 +1,12 @@
-import { IImage } from '@/shared/interfaces/common/image.interface';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
-import { v2 as cloudinary, SignApiOptions, TransformationOptions } from 'cloudinary';
-import { Queue } from 'bullmq';
 import { CacheService } from '../cache/cache.service';
+import { IImage } from '@/shared/interfaces/common/image.interface';
+import { v2 as cloudinary, SignApiOptions, TransformationOptions } from 'cloudinary';
+import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { CloudinaryDeleteResourcesResponse, CloudinaryDestroyResponse } from './cloudinary.interface';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(
-    @InjectQueue('cloudinary')
-    private readonly cloudinaryQueue: Queue,
-    private cacheService: CacheService,
-  ) {}
+  constructor(private cacheService: CacheService) {}
 
   /**
    * 1. GENERATE SIGNATURE (Bảo mật cho Client-side Upload)
@@ -47,52 +42,50 @@ export class CloudinaryService {
    */
   async generateUrl(publicId: string, customOptions?: TransformationOptions): Promise<string> {
     if (!publicId) return '';
+    const keyCacheKey = `image:${publicId}:${JSON.stringify(customOptions)}`;
 
-    const cachedUrl = await this.cacheService.get<string>(publicId);
+    const cachedUrl = await this.cacheService.get<string>(keyCacheKey);
 
     if (cachedUrl) return cachedUrl;
 
-    const defaultOptions: TransformationOptions = {
-      secure: true,
+    const url = cloudinary.url(publicId, {
       quality: 'auto',
       fetch_format: 'auto',
-      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
-    };
-
-    const url = cloudinary.url(publicId, {
-      ...defaultOptions,
       ...(customOptions && typeof customOptions === 'object' && { ...customOptions }), // Cho phép ghi đè size (width, height), crop,... nếu cần
+      secure: true, // Luôn dùng HTTPS
+      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
+      crop: 'fill',
+      gravity: 'center',
     });
 
     // Cache URL trong Redis với TTL 24h (86,400,000 ms)
-    await this.cacheService.set(publicId, url, 86_400_000);
+    await this.cacheService.set(keyCacheKey, url, 86_400_000);
 
     return url;
   }
 
   /**
-   * 3. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
+   * 3. GENERATE OPTIMIZED IMAGES (Chuẩn SEO & Performance)
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
-  async generateUrls(images: IImage[], customOptions?: TransformationOptions): Promise<IImage[]> {
+  async generateImages(images: IImage[], customOptions?: TransformationOptions): Promise<IImage[]> {
     if (!images || images.length === 0) return [];
 
-    const defaultOptions: TransformationOptions = {
-      secure: true,
+    const finalOptions = {
       quality: 'auto',
       fetch_format: 'auto',
-      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
-    };
-
-    const finalOptions = {
-      ...defaultOptions,
       ...(customOptions && typeof customOptions === 'object' && { ...customOptions }), // Cho phép ghi đè size (width, height), crop,... nếu cần
+      secure: true, // Luôn dùng HTTPS
+      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
+      crop: 'fill',
+      gravity: 'center',
     };
 
     // Duyệt qua mảng images và xử lý song song từng đối tượng
     const imageSignedPromises = images.map(async (image) => {
       // 1. Kiểm tra cache bằng image.key (hoặc publicId tùy cách bạn đặt tên thuộc tính)
-      const cachedUrl = await this.cacheService.get<string>(image.key);
+      const keyCacheKey = `image:${image.key}:${JSON.stringify(customOptions)}`;
+      const cachedUrl = await this.cacheService.get<string>(keyCacheKey);
 
       if (cachedUrl) {
         return {
@@ -105,7 +98,7 @@ export class CloudinaryService {
       const url = cloudinary.url(image.key, finalOptions);
 
       // 3. Cache URL trong Redis với TTL 24h (86,400,000 ms)
-      await this.cacheService.set(image.key, url, 86_400_000);
+      await this.cacheService.set(keyCacheKey, url);
 
       return {
         ...image,
@@ -119,7 +112,6 @@ export class CloudinaryService {
 
   /**
    * 4. XÓA MỘT FILE ĐƠN LẺ (Delete Single Asset)
-   * @param publicId ID định danh của file trên Cloudinary (ví dụ: 'products/chair_123')
    * Add job vào queue - xử lý trên worker process riêng
    */
   async deleteImage(publicId: string) {
@@ -142,7 +134,6 @@ export class CloudinaryService {
 
   /**
    * 5. XÓA HÀNG LOẠT FILE (Bulk Delete Assets)
-   * @param publicIds Mảng chứa các ID cần xóa (tối đa 100 IDs trong 1 request)
    * Add job vào queue - xử lý trên worker process riêng
    */
   async deleteMultipleImages(publicIds: string[]) {
@@ -160,14 +151,4 @@ export class CloudinaryService {
       throw new Error(`Bulk delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
-}
-
-interface CloudinaryDestroyResponse {
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  result: 'ok' | 'not_found' | string;
-}
-
-interface CloudinaryDeleteResourcesResponse {
-  deleted: Record<string, 'deleted' | 'not_found'>;
-  partial: boolean;
 }

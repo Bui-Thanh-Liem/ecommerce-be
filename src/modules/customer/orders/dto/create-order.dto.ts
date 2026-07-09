@@ -23,9 +23,5 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsString()
-  invoiceNumber: string;
-
-  @IsNotEmpty()
-  @IsString()
   shoppingAddress: string;
 }

@@ -224,7 +224,7 @@ export class CampaignsService {
       };
     }
     if (campaign?.images) {
-      campaign.images = await this.cloudinaryService.generateUrls(campaign?.images || []);
+      campaign.images = await this.cloudinaryService.generateImages(campaign?.images || []);
     }
     return campaign;
   }
@@ -409,7 +409,7 @@ export class CampaignsService {
         const imageKeys = cam.images || [];
         const mainImageKey = cam.mainImage?.key;
         const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
-        const images = await this.cloudinaryService.generateUrls(imageKeys);
+        const images = await this.cloudinaryService.generateImages(imageKeys);
         const mktImageUrl = await this.cloudinaryService.generateUrl(cam.marketingProgram?.mainImage?.key || '');
 
         return {

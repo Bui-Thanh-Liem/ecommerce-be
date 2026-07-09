@@ -9,7 +9,7 @@ export interface IOrder extends IBase {
   customer: ICustomer;
   totalAmount: number;
   status: OrderStatus;
-  invoiceNumber: string;
+  invoiceNumber?: string; // Chỉ có giá trị khi đã thanh toán
   shoppingAddress: string;
   paymentGateway: PaymentGateway;
   paymentMethod: PaymentMethod;

@@ -9,6 +9,7 @@ import { OrderItemEntity } from '../order-items/entities/order-item.entity';
 import { OrderStatus } from '@/shared/enums/order-status.enum';
 import { OrderQueryDto } from './dto/query-order.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
+import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +17,7 @@ export class OrdersService {
     @InjectRepository(OrderEntity)
     private orderRepo: Repository<OrderEntity>,
     private readonly customersService: CustomersService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
@@ -82,6 +84,7 @@ export class OrdersService {
         'product.id',
         'product.spu',
         'product.name',
+        'product.thumbnail',
       ])
       .where('customer.id = :customerId', { customerId })
       .take(take)
@@ -89,8 +92,10 @@ export class OrdersService {
 
     const [data, totalData] = await builder.getManyAndCount();
 
+    const dataWithSignedUrl = await this.signUrl(data);
+
     return {
-      data,
+      data: dataWithSignedUrl,
       totalData,
       page,
       totalPage: Math.ceil(totalData / limit),
@@ -116,5 +121,23 @@ export class OrdersService {
 
   remove(id: number) {
     return `This action removes a #${id} order`;
+  }
+
+  private async signUrl(data: OrderEntity[]): Promise<OrderEntity[]> {
+    await Promise.all(
+      data.map(async (order) => {
+        await Promise.all(
+          order.orderItems.map(async (item) => {
+            const key = item.product.product.thumbnail?.key;
+
+            if (key) {
+              item.product.product.thumbnail.url = await this.cloudinaryService.generateUrl(key);
+            }
+          }),
+        );
+      }),
+    );
+
+    return data;
   }
 }

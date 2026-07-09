@@ -22,6 +22,12 @@ export class CustomerAddressController {
   }
 
   @Customer()
+  @Get('default')
+  async findOneIsDefault(@CurrentCustomer() customer: CustomerEntity) {
+    return await this.customerAddressService.findOneIsDefault(customer.id);
+  }
+
+  @Customer()
   @Post()
   async create(
     @CurrentCustomer() customer: CustomerEntity,

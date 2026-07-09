@@ -5,6 +5,7 @@ import { IBrand } from './brand.interface';
 import { IProductVariant } from './product-variant.interface';
 import { IProductImage } from './product-image.interface';
 import { ICartItem } from '../customer/cart-item.interface';
+import { IImage } from '../../common/image.interface';
 
 export interface ISpecificationItem {
   key: string; // vd: "color", "storage"
@@ -35,7 +36,7 @@ export interface IProduct extends IBase {
   specifications: ISpecification[];
 
   // Media tối ưu
-  thumbnail?: string; // Khi có productImages lấy tấm đầu tiên làm thumbnail
+  thumbnail: IImage; // Khi có productImages lấy tấm đầu tiên làm thumbnail
   videoUrl?: string;
 
   // Logistics mặc định cho SPU

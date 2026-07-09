@@ -50,6 +50,26 @@ export class CustomerAddressService {
     };
   }
 
+  async findOneIsDefault(customerId: string) {
+    return await this.customerAddressRepo.findOne({
+      where: { customer: { id: customerId }, isDefault: true },
+      relations: ['customer', 'country', 'provinceCity', 'districtTown', 'wardCommune'],
+      select: {
+        id: true,
+        address: true,
+        createdAt: true,
+        isDefault: true,
+        recipientName: true,
+        recipientPhone: true,
+        customer: { id: true, fullname: true, phone: true },
+        country: { id: true, name: true },
+        provinceCity: { id: true, name: true },
+        districtTown: { id: true, name: true },
+        wardCommune: { id: true, name: true },
+      },
+    });
+  }
+
   async create(id: string, dto: CreateCustomerAddressDto) {
     const { provinceCity, country, districtTown, wardCommune, ...rest } = dto;
 

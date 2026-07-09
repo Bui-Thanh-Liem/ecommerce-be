@@ -28,8 +28,8 @@ export class OrderEntity extends BaseEntity implements IOrder {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Column({ type: 'varchar' })
-  invoiceNumber: string;
+  @Column({ nullable: true })
+  invoiceNumber?: string;
 
   @Column({ type: 'text' })
   shoppingAddress: string;

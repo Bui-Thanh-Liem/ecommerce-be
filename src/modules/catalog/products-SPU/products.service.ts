@@ -22,6 +22,7 @@ import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { ProductImageEntity } from '../product-images/entities/product-image.entity';
 import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
+import { IImage } from '@/shared/interfaces/common/image.interface';
 
 @Injectable()
 export class ProductsService {
@@ -55,12 +56,11 @@ export class ProductsService {
       const slug = stringToSlug(name);
 
       // 1. Kiểm tra trùng (Unique constraint check)
-      const [eS, eM, categoryCode, brandCode, thumb, secondaryCategoriesExist] = await Promise.all([
+      const [eS, eM, categoryCode, brandCode, secondaryCategoriesExist] = await Promise.all([
         this.productRepo.findOne({ where: { slug } }),
         this.productRepo.findOne({ where: { model } }),
         this.cateService.findCodeById(categoryId),
         this.brandService.findCodeById(brandId),
-        productImages?.length > 0 ? this.cloudinaryService.generateUrl(productImages[0].image.key) : null,
         secondaryCategoryIds.length > 0 ? this.cateService.exists(secondaryCategoryIds) : null,
       ]);
       if (eS) throw new ConflictException('Product with this name already exists');
@@ -86,8 +86,8 @@ export class ProductsService {
         model,
         productImages, // Thêm productImages vào đây để cascade lưu
         brand: { id: brandId },
-        thumbnail: thumb ?? undefined, // Lấy thumbnail từ productImages nếu có
         category: { id: categoryId },
+        thumbnail: productImages[0]?.image ?? undefined, // Lấy thumbnail từ productImages nếu có
         secondaryCategories: secondaryCategoryIds.map((id) => ({ id })),
       });
       return await this.productRepo.save(product);
@@ -369,7 +369,7 @@ export class ProductsService {
 
       if (productImages !== undefined) {
         updatedProduct.productImages = productImages as ProductImageEntity[];
-        updatedProduct.thumbnail = await this.cloudinaryService.generateUrl(productImages[0].image.key);
+        updatedProduct.thumbnail = productImages[0]?.image ?? undefined;
       }
 
       // Lưu vào DB qua transaction manager
@@ -443,6 +443,9 @@ export class ProductsService {
       products.map(async (product) => {
         const flattenedImages = product?.productImages?.flat() || [];
 
+        const publicIdThumb = product.thumbnail?.key;
+        const thumbImgUrl = publicIdThumb ? await this.cloudinaryService.generateUrl(publicIdThumb) : '';
+
         const updatedImages = flattenedImages.map(async (img) => {
           const publicId = img?.image?.key || '';
           const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
@@ -457,6 +460,10 @@ export class ProductsService {
         });
 
         product.productImages = await Promise.all(updatedImages);
+        product.thumbnail = {
+          ...product.thumbnail,
+          url: thumbImgUrl,
+        } as IImage;
 
         return product;
       }),

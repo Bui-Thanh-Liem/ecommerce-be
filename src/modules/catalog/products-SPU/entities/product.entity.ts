@@ -5,6 +5,7 @@ import { ProductVariantEntity } from '@/modules/catalog/product-variants-SKU/ent
 import { CartItemEntity } from '@/modules/customer/cart-items/entities/cart-item.entity';
 import { BaseEntity } from '@/shared/entities/base.entity';
 import { ProductStatus } from '@/shared/enums/product-status.enum';
+import { type IImage } from '@/shared/interfaces/common/image.interface';
 import { IProduct, ISpecification } from '@/shared/interfaces/models/catalog/product.interface';
 import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
@@ -48,8 +49,8 @@ export class ProductEntity extends BaseEntity implements IProduct {
   @ManyToOne(() => BrandEntity, (brand) => brand.products, { onDelete: 'SET NULL' })
   brand: BrandEntity;
 
-  @Column({ type: 'varchar', nullable: true })
-  thumbnail?: string;
+  @Column({ type: 'json', nullable: true })
+  thumbnail: IImage;
 
   @Column({ type: 'varchar', nullable: true })
   videoUrl?: string;
