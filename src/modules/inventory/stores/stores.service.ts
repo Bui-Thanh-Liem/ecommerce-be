@@ -149,8 +149,8 @@ export class StoresService {
     // Chuyển đổi URL ảnh nếu có
     const dataWithUrls = await Promise.all(
       data.map(async (store) => {
-        if (store.image && store.image.key) {
-          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+        if (store.image) {
+          store.image = await this.cloudinaryService.generateImage(store.image);
         }
         return store;
       }),
@@ -180,8 +180,8 @@ export class StoresService {
     // Chuyển đổi URL ảnh nếu có
     const dataWithUrls = await Promise.all(
       data.map(async (store) => {
-        if (store.image && store.image.key) {
-          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+        if (store.image) {
+          store.image = await this.cloudinaryService.generateImage(store.image);
         }
         return store;
       }),

@@ -144,7 +144,7 @@ export class MainBannerService {
     });
 
     if (mainBanner?.image && mainBanner.image.key) {
-      mainBanner.image.url = await this.cloudinaryService.generateUrl(mainBanner.image.key);
+      mainBanner.image = await this.cloudinaryService.generateImage(mainBanner.image);
     }
 
     return mainBanner;
@@ -254,7 +254,7 @@ export class MainBannerService {
     return await Promise.all(
       banners.map(async (banner) => {
         if (banner.image && banner.image.key) {
-          banner.image.url = await this.cloudinaryService.generateUrl(banner.image.key);
+          banner.image = await this.cloudinaryService.generateImage(banner.image);
         }
         return banner;
       }),

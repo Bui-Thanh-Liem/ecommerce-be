@@ -30,6 +30,13 @@ export class OrdersController {
     return this.ordersService.findAllOwned(customer.id, query);
   }
 
+  @Customer()
+  @Get('owned/:id')
+  @Serializer(OrderMetadataDto)
+  findOneOwned(@CurrentCustomer() customer: CustomerEntity, @Param('id') id: string) {
+    return this.ordersService.findOneOwned(customer.id, id);
+  }
+
   @Get(':id')
   @Permissions(permissionsSeed.order.read.code)
   findOne(@Param('id') id: string) {

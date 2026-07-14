@@ -1,7 +1,7 @@
 import { PaymentGateway } from '@/shared/enums/order-payment-gateway.enum';
 import { PaymentMethod } from '@/shared/enums/payment-method.enum';
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, Min, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CreateOrderItemDto } from '../../order-items/dto/create-order-item.dto';
 
 export class CreateOrderDto {
@@ -12,7 +12,6 @@ export class CreateOrderDto {
   orderItems: CreateOrderItemDto[];
 
   @IsNumber()
-  @Min(1000, { message: 'Số tiền tối thiểu là 1000 VND' })
   totalAmount: number;
 
   @IsEnum(PaymentGateway)
@@ -21,7 +20,7 @@ export class CreateOrderDto {
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   shoppingAddress: string;
 }

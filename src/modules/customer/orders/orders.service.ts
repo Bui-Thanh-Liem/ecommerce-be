@@ -102,6 +102,54 @@ export class OrdersService {
     };
   }
 
+  async findOneOwned(customerId: string, id: string) {
+    const builder = this.orderRepo
+      .createQueryBuilder('order')
+
+      //
+      .leftJoinAndSelect('order.customer', 'customer')
+      .leftJoinAndSelect('order.orderItems', 'orderItem')
+      .leftJoinAndSelect('orderItem.product', 'variant')
+      .leftJoinAndSelect('variant.product', 'product')
+
+      //
+      .select([
+        'order.id',
+        'order.totalAmount',
+        'order.paymentGateway',
+        'order.paymentMethod',
+        'order.status',
+        'order.invoiceNumber',
+        'order.shoppingAddress',
+        'order.createdAt',
+
+        'customer.id',
+        'customer.fullname',
+        'customer.phone',
+
+        'orderItem.id',
+        'orderItem.price',
+        'orderItem.quantity',
+
+        'variant.id',
+        'variant.sku',
+        'variant.price',
+
+        'product.id',
+        'product.spu',
+        'product.name',
+        'product.thumbnail',
+      ])
+
+      //
+      .where('customer.id = :customerId', { customerId })
+      .andWhere('order.id = :id', { id });
+
+    const data = await builder.getOne();
+
+    return data ? await this.signUrl([data]) : null;
+  }
+
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.orderRepo.countBy({ id: In(ids) });
     return count === ids.length;
@@ -128,10 +176,10 @@ export class OrdersService {
       data.map(async (order) => {
         await Promise.all(
           order.orderItems.map(async (item) => {
-            const key = item.product.product.thumbnail?.key;
+            const thumbImg = item.product.product.thumbnail;
 
-            if (key) {
-              item.product.product.thumbnail.url = await this.cloudinaryService.generateUrl(key);
+            if (thumbImg) {
+              item.product.product.thumbnail = await this.cloudinaryService.generateImage(thumbImg);
             }
           }),
         );

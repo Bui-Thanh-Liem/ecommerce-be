@@ -157,8 +157,8 @@ export class StaffsService implements OnModuleInit {
     // Chuyển đổi URL ảnh nếu có
     const dataWithUrls = await Promise.all(
       data.map(async (staff) => {
-        if (staff.avatar && staff.avatar.key) {
-          staff.avatar.url = await this.cloudinaryService.generateUrl(staff.avatar.key);
+        if (staff.avatar) {
+          staff.avatar = await this.cloudinaryService.generateImage(staff.avatar);
         }
         return staff;
       }),
@@ -188,8 +188,8 @@ export class StaffsService implements OnModuleInit {
     // Chuyển đổi URL ảnh nếu có
     const dataWithUrls = await Promise.all(
       data.map(async (staff) => {
-        if (staff.avatar && staff.avatar.key) {
-          staff.avatar.url = await this.cloudinaryService.generateUrl(staff.avatar.key);
+        if (staff.avatar) {
+          staff.avatar = await this.cloudinaryService.generateImage(staff.avatar);
         }
         return staff;
       }),

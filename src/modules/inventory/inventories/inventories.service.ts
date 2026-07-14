@@ -243,8 +243,8 @@ export class InventoriesService {
         if (images) {
           item.productVariant.productImages = await Promise.all(
             images.flat().map(async (img) => {
-              if (img.image?.key) {
-                img.image.url = await this.cloudinaryService.generateUrl(img.image.key);
+              if (img.image) {
+                img.image = await this.cloudinaryService.generateImage(img.image);
               }
 
               return img;

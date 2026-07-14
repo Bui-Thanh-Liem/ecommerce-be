@@ -99,7 +99,7 @@ export class CategoriesService {
     const dataWithUrls = await Promise.all(
       data.map(async (category) => {
         if (category.image && category.image.key) {
-          category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
+          category.image = await this.cloudinaryService.generateImage(category.image);
         }
         return category;
       }),
@@ -143,7 +143,7 @@ export class CategoriesService {
     const dataWithUrls = await Promise.all(
       data.map(async (category) => {
         if (category.image && category.image.key) {
-          category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
+          category.image = await this.cloudinaryService.generateImage(category.image);
         }
         return category;
       }),
@@ -247,7 +247,7 @@ export class CategoriesService {
     });
 
     if (category?.image && category.image.key) {
-      category.image.url = await this.cloudinaryService.generateUrl(category.image.key);
+      category.image = await this.cloudinaryService.generateImage(category.image);
     }
 
     return category;

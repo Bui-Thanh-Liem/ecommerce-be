@@ -9,6 +9,5 @@ export class CreateOrderItemDto {
   quantity: number;
 
   @IsNumber()
-  @Min(1000, { message: 'Giá sản phẩm phải lớn hơn hoặc bằng 1000 VND' })
   price: number;
 }

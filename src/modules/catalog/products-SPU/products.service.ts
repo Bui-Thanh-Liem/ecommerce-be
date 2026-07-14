@@ -22,7 +22,6 @@ import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { ProductImageEntity } from '../product-images/entities/product-image.entity';
 import { ProductVariantsService } from '../product-variants-SKU/product-variants.service';
-import { IImage } from '@/shared/interfaces/common/image.interface';
 
 @Injectable()
 export class ProductsService {
@@ -443,27 +442,23 @@ export class ProductsService {
       products.map(async (product) => {
         const flattenedImages = product?.productImages?.flat() || [];
 
-        const publicIdThumb = product.thumbnail?.key;
-        const thumbImgUrl = publicIdThumb ? await this.cloudinaryService.generateUrl(publicIdThumb) : '';
+        const thumbImg = product.thumbnail
+          ? await this.cloudinaryService.generateImage(product.thumbnail)
+          : product.thumbnail;
 
         const updatedImages = flattenedImages.map(async (img) => {
-          const publicId = img?.image?.key || '';
-          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+          const imgData = img?.image ? await this.cloudinaryService.generateImage(img?.image) : img?.image;
 
           return {
             ...img,
             image: {
-              ...img.image,
-              url,
+              ...imgData,
             },
           } as ProductImageEntity;
         });
 
         product.productImages = await Promise.all(updatedImages);
-        product.thumbnail = {
-          ...product.thumbnail,
-          url: thumbImgUrl,
-        } as IImage;
+        product.thumbnail = thumbImg;
 
         return product;
       }),

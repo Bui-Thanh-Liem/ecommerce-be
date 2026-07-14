@@ -21,7 +21,6 @@ import { CampaignsService } from '../campaigns/campaigns.service';
 import { MktProgramQueryDto } from './dto/query-mkt-program.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
-import { IImage } from '@/shared/interfaces/common/image.interface';
 
 @Injectable()
 export class MarketingProgramsService {
@@ -164,12 +163,10 @@ export class MarketingProgramsService {
       relations: ['campaigns'],
     });
 
-    const mainImageKey = campaign?.mainImage?.key || '';
-    if (mainImageKey) {
-      campaign!.mainImage = {
-        ...campaign?.mainImage,
-        url: await this.cloudinaryService.generateUrl(mainImageKey),
-      } as IImage;
+    const mainImage = campaign?.mainImage || '';
+    const mainImageData = mainImage ? await this.cloudinaryService.generateImage(mainImage) : undefined;
+    if (mainImageData) {
+      campaign!.mainImage = mainImageData;
     }
 
     return campaign;
@@ -309,12 +306,11 @@ export class MarketingProgramsService {
   private async signUrl(data: MarketingProgramEntity[]): Promise<MarketingProgramEntity[]> {
     return await Promise.all(
       data.map(async (item) => {
-        const mainImageUrl = await this.cloudinaryService.generateUrl(item.mainImage?.key || '');
+        const mainImageData = item.mainImage ? await this.cloudinaryService.generateImage(item.mainImage) : undefined;
         return {
           ...item,
           mainImage: {
-            ...item.mainImage,
-            url: mainImageUrl,
+            ...mainImageData,
           },
         } as MarketingProgramEntity;
       }),

@@ -121,8 +121,8 @@ export class FiltersService {
     // 4. Sử dụng CloudinaryService để generate URL cho từng brand nếu có image
     const dataWithUrls = await Promise.all(
       brands.map(async (brand) => {
-        if (brand.image && brand.image.key) {
-          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+        if (brand.image) {
+          brand.image = await this.cloudinaryService.generateImage(brand.image);
         }
         return brand;
       }),

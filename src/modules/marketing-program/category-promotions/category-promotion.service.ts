@@ -350,16 +350,15 @@ export class CategoryPromotionService {
   async signUrl(data: CategoryPromotionEntity[]): Promise<CategoryPromotionEntity[]> {
     return await Promise.all(
       data.map(async (cp) => {
-        const imageKey = cp.promotion.image?.key;
-        const imageUrl = await this.cloudinaryService.generateUrl(imageKey);
+        const image = cp.promotion.image;
+        const imageData = await this.cloudinaryService.generateImage(image);
 
         return {
           ...cp,
           promotion: {
             ...cp.promotion,
             image: {
-              ...cp.promotion.image,
-              url: imageUrl,
+              ...imageData,
             },
           },
         } as CategoryPromotionEntity;

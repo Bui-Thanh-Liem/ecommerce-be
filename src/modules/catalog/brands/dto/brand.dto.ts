@@ -1,6 +1,6 @@
 import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 
 export class BrandDto extends SerializerDto {
   @Expose()
@@ -13,7 +13,6 @@ export class BrandDto extends SerializerDto {
   code: string;
 
   @Expose()
-  @Type(() => ResponseImageDto)
   image: ResponseImageDto;
 
   @Expose()

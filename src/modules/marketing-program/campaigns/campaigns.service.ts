@@ -216,12 +216,8 @@ export class CampaignsService {
       relations: ['promotions', 'productHighlighted', 'marketingProgram'],
     });
 
-    const mainImageKey = campaign?.mainImage?.key;
-    if (mainImageKey) {
-      campaign.mainImage = {
-        ...campaign.mainImage,
-        url: await this.cloudinaryService.generateUrl(mainImageKey),
-      };
+    if (campaign?.mainImage) {
+      campaign.mainImage = await this.cloudinaryService.generateImage(campaign?.mainImage);
     }
     if (campaign?.images) {
       campaign.images = await this.cloudinaryService.generateImages(campaign?.images || []);
@@ -407,25 +403,20 @@ export class CampaignsService {
     return await Promise.all(
       data.map(async (cam) => {
         const imageKeys = cam.images || [];
-        const mainImageKey = cam.mainImage?.key;
-        const mainImageUrl = await this.cloudinaryService.generateUrl(mainImageKey);
+        const mainImage = await this.cloudinaryService.generateImage(cam.mainImage);
         const images = await this.cloudinaryService.generateImages(imageKeys);
-        const mktImageUrl = await this.cloudinaryService.generateUrl(cam.marketingProgram?.mainImage?.key || '');
+
+        const mktImage = cam.marketingProgram?.mainImage;
+        const mktMainImageData = mktImage ? await this.cloudinaryService.generateImage(mktImage) : undefined;
 
         return {
           ...cam,
           marketingProgram: {
             ...cam.marketingProgram,
-            mainImage: {
-              ...cam.marketingProgram?.mainImage,
-              url: mktImageUrl,
-            },
+            mainImage: mktMainImageData,
           },
           images: images,
-          mainImage: {
-            ...cam.mainImage,
-            url: mainImageUrl,
-          },
+          mainImage: mainImage,
         } as CampaignEntity;
       }),
     );

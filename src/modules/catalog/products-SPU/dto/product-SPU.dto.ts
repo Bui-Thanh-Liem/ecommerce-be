@@ -5,7 +5,7 @@ import { SerializerDto } from '@/shared/dtos/res/serializer.dto';
 import { ISpecification, ISpecificationItem } from '@/shared/interfaces/models/catalog/product.interface';
 import { Expose, Type } from 'class-transformer';
 import { ProductVariantSKUDto } from '../../product-variants-SKU/dto/product-variant-SKU.dto';
-import { ImageDto } from '@/shared/dtos/req/image.dto';
+import { ResponseImageDto } from '@/shared/dtos/res/response-image.dto';
 
 export class SpecificationItemDto implements ISpecificationItem {
   @Expose()
@@ -50,7 +50,7 @@ export class ProductSPUDto extends SerializerDto {
   model: string;
 
   @Expose()
-  thumbnail: ImageDto;
+  thumbnail: ResponseImageDto;
 
   @Expose()
   desc: string;

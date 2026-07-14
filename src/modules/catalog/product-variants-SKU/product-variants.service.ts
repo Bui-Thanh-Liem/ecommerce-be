@@ -409,9 +409,6 @@ export class ProductVariantsService {
       'parentCategory.id',
       'parentCategory.name',
       'parentCategory.slug',
-
-      'productImages.id',
-      'productImages.image',
     ]);
 
     // 1. Thêm select và đặt tên viết THƯỜNG HOÀN TOÀN (để tránh lỗi tự động convert của Postgres)
@@ -690,25 +687,30 @@ export class ProductVariantsService {
 
   private async signUrl(data: ProductVariantEntity[]): Promise<ProductVariantEntity[]> {
     return await Promise.all(
-      data.map(async (product) => {
-        const flattenedImages = product?.productImages?.flat() || [];
-
+      data.map(async (variant) => {
+        const flattenedImages = variant?.productImages?.flat() || [];
         const updatedImages = flattenedImages.map(async (img) => {
-          const publicId = img?.image?.key || '';
-          const url = publicId ? await this.cloudinaryService.generateUrl(publicId) : '';
+          const imgData = img?.image ? await this.cloudinaryService.generateImage(img?.image) : img?.image;
 
           return {
             ...img,
             image: {
-              ...img.image,
-              url,
+              ...imgData,
             },
           } as ProductImageEntity;
         });
+        variant.productImages = await Promise.all(updatedImages);
 
-        product.productImages = await Promise.all(updatedImages);
+        //
+        const imgThumbnail = variant.product.thumbnail;
+        if (imgThumbnail?.key) {
+          variant.product.thumbnail = await this.cloudinaryService.generateImage(imgThumbnail, {
+            height: 400,
+            width: 600,
+          });
+        }
 
-        return product;
+        return variant;
       }),
     );
   }

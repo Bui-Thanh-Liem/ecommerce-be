@@ -224,13 +224,12 @@ export class CustomerProductsService {
         const flattenedImages = item.productVariant?.productImages?.flat() || [];
 
         const updatedImages = flattenedImages.map(async (image) => {
-          const url = image.image.key ? await this.cloudinaryService.generateUrl(image.image.key) : '';
+          const imgData = image.image ? await this.cloudinaryService.generateImage(image.image) : image.image;
 
           return {
             ...image,
             image: {
-              ...image.image,
-              url,
+              ...imgData,
             },
           } as ProductImageEntity;
         });

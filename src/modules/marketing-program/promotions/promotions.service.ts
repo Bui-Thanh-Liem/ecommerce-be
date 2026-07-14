@@ -156,7 +156,7 @@ export class PromotionsService {
     const dataWithUrls = await Promise.all(
       data.map(async (store) => {
         if (store.image && store.image.key) {
-          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+          store.image = await this.cloudinaryService.generateImage(store.image);
         }
         return store;
       }),
@@ -197,7 +197,7 @@ export class PromotionsService {
     const dataWithUrls = await Promise.all(
       data.map(async (store) => {
         if (store.image && store.image.key) {
-          store.image.url = await this.cloudinaryService.generateUrl(store.image.key);
+          store.image = await this.cloudinaryService.generateImage(store.image);
         }
         return store;
       }),

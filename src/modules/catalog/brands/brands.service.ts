@@ -120,7 +120,7 @@ export class BrandsService {
     const brand = await this.brandRepo.findOne({ where: { id } });
 
     if (brand && brand.image && brand.image.key) {
-      brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+      brand.image = await this.cloudinaryService.generateImage(brand.image);
     }
     return brand;
   }
@@ -246,7 +246,7 @@ export class BrandsService {
     return await Promise.all(
       data.map(async (brand) => {
         if (brand.image && brand.image.key) {
-          brand.image.url = await this.cloudinaryService.generateUrl(brand.image.key);
+          brand.image = await this.cloudinaryService.generateImage(brand.image);
         }
         return brand;
       }),
