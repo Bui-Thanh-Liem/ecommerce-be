@@ -37,35 +37,7 @@ export class CloudinaryService {
   }
 
   /**
-   * 2. GENERATE OPTIMIZED URL (Chuẩn SEO & Performance)
-   * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
-   */
-  async generateUrlf(publicId: string, customOptions?: TransformationOptions): Promise<string> {
-    if (!publicId) return '';
-    const keyCacheKey = `image:${publicId}:${JSON.stringify(customOptions)}`;
-
-    const cachedUrl = await this.cacheService.get<string>(keyCacheKey);
-
-    if (cachedUrl) return cachedUrl;
-
-    const url = cloudinary.url(publicId, {
-      quality: 'auto',
-      fetch_format: 'auto',
-      ...(customOptions && typeof customOptions === 'object' && { ...customOptions }), // Cho phép ghi đè size (width, height), crop,... nếu cần
-      secure: true, // Luôn dùng HTTPS
-      sign_url: true, // KÍCH HOẠT CHỮ KÝ SỐ (BẮT BUỘC ĐỂ HẾT LỖI 401)
-      crop: 'fill',
-      gravity: 'center',
-    });
-
-    // Cache URL trong Redis với TTL 24h (86,400,000 ms)
-    await this.cacheService.set(keyCacheKey, url, 86_400_000);
-
-    return url;
-  }
-
-  /**
-   * 3. GENERATE OPTIMIZED IMAGES (Chuẩn SEO & Performance)
+   * 2. GENERATE OPTIMIZED IMAGES (Chuẩn SEO & Performance)
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateImage(image: IImage, customOptions?: TransformationOptions): Promise<IImage> {
@@ -101,8 +73,9 @@ export class CloudinaryService {
       url: url,
     };
   }
+
   /**
-   * 4. GENERATE OPTIMIZED IMAGES (Chuẩn SEO & Performance)
+   * 3. GENERATE OPTIMIZED IMAGES (Chuẩn SEO & Performance)
    * Tự động optimize dung lượng, định dạng (WebP/AVIF) dựa trên trình duyệt của user.
    */
   async generateImages(images: IImage[], customOptions?: TransformationOptions): Promise<IImage[]> {
@@ -148,7 +121,7 @@ export class CloudinaryService {
   }
 
   /**
-   * 5. XÓA MỘT FILE ĐƠN LẺ (Delete Single Asset)
+   * 4. XÓA MỘT FILE ĐƠN LẺ (Delete Single Asset)
    * Add job vào queue - xử lý trên worker process riêng
    */
   async deleteImage(publicId: string) {
@@ -170,7 +143,7 @@ export class CloudinaryService {
   }
 
   /**
-   * 6. XÓA HÀNG LOẠT FILE (Bulk Delete Assets)
+   * 5. XÓA HÀNG LOẠT FILE (Bulk Delete Assets)
    * Add job vào queue - xử lý trên worker process riêng
    */
   async deleteMultipleImages(publicIds: string[]) {
