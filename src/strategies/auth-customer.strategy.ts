@@ -27,7 +27,7 @@ export class JwtAuthCustomerStrategy extends PassportStrategy(Strategy, 'jwt-cus
           const token: string | null = (req.cookies as { e_token_customer?: string })?.e_token_customer ?? null;
           if (!token) {
             this.logger.error('Không tìm thấy token trong cookie');
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Unauthorized Customer');
           }
           return token;
         },
@@ -42,7 +42,7 @@ export class JwtAuthCustomerStrategy extends PassportStrategy(Strategy, 'jwt-cus
     // 0. Nếu payload không có customerId, chặn ngay tại đây
     if (!payload?.customerId) {
       this.logger.error('Payload không có customerId');
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Unauthorized Customer');
     }
 
     // 1. Check database xem customer còn tồn tại hay không
@@ -51,7 +51,7 @@ export class JwtAuthCustomerStrategy extends PassportStrategy(Strategy, 'jwt-cus
     // 2. Nếu không thấy, chặn ngay tại đây
     if (!customer) {
       this.logger.error('Không tìm thấy customer với ID từ payload');
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Unauthorized Customer');
     }
 
     // 3. Nếu OK, trả về customer. Object này sẽ được truyền vào handleRequest

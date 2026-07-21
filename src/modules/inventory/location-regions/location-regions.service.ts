@@ -319,20 +319,24 @@ export class LocationRegionsService implements OnModuleInit {
     // ...
 
     //
-    const [ward, district] = await Promise.all([
+    const [ward, district, province, country] = await Promise.all([
       this.locationRegionRepo.findOneBy({ id: payload.personal.wardCommune }),
       this.locationRegionRepo.findOneBy({ id: payload.personal.districtTown }),
+      this.locationRegionRepo.findOneBy({ id: payload.personal.provinceCity }),
+      this.locationRegionRepo.findOneBy({ id: payload.personal.country }),
     ]);
 
     //
-    if (!ward || !district) {
-      throw new NotFoundException('Selected ward or district not found');
+    if (!ward || !district || !province || !country) {
+      throw new NotFoundException('Selected location not found');
     }
 
     //
     return {
       wardCommune: ward,
       districtTown: district,
+      provinceCity: province,
+      country: country,
       addressDetail: payload.personal.addressDetail,
     };
   }

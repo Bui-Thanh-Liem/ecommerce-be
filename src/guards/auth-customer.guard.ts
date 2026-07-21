@@ -42,7 +42,7 @@ export class JwtAuthCustomerGuard extends AuthGuard('jwt-customer') {
       }
 
       //
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Unauthorized Customer');
     }
 
     // Thay vì để mặc định gán vào req.user, ta gán vào req.customer

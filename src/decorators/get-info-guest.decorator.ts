@@ -9,5 +9,12 @@ export const GetInfoGuest = createParamDecorator((data: any, ctx: ExecutionConte
   const personal = (request.cookies['e_personal'] || '') as string;
   const jsonString = decodeURIComponent(personal) || '{}';
   const personalObj = JSON.parse(jsonString) as ILocationSelection;
+
+  //
+  if (session !== personalObj.session) {
+    console.error('Session mismatch');
+    console.error('session :::', session);
+    console.error('personalObj.session :::', personalObj.session);
+  }
   return { session, personal: personalObj };
 });
