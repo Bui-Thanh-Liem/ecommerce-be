@@ -24,6 +24,7 @@ export class InventoryEntity extends BaseEntity implements IInventory {
   @Column({ type: 'enum', enum: InventoryStockType })
   stockType: InventoryStockType;
 
+  //
   @OneToMany(() => ProductItemEntity, (productItem) => productItem.inventory)
   productItems?: ProductItemEntity[];
 

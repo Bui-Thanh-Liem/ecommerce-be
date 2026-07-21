@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -32,15 +32,26 @@ export class OrdersController {
 
   @Customer()
   @Get('owned/:id')
-  @Serializer(OrderMetadataDto)
-  findOneOwned(@CurrentCustomer() customer: CustomerEntity, @Param('id') id: string) {
-    return this.ordersService.findOneOwned(customer.id, id);
+  async findOneOwned(@CurrentCustomer() customer: CustomerEntity, @Param('id') id: string) {
+    return await this.ordersService.findOneOwned(customer.id, id);
   }
 
   @Get(':id')
   @Permissions(permissionsSeed.order.read.code)
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);
+  }
+
+  @Customer()
+  @Patch(':orderId/items/:orderItemId/product/:productId/quantity/:q')
+  async changeQuantityItem(
+    @CurrentCustomer() customer: CustomerEntity,
+    @Param('orderId') orderId: string,
+    @Param('orderItemId') orderItemId: string,
+    @Param('productId') productId: string,
+    @Param('q', new ParseIntPipe()) quantity: number,
+  ) {
+    return await this.ordersService.changeQuantityItem(orderId, orderItemId, productId, quantity, customer.id);
   }
 
   @Patch(':id')

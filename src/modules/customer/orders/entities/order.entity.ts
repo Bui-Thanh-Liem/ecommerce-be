@@ -34,6 +34,12 @@ export class OrderEntity extends BaseEntity implements IOrder {
   @Column({ type: 'text' })
   shoppingAddress: string;
 
+  @Column()
+  recipientName: string;
+
+  @Column()
+  recipientPhone: string;
+
   // Ở Service chỉ cần order.orderItems=[{product: uuid, price: number, quantity: number}] là đủ
   @BeforeInsert()
   @BeforeUpdate()

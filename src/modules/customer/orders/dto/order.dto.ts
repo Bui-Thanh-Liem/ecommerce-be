@@ -31,4 +31,10 @@ export class OrderDto extends SerializerDto {
 
   @Expose()
   shoppingAddress: string;
+
+  @Expose()
+  recipientName: string;
+
+  @Expose()
+  recipientPhone: string;
 }

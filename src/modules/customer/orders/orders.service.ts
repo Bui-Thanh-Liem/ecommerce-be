@@ -10,6 +10,7 @@ import { OrderStatus } from '@/shared/enums/order-status.enum';
 import { OrderQueryDto } from './dto/query-order.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { OrderItemsService } from '../order-items/order-items.service';
 
 @Injectable()
 export class OrdersService {
@@ -18,6 +19,7 @@ export class OrdersService {
     private orderRepo: Repository<OrderEntity>,
     private readonly customersService: CustomersService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly orderItemsService: OrderItemsService,
   ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
@@ -26,6 +28,12 @@ export class OrdersService {
     //
     const customerExists = await this.customersService.exists([customerId]);
     if (!customerExists) throw new NotFoundException('Customer not found');
+
+    // Kiểm tra sản phẩm tồn tại và tồn kho một lần trước để thông báo sơm cho khách hàng
+    const variantIds = orderItems.map((item) => item.product);
+    const [exists, available] = await this.orderItemsService.checkout(variantIds);
+    if (!exists) throw new NotFoundException('Some product variants not found');
+    if (!available) throw new NotFoundException('Some product variants are out of stock');
 
     //
     const dataCreate = this.orderRepo.create({
@@ -121,6 +129,8 @@ export class OrdersService {
         'order.status',
         'order.invoiceNumber',
         'order.shoppingAddress',
+        'order.recipientName',
+        'order.recipientPhone',
         'order.createdAt',
 
         'customer.id',
@@ -133,6 +143,7 @@ export class OrdersService {
 
         'variant.id',
         'variant.sku',
+        'variant.discountPercent',
         'variant.price',
 
         'product.id',
@@ -146,8 +157,10 @@ export class OrdersService {
       .andWhere('order.id = :id', { id });
 
     const data = await builder.getOne();
+    if (!data) throw new NotFoundException('Order not found');
 
-    return data ? await this.signUrl([data]) : null;
+    const res = await this.signUrl([data]);
+    return res[0];
   }
 
   async exists(ids: string[]): Promise<boolean> {
@@ -161,6 +174,27 @@ export class OrdersService {
 
   findOne(id: number) {
     return `This action returns a #${id} order`;
+  }
+
+  async changeQuantityItem(
+    orderId: string,
+    orderItemId: string,
+    productId: string,
+    quantity: number,
+    customerId: string,
+  ) {
+    // Kiểm tra order tồn tại và thuộc về customer
+    const order = await this.orderRepo.findOne({
+      where: { id: orderId, customer: { id: customerId } },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    // Kiểm tra sản phẩm tồn tại và tồn kho một lần trước để thông báo sơm cho khách hàng
+    const [exists, available] = await this.orderItemsService.checkout([productId]);
+    if (!exists) throw new NotFoundException('Some product variants not found');
+    if (!available) throw new NotFoundException('Some product variants are out of stock');
+
+    return await this.orderItemsService.changeQuantity(orderId, orderItemId, quantity, customerId);
   }
 
   update(id: number, dto: UpdateOrderDto) {

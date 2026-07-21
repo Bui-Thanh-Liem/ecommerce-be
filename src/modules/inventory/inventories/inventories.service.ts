@@ -11,6 +11,7 @@ import { InventoryQueryDto } from './dto/query-inventory.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
+import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
 
 @Injectable()
 export class InventoriesService {
@@ -233,6 +234,17 @@ export class InventoriesService {
       throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
     return this.inventoryRepo.remove(inventory);
+  }
+
+  async checkInventoryByStoreAndVariant(variantId: string, storeId?: string): Promise<boolean> {
+    const inventory = await this.inventoryRepo.findOne({
+      where: {
+        store: { id: storeId },
+        productVariant: { id: variantId },
+        stockType: InventoryStockType.AVAILABLE,
+      },
+    });
+    return !!inventory;
   }
 
   async signUrl(data: InventoryEntity[]): Promise<InventoryEntity[]> {
