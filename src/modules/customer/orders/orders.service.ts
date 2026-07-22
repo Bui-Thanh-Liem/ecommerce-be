@@ -11,6 +11,7 @@ import { OrderQueryDto } from './dto/query-order.dto';
 import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { OrderItemsService } from '../order-items/order-items.service';
+import { ChangeQuantityDto } from './dto/change-quantity-item.dto';
 
 @Injectable()
 export class OrdersService {
@@ -32,8 +33,11 @@ export class OrdersService {
     // Kiểm tra sản phẩm tồn tại và tồn kho một lần trước để thông báo sơm cho khách hàng
     const variantIds = orderItems.map((item) => item.product);
     const [exists, available] = await this.orderItemsService.checkout(variantIds);
-    if (!exists) throw new NotFoundException('Some product variants not found');
-    if (!available) throw new NotFoundException('Some product variants are out of stock');
+    if (!exists) throw new NotFoundException('Không tìm thấy một số sản phẩm trong đơn hàng, vui lòng kiểm tra lại');
+    if (!available)
+      throw new NotFoundException(
+        'Sản phẩm này hiện tại đã hết hàng, vui lòng kiểm tra lại sau hoặc liên hệ với chúng tôi để được hỗ trợ',
+      );
 
     //
     const dataCreate = this.orderRepo.create({
@@ -176,13 +180,9 @@ export class OrdersService {
     return `This action returns a #${id} order`;
   }
 
-  async changeQuantityItem(
-    orderId: string,
-    orderItemId: string,
-    productId: string,
-    quantity: number,
-    customerId: string,
-  ) {
+  async changeQuantityItem(payload: ChangeQuantityDto) {
+    const { orderId, orderItemId, productId, quantity, customerId } = payload;
+
     // Kiểm tra order tồn tại và thuộc về customer
     const order = await this.orderRepo.findOne({
       where: { id: orderId, customer: { id: customerId } },
@@ -190,9 +190,21 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order not found');
 
     // Kiểm tra sản phẩm tồn tại và tồn kho một lần trước để thông báo sơm cho khách hàng
+    console.log({
+      orderId,
+      orderItemId,
+      productId,
+      quantity,
+      customerId,
+    });
+
+    //
     const [exists, available] = await this.orderItemsService.checkout([productId]);
-    if (!exists) throw new NotFoundException('Some product variants not found');
-    if (!available) throw new NotFoundException('Some product variants are out of stock');
+    if (!exists) throw new NotFoundException('Không tìm thấy một số sản phẩm trong đơn hàng, vui lòng kiểm tra lại');
+    if (!available)
+      throw new NotFoundException(
+        'Sản phẩm này hiện tại đã hết hàng, vui lòng kiểm tra lại sau hoặc liên hệ với chúng tôi để được hỗ trợ',
+      );
 
     return await this.orderItemsService.changeQuantity(orderId, orderItemId, quantity, customerId);
   }

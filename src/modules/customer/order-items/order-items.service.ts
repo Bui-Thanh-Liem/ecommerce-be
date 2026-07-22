@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItemEntity } from './entities/order-item.entity';
+import { CheckoutDto } from './dto/checkout.dto';
 
 @Injectable()
 export class OrderItemsService {
@@ -15,12 +16,16 @@ export class OrderItemsService {
   ) {}
 
   // REFACTOR: Sẽ kiểm tra sâu hơn khi hoàn thành các chức năng cơ bản
-  async checkout(variantIds: string[]) {
+  async checkout({ items }: CheckoutDto) {
     const [exists, available] = await Promise.all([
-      this.variantService.exists(variantIds),
+      this.variantService.exists(items.map((item) => item.productId)),
       Promise.all(
-        variantIds.map(async (id) => {
-          return await this.inventoriesService.checkInventoryByStoreAndVariant(id);
+        items.map(async (item) => {
+          return await this.inventoriesService.checkInventoryByStoreAndVariant(
+            item.quantity,
+            item.productId,
+            item.,
+          );
         }),
       ),
     ]);

@@ -12,6 +12,8 @@ import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
+import { CheckoutInventoryDto } from './dto/check-inventory.dto';
+import { CheckInventoryResult, StoreInventoryDetail } from './dto/check-inventory-result.dto';
 
 @Injectable()
 export class InventoriesService {
@@ -236,15 +238,47 @@ export class InventoriesService {
     return this.inventoryRepo.remove(inventory);
   }
 
-  async checkInventoryByStoreAndVariant(variantId: string, storeId?: string): Promise<boolean> {
-    const inventory = await this.inventoryRepo.findOne({
-      where: {
-        store: { id: storeId },
-        productVariant: { id: variantId },
-        stockType: InventoryStockType.AVAILABLE,
-      },
-    });
-    return !!inventory;
+  async checkInventory(payload: CheckoutInventoryDto): Promise<CheckInventoryResult> {
+    const { quantityOrdered, variantId, storeIds } = payload;
+
+    const query = this.inventoryRepo
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.store', 'store')
+      .where('inventory.productVariantId = :variantId', { variantId })
+      .andWhere('inventory.stockType = :stockType', { stockType: InventoryStockType.AVAILABLE });
+
+    if (storeIds?.length) {
+      query.andWhere('store.id IN (:...storeIds)', { storeIds });
+    }
+
+    const inventories = await query.getMany();
+
+    const details: StoreInventoryDetail[] = inventories.map((inv) => ({
+      storeId: inv.store.id,
+      storeName: inv.store.name,
+      availableQuantity: inv.quantity,
+      isSufficient: inv.quantity >= quantityOrdered,
+      shortage: Math.max(0, quantityOrdered - inv.quantity),
+    }));
+
+    const totalAvailableQuantity = details.reduce((sum, d) => sum + d.availableQuantity, 0);
+    const outOfStockStores = details.filter((d) => !d.isSufficient);
+
+    // Nếu client chỉ định storeIds cụ thể -> yêu cầu TỪNG store đó phải đủ hàng riêng
+    // (và phải tồn tại bản ghi inventory cho store đó, nếu thiếu record cũng coi là hết hàng)
+    // Nếu không chỉ định (kiểm tra cả hệ thống) -> chỉ cần TỔNG tồn kho đủ là được
+    const isAvailable = storeIds?.length
+      ? details.length === storeIds.length && details.every((d) => d.isSufficient)
+      : totalAvailableQuantity >= quantityOrdered;
+
+    return {
+      isAvailable,
+      variantId,
+      quantityOrdered,
+      totalAvailableQuantity,
+      details,
+      outOfStockStores,
+    };
   }
 
   async signUrl(data: InventoryEntity[]): Promise<InventoryEntity[]> {
