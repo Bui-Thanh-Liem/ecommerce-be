@@ -12,7 +12,7 @@ import { Throttle } from '@nestjs/throttler';
 import { LocalAuthGuard } from './guards/local.guard';
 import { CurrentCustomer } from '@/decorators/current-customer.decorator';
 import { CustomerEntity } from './entities/customer.entity';
-import { CookieOptions, type Response } from 'express';
+import { CookieOptions, type Request, type Response } from 'express';
 import { CustomerMetadataDto } from './dto/metadata-customer.dto';
 import { CustomerQueryDto } from './dto/query-customer.dto';
 import { CustomerVerifiedDto } from './dto/customer-verified.dto';
@@ -73,6 +73,35 @@ export class CustomersController {
     res.cookie('e_refresh_token_customer', refreshToken, { ...this.defaultConfig, maxAge: 7 * 24 * 60 * 60 * 1000 }); // 30 ngày
 
     return { customer };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 1, ttl: 900000 } }) // Giới hạn 1 yêu cầu mỗi 15 phút cho endpoint refresh-token
+  @Post('refresh-token')
+  @UseGuards(RefreshTokenAuthCustomerGuard)
+  async refreshToken(
+    @Req() request: Request,
+    @GetJwtPayload() jwtPayload: IJwtPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = request.cookies['e_refresh_token_customer'] as string;
+
+    //
+    const tokens = await this.customersService.refreshToken(refreshToken, jwtPayload);
+
+    //
+    if (!tokens) {
+      res.clearCookie('e_token_customer');
+      res.clearCookie('e_refresh_token_customer');
+      return false;
+    }
+
+    //
+    const refreshMaxAge = Math.floor(jwtPayload.exp! - Date.now() / 1000) * 1000; // ms
+    res.cookie('e_token_customer', tokens?.access, { ...this.defaultConfig }); // 15 phút
+    res.cookie('e_refresh_token_customer', tokens?.refresh, { ...this.defaultConfig, maxAge: refreshMaxAge });
+
+    return true;
   }
 
   @Public()

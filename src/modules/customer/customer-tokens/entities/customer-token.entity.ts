@@ -16,6 +16,9 @@ export class CustomerTokenEntity extends BaseEntity implements ICustomerToken {
   @Column({ type: 'text' })
   token: string;
 
+  @Column({ type: 'text', nullable: true })
+  usedToken: string;
+
   @Column({ type: 'timestamp' })
   expiresAt: Date;
 

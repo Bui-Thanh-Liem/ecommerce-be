@@ -34,7 +34,7 @@ export class CustomerTokensService {
   }: {
     secretKey: string;
     payload: IJwtPayload;
-    expiresIn: StringValue;
+    expiresIn: StringValue | number;
   }): string {
     return sign(payload, secretKey, { expiresIn });
   }
@@ -66,6 +66,56 @@ export class CustomerTokensService {
   }
 
   //
+  async refreshAuthToken(refreshToken: string, jwtPayload: IJwtPayload) {
+    //
+    const existingTokenUsed = await this.customerTokenRepo.findOne({
+      where: { usedToken: refreshToken, type: TokenType.REFRESH },
+      relations: ['customer'],
+      select: { customer: { id: true } },
+    });
+    if (existingTokenUsed) {
+      // Nếu token đã được sử dụng để đổi lấy access token mới, thì xóa token đó đi và không cho phép tạo token mới nữa
+      // Cho customer đăng nhập lại ở mọi nơi nếu phát hiện token bị lạm dụng
+      await this.delete(existingTokenUsed.customer.id, TokenType.REFRESH);
+      throw new BadRequestException('Refresh token has already been used');
+    }
+
+    // Tìm token hiện tại của customer
+    const existingToken = await this.customerTokenRepo.findOne({
+      where: { token: refreshToken, type: TokenType.REFRESH },
+    });
+
+    // Nếu không tìm thấy token hoặc token đã bị thu hồi, không cho phép tạo token mới
+    if (!existingToken || existingToken.isRevoked) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+
+    // Tạo token mới
+    const access = this.generateToken({
+      payload: { customerId: jwtPayload.customerId, type: TokenType.ACCESS },
+      secretKey: this.configService.get<string>('JWT_ACCESS_SECRET_CUSTOMER') || 'key-secret',
+      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN_CUSTOMER') || '15m',
+    });
+
+    // Tính thời gian hết hạn của refresh token mới dựa trên exp của token cũ (nếu có) hoặc dựa trên cấu hình mặc định
+    const exp = Math.floor(jwtPayload.exp! - Date.now() / 1000);
+    const refresh = this.generateToken({
+      payload: { customerId: jwtPayload.customerId, type: TokenType.REFRESH },
+      secretKey: this.configService.get<string>('JWT_REFRESH_SECRET_CUSTOMER') || 'refresh-key-secret',
+      expiresIn: exp,
+    });
+
+    // Cập nhật token mới vào database, đánh dấu token cũ đã dùng
+    await this.customerTokenRepo.save({
+      ...existingToken,
+      usedToken: refreshToken, // đánh dấu token cũ đã dùng
+      token: refresh, // lưu token mới
+    });
+
+    return { access, refresh };
+  }
+
+  //
   private async generateAuthTokenPair({
     customerId,
   }: {
@@ -80,9 +130,9 @@ export class CustomerTokensService {
       expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN_CUSTOMER') || '15m',
     });
     const refreshToken = this.generateToken({
+      expiresIn: expiresInRefresh,
       payload: { customerId, type: TokenType.REFRESH },
       secretKey: this.configService.get<string>('JWT_REFRESH_SECRET_CUSTOMER') || 'refresh-key-secret',
-      expiresIn: expiresInRefresh,
     });
 
     // Lưu refresh token vào database

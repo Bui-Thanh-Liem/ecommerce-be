@@ -1,9 +1,11 @@
-import { IsNumber, IsUUID } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsUUID } from 'class-validator';
 
 export class ChangeQuantityDto {
+  @IsOptional()
   @IsUUID('4')
   orderId: string;
 
+  @IsOptional()
   @IsUUID('4')
   orderItemId: string;
 
@@ -16,6 +18,7 @@ export class ChangeQuantityDto {
   @IsUUID('4')
   customerId: string;
 
-  @IsUUID('4')
-  storeId: string;
+  @IsArray()
+  @IsUUID('4', { each: true })
+  storeIds: string[];
 }

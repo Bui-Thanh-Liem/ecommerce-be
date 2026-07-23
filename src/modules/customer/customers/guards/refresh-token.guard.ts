@@ -22,7 +22,7 @@ export class RefreshTokenAuthCustomerGuard extends AuthGuard('refresh-token-cust
     if (err || !payload) {
       res.clearCookie('e_token_customer');
       res.clearCookie('e_refresh_token_customer');
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Unauthorized Customer');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

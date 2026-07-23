@@ -13,7 +13,7 @@ import { IMetadata } from '@/shared/interfaces/common/metadata.interface';
 import { CloudinaryService } from '@/common/cloudinary/cloudinary.service';
 import { InventoryStockType } from '@/shared/enums/inventory-stock-type.enum';
 import { CheckoutInventoryDto } from './dto/check-inventory.dto';
-import { CheckInventoryResult, StoreInventoryDetail } from './dto/check-inventory-result.dto';
+import { CheckInventoryResult, StoreInventoryDetail } from './interface/check-inventory-result.interface';
 
 @Injectable()
 export class InventoriesService {
@@ -238,8 +238,8 @@ export class InventoriesService {
     return this.inventoryRepo.remove(inventory);
   }
 
-  async checkInventory(payload: CheckoutInventoryDto): Promise<CheckInventoryResult> {
-    const { quantityOrdered, variantId, storeIds } = payload;
+  async checkInventory(params: CheckoutInventoryDto): Promise<CheckInventoryResult> {
+    const { quantityOrdered, variantId, storeIds } = params;
 
     const query = this.inventoryRepo
       .createQueryBuilder('inventory')

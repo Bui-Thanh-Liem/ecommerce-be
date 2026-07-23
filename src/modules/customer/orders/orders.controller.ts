@@ -51,7 +51,14 @@ export class OrdersController {
     @Param('productId') productId: string,
     @Param('q', new ParseIntPipe()) quantity: number,
   ) {
-    return await this.ordersService.changeQuantityItem(orderId, orderItemId, productId, quantity, customer.id);
+    return await this.ordersService.changeQuantityItem({
+      orderId,
+      quantity,
+      productId,
+      orderItemId,
+      customerId: customer.id,
+      storeIds: [], // REFACTOR: Cần lấy storeIds từ đâu đó, hiện tại để trống
+    });
   }
 
   @Patch(':id')

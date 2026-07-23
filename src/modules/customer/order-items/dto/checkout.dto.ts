@@ -1,8 +1,16 @@
-import { IsArray, ValidateNested } from 'class-validator';
-import { ChangeQuantityDto } from '../../orders/dto/change-quantity-item.dto';
+import { IsArray, IsNumber, IsUUID } from 'class-validator';
 
 export class CheckoutDto {
+  @IsUUID('4')
+  productId: string;
+
+  @IsNumber()
+  quantityOrdered: number;
+
+  @IsUUID('4')
+  customerId: string;
+
   @IsArray()
-  @ValidateNested({ each: true })
-  items: ChangeQuantityDto[];
+  @IsUUID('4', { each: true })
+  storeIds: string[];
 }

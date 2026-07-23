@@ -10,6 +10,7 @@ import { calculatePagination } from '@/utils/pagination-calculator.util';
 import { CacheService } from '@/common/cache/cache.service';
 import { OrderService } from '@/common/otp/otp.service';
 import { TokenType } from '@/shared/enums/token-type.enum';
+import { IJwtPayload } from '@/shared/interfaces/common/jwt-payload.interface';
 
 @Injectable()
 export class CustomersService {
@@ -72,6 +73,16 @@ export class CustomersService {
   // Sign out a customer by revoking the token
   async signOut(customerId: string) {
     await this.customerTokensService.delete(customerId, TokenType.REFRESH);
+  }
+
+  //
+  async refreshToken(refreshToken: string, jwtPayload: IJwtPayload) {
+    try {
+      return await this.customerTokensService.refreshAuthToken(refreshToken, jwtPayload);
+    } catch (error) {
+      this.logger.error('Refresh token fail :::', error);
+      return false;
+    }
   }
 
   async findAll(queries: CustomerQueryDto) {

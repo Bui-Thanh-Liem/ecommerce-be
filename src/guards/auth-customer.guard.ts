@@ -34,8 +34,6 @@ export class JwtAuthCustomerGuard extends AuthGuard('jwt-customer') {
 
     // Nếu có lỗi hoặc không tìm thấy customer, trả về lỗi Unauthorized
     if (err || !customer) {
-      this.logger.error(info || 'Unauthorized');
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (info?.name === 'TokenExpiredError' && info?.message === 'jwt expired') {
         throw new UnauthorizedException('TokenCustomerExpiredError');

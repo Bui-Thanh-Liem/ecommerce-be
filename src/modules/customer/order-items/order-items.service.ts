@@ -1,6 +1,6 @@
 import { ProductVariantsService } from '@/modules/catalog/product-variants-SKU/product-variants.service';
 import { InventoriesService } from '@/modules/inventory/inventories/inventories.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItemEntity } from './entities/order-item.entity';
@@ -15,24 +15,37 @@ export class OrderItemsService {
     private readonly variantService: ProductVariantsService,
   ) {}
 
-  // REFACTOR: Sẽ kiểm tra sâu hơn khi hoàn thành các chức năng cơ bản
-  async checkout({ items }: CheckoutDto) {
+  //
+  async checkout(items: CheckoutDto[]) {
     const [exists, available] = await Promise.all([
       this.variantService.exists(items.map((item) => item.productId)),
       Promise.all(
         items.map(async (item) => {
-          return await this.inventoriesService.checkInventoryByStoreAndVariant(
-            item.quantity,
-            item.productId,
-            item.,
-          );
+          return await this.inventoriesService.checkInventory({
+            quantityOrdered: item.quantityOrdered,
+            variantId: item.productId,
+            storeIds: item.storeIds,
+          });
         }),
       ),
     ]);
 
-    return [exists, available.every((item) => item === true)];
+    //
+    if (!exists) throw new NotFoundException('Không tìm thấy một số sản phẩm trong đơn hàng, vui lòng kiểm tra lại');
+
+    //
+    for (let i = 0; i < available.length; i++) {
+      const result = available[i];
+      if (!result.isAvailable) {
+        const str = result.outOfStockStores.map(
+          (s) => `${s.storeName} (còn ${s.availableQuantity}, thiếu ${s.shortage})`,
+        );
+        throw new NotFoundException(`Sản phẩm hết hàng ở các cửa hàng: ${str.join(', ')}`);
+      }
+    }
   }
 
+  //
   async changeQuantity(orderId: string, orderItemId: string, quantity: number, customerId: string) {
     const orderItem = await this.orderItemRepo.findOne({
       where: { id: orderItemId, order: { id: orderId, customer: { id: customerId } } },
