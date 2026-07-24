@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Response } from 'express';
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { IWebhookEvent } from './sepay.interface';
+import { IResponseCheckout, IWebhookEvent } from './interface/sepay.interface';
 import { sepayClient } from '@/configs/se-pg-pay.config';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { OrdersService } from '@/modules/customer/orders/orders.service';
@@ -15,7 +15,7 @@ export class SepayService {
     private orderService: OrdersService,
   ) {}
 
-  async createCheckout(payload: CreateCheckoutDto) {
+  async createCheckout(payload: CreateCheckoutDto): Promise<IResponseCheckout> {
     const { amount, description, paymentMethod, order: orderId } = payload;
 
     //
@@ -26,19 +26,79 @@ export class SepayService {
     const invoiceNumber = `INV-${Date.now()}`;
     const checkoutURL = sepayClient.checkout.initCheckoutUrl();
     const APP_BASE_URL = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:3001';
+    console.log('APP_BASE_URL:', APP_BASE_URL);
+
+    const fields = {
+      merchant: 'SP-TEST-BT674A37',
+      order_amount: '12000',
+      currency: 'VND',
+      operation: 'PURCHASE',
+      // order_description: 'Thanh toán đơn hàng #6f440124-16b4-45f7-959e-6a45d7511ea9',
+      order_description: 'Thanh toan don hang #6f440124-16b4-45f7-959e-6a45d7511ea9',
+      order_invoice_number: 'INV-1784886968673',
+      payment_method: 'BANK_TRANSFER',
+      success_url: 'https://8982-42-112-75-109.ngrok-free.app/payment/success',
+      error_url: 'https://8982-42-112-75-109.ngrok-free.app/payment/error',
+      cancel_url: 'https://8982-42-112-75-109.ngrok-free.app/payment/cancel',
+    };
+
+    // Tự ký
+    const allowed = [
+      'order_amount',
+      'merchant',
+      'currency',
+      'operation',
+      'order_description',
+      'order_invoice_number',
+      'payment_method',
+      'success_url',
+      'error_url',
+      'cancel_url',
+    ];
+
+    const signString = allowed.map((key) => `${key}=${fields[key as keyof typeof fields]}`).join(',');
+
+    const signature = crypto.createHmac('sha256', process.env.SEPAY_SECRET_KEY!).update(signString).digest('base64');
+
+    console.log('Manual Signature:', signature);
+
+    const checkoutFormFields = { ...fields, signature } as any;
 
     //
-    const checkoutFormFields = sepayClient.checkout.initOneTimePaymentFields({
-      operation: 'PURCHASE',
-      payment_method: paymentMethod,
-      order_invoice_number: invoiceNumber,
-      order_amount: amount,
-      currency: 'VND',
-      order_description: description,
-      success_url: `${APP_BASE_URL}/payment/success`,
-      error_url: `${APP_BASE_URL}/payment/error`,
-      cancel_url: `${APP_BASE_URL}/payment/cancel`,
-    });
+    // const checkoutFormFields = sepayClient.checkout.initOneTimePaymentFields({
+    //   operation: 'PURCHASE',
+    //   payment_method: paymentMethod,
+    //   order_invoice_number: invoiceNumber,
+    //   order_amount: amount,
+    //   currency: 'VND',
+    //   order_description: description,
+    //   success_url: `${APP_BASE_URL}/payment/success`,
+    //   error_url: `${APP_BASE_URL}/payment/error`,
+    //   cancel_url: `${APP_BASE_URL}/payment/cancel`,
+    // });
+
+    console.log('=== CHECKOUT FIELDS ===');
+    console.dir(checkoutFormFields, { depth: null });
+
+    console.log('Signature generated:', checkoutFormFields.signature);
+
+    const debugFields = checkoutFormFields; // hoặc object bạn truyền vào
+
+    const allowedFields = [
+      'order_amount',
+      'merchant',
+      'currency',
+      'operation',
+      'order_description',
+      'order_invoice_number',
+      'payment_method',
+      'success_url',
+      'error_url',
+      'cancel_url',
+    ];
+
+    console.log('🔍 SIGNING STRING:', signString);
+    console.log('🔑 SECRET KEY LENGTH:', process.env.SEPAY_SECRET_KEY?.length);
 
     // chuyển trạng thái pendding, để đối chiếu trong ipn sau
     await this.orderService.changeStatus(orderId, OrderStatus.PENDING);

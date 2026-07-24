@@ -2,8 +2,10 @@ import { Controller, Post, Res, Req, HttpCode, Body } from '@nestjs/common';
 import { SepayService } from './sepay.service';
 import { Public } from '@/decorators/public.decorator';
 import { type Request, type Response } from 'express';
-import { type IWebhookEvent } from './sepay.interface';
+import { type IWebhookEvent } from './interface/sepay.interface';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
+import { ResponseCheckoutDto } from './dto/response-checkout.dto';
+import { Serializer } from '@/interceptors/serializer.interceptor';
 
 @Controller('sepay')
 export class SepayController {
@@ -11,6 +13,7 @@ export class SepayController {
 
   @Public()
   @Post('checkout')
+  @Serializer(ResponseCheckoutDto)
   createCheckout(@Body() body: CreateCheckoutDto) {
     return this.sepayService.createCheckout(body);
   }
