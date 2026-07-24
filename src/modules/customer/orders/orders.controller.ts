@@ -2,8 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe 
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Permissions } from '@/decorators/permission.decorator';
-import { permissionsSeed } from '@/modules/management/permissions/seeding';
 import { Customer } from '@/decorators/customer.decorator';
 import { CurrentCustomer } from '@/decorators/current-customer.decorator';
 import { CustomerEntity } from '../customers/entities/customer.entity';
@@ -34,12 +32,6 @@ export class OrdersController {
   @Get('owned/:id')
   async findOneOwned(@CurrentCustomer() customer: CustomerEntity, @Param('id') id: string) {
     return await this.ordersService.findOneOwned(customer.id, id);
-  }
-
-  @Get(':id')
-  @Permissions(permissionsSeed.order.read.code)
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
   }
 
   @Customer()

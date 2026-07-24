@@ -58,7 +58,7 @@ export class OrdersService {
   }
 
   async findAllOwned(customerId: string, query: OrderQueryDto) {
-    const { page, limit } = query;
+    const { page, limit, filters } = query;
 
     //
     const { take, skip } = calculatePagination(page, limit);
@@ -92,15 +92,21 @@ export class OrdersService {
         'variant.id',
         'variant.sku',
         'variant.price',
+        'variant.salesAttributes',
 
         'product.id',
         'product.spu',
         'product.name',
         'product.thumbnail',
       ])
-      .where('customer.id = :customerId', { customerId })
-      .take(take)
-      .skip(skip);
+
+      .where('customer.id = :customerId', { customerId });
+
+    if (filters?.status) {
+      builder.andWhere('order.status = :status', { status: filters.status });
+    }
+
+    builder.take(take).skip(skip);
 
     const [data, totalData] = await builder.getManyAndCount();
 
@@ -170,14 +176,6 @@ export class OrdersService {
   async exists(ids: string[]): Promise<boolean> {
     const count = await this.orderRepo.countBy({ id: In(ids) });
     return count === ids.length;
-  }
-
-  findAll() {
-    return `This action returns all orders`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
   }
 
   async changeQuantityItem(payload: ChangeQuantityDto) {

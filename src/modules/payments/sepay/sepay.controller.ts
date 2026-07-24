@@ -10,7 +10,7 @@ export class SepayController {
   constructor(private readonly sepayService: SepayService) {}
 
   @Public()
-  @Post('create-checkout')
+  @Post('checkout')
   createCheckout(@Body() body: CreateCheckoutDto) {
     return this.sepayService.createCheckout(body);
   }
@@ -24,7 +24,7 @@ export class SepayController {
 
   @Public()
   @HttpCode(200)
-  @Post('sepay-payment')
+  @Post('payment')
   handleWebhookEvent(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Body() payload: IWebhookEvent) {
     const signature = (req.headers['x-sepay-signature'] || '') as string;
     const timestamp = (req.headers['x-sepay-timestamp'] || '') as string;

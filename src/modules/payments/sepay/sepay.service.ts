@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { IWebhookEvent } from './sepay.interface';

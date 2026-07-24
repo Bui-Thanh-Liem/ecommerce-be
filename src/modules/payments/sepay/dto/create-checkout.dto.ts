@@ -1,9 +1,8 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString, IsUUID, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsUUID, Min } from 'class-validator';
 import { PaymentMethod } from '../../../../shared/enums/payment-method.enum';
 
 export class CreateCheckoutDto {
   @IsUUID('4')
-  @IsNotEmpty()
   order: string;
 
   @IsNumber()
